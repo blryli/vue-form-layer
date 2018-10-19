@@ -1,8 +1,15 @@
 import Vue from 'vue'
 import App from './App.vue'
-import VueForm from './lib'
+import VueFormLayer from './lib'
+import ElementUI from 'element-ui'
+import 'element-ui/lib/theme-chalk/index.css'
 
-Vue.use(VueForm)
+Vue.config.productionTip = false
+
+Vue.use(VueFormLayer)
+Vue.use(ElementUI, {
+  size: 'small'
+})
 
 new Vue({
   el: '#app',

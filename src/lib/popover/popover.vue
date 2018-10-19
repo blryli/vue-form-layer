@@ -1,7 +1,9 @@
 <template>
   <div class="vue-popover" :class="effectClass" :style="popoverStyle">
     <div class="vue-popover-trigger" ref="trigger" :class="triggerClass" :style="triggerStyle">
-      <slot name="reference"><img v-if="typeof icon === 'string'" class="vue-popover-trigger__img" :src="src" /></slot>
+      <slot name="reference">
+        <div v-if="typeof target === 'string'" class="vue-popover-trigger__target" :class="'trigger__target-'+target"></div>
+      </slot>
     </div>
     <transition name="fade">
       <div class="vue-popover-wrap" :class="[
@@ -11,7 +13,7 @@
         {'vue-popover-wrap-right':  placement === 'right'},
         {'vue-popover-wrap-bottom': placement === 'bottom'},
         {'vue-popover-wrap-visible': show},
-        {'vue-popover-wrap-hidden': !content || disable || !show}
+        {'vue-popover-wrap-hidden': !show}
       ]" ref="popover" role="popover" :style="effectStyle">
         <div class="vue-popover-arrow" v-if="visibleArrow"></div>
         <vue-popover-content :content="content"></vue-popover-content>
@@ -46,14 +48,15 @@ export default {
       type: Boolean,
       default: true
     },
-    icon: [String, Function],
+    target: [String, Function],
     order: {
       type: Number,
       default: 0
     },
     rules: Object,
     openValidate: Boolean,
-    triggerShow: Boolean
+    triggerShow: Boolean,
+    isValidate: Boolean
   },
   data() {
     return {
@@ -62,16 +65,15 @@ export default {
         top: 0,
         left: 0
       },
-      show: true,
-      overflow: null
+      show: true
     };
   },
   computed: {
-    src() {
-      return `/static/img/${this.icon}.png`;
-    },
-    popoverId() {
-      return `vue-popover-${generateId()}`;
+    validatePopoverShow() {
+      if (this.isValidate) {
+        return this.openValidate && this.content;
+      }
+      return true;
     },
     triggerClass() {
       let clas;
@@ -82,7 +84,7 @@ export default {
     },
     effectClass() {
       let effect = this.effect ? `is-${this.effect}` : "is-light";
-      !this.icon && (effect += " vue-popover-main");
+      !this.target && (effect += " vue-popover-main");
       return effect;
     },
     popoverStyle() {
@@ -94,7 +96,7 @@ export default {
     },
     triggerStyle() {
       let style = {};
-      if (!this.icon) return style;
+      if (!this.target) return style;
       style.width = this.triggerShow ? "auto" : 0;
       style.height = this.triggerShow ? "auto" : 0;
       style.visibility = this.triggerShow ? "visible" : "hidden";
@@ -184,34 +186,23 @@ export default {
           trigerOffsetTop
         );
 
-        // if (popoverTop < viewTop) {
-        //   this.overflow = "bottom";
-        // }
-        // if (popoverRight > viewRight) {
-        //   this.overflow = "left";
-        // }
-        // if (popoverBottom > viewBottom) {
-        //   this.overflow = "top";
-        // }
-        // if (popoverLeft < viewLeft) {
-        //   this.overflow = "right";
-        // }
-        // this.overflow && this.getPosition(
-        //   this.overflow,
-        //   popover,
-        //   triger,
-        //   trigerOffsetLeft,
-        //   trigerOffsetTop
-        // );
-
         popover.style.top = this.position.top + "px";
         popover.style.left = this.position.left + "px";
+        this.$emit("show");
+      } else {
+        this.$emit("hide");
       }
     }
   },
   methods: {
     toggle() {
-      this.show = !this.show;
+      this.validatePopoverShow && !this.disable && (this.show = !this.show);
+    },
+    doShow() {
+      this.validatePopoverShow && !this.disable && (this.show = true);
+    },
+    doHide() {
+      this.validatePopoverShow && !this.disable && (this.show = false);
     },
     getPosition(placement, popover, triger, trigerOffsetLeft, trigerOffsetTop) {
       // 通过placement计算出位子
@@ -269,19 +260,11 @@ export default {
     let triger = this.$refs.trigger;
     // 根据trigger监听特定事件
     if (this.trigger === "hover") {
-      this._mouseenterEvent = EventListener(triger, "mouseenter", () => {
-        this.show = true;
-      });
-      this._mouseleaveEvent = EventListener(triger, "mouseleave", () => {
-        this.show = false;
-      });
+      this._mouseenterEvent = EventListener(triger, "mouseenter", this.doShow);
+      this._mouseleaveEvent = EventListener(triger, "mouseleave", this.doHide);
     } else if (this.trigger === "focus") {
-      this._focusEvent = EventListener(triger, "focus", () => {
-        this.show = true;
-      });
-      this._blurEvent = EventListener(triger, "blur", () => {
-        this.show = false;
-      });
+      this._focusEvent = EventListener(triger, "focus", this.doShow);
+      this._blurEvent = EventListener(triger, "blur", this.doHide);
     } else {
       this._clickEvent = EventListener(triger, "click", this.toggle);
     }
@@ -303,26 +286,9 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-* {
-  box-sizing: border-box;
-  font-size: 14px;
-}
 .vue-popover {
   position: relative;
   order: var(--order);
-}
-.vue-popover-trigger {
-  position: relative;
-  &.is-validate {
-    input {
-      border-color: var(--bgColor);
-    }
-  }
-  &.is-success {
-    input {
-      border-color: #67c23a;
-    }
-  }
 }
 .vue-popover-wrap {
   visibility: hidden;
@@ -331,6 +297,7 @@ export default {
   opacity: 0;
   padding: 10px;
   line-height: 1.2;
+  font-size: 14px;
   min-width: 10px;
   border-radius: 4px;
   border: 1px solid;
@@ -419,10 +386,30 @@ export default {
 .light {
   color: #666;
 }
-.vue-popover-trigger__img {
+.vue-popover-trigger__target {
   display: block;
-  margin: 0 4px;
-  width: 18px;
   height: auto;
+  &::before {
+    display: block;
+    width: 16px;
+    height: 16px;
+    line-height: 16px;
+    font-size: 13px;
+    text-align: center;
+    border-radius: 50%;
+    color: #fff;
+  }
+}
+.trigger__target-why {
+  &::before {
+    content: "?";
+    background-color: #333;
+  }
+}
+.trigger__target-warn {
+  &::before {
+    content: "!";
+    background-color: #e6a23c;
+  }
 }
 </style>

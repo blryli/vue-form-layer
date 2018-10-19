@@ -32,19 +32,11 @@ export default {
       }
       return parent;
     },
-    showIndex() {
-      return /^[0-9]*$/.test(this.form.$attrs.showIndex)
-        ? this.form.$attrs.showIndex
-        : null;
-    },
     layer() {
-      if (!this.form.$attrs.layer || !this.form.$attrs.layer.length) {
+      if (!this.form.$props.layer || !this.form.$props.layer.length) {
         return false;
       }
-      return this.form.$attrs.layer;
-    },
-    formName() {
-      return this.form.$attrs.formName;
+      return this.form.$props.layer;
     }
   },
   render(h) {
@@ -60,6 +52,8 @@ export default {
       d.span && (hasSpan = false);
     });
     let offSet = tags.length - this.cols.length;
+    const layerGutter = this.form.$props.layerGutter;
+    const rowledge = this.form.$props.rowledge + "px";
     tags.forEach((tag, index) => {
       if (!this.cols[index]) {
         let overflowSpan;
@@ -83,8 +77,12 @@ export default {
       let span = hasSpan ? 24 / this.cols.length : this.cols[index].span;
       let label = this.cols[index].label;
       let labelWidth =
-        this.cols[index].labelWidth || this.labelWidth || "100px";
+        this.cols[index].labelWidth ||
+        this.labelWidth ||
+        this.form.$props.labelWidth ||
+        "80px";
       let prop = this.cols[index].prop || "";
+      let required = this.cols[index].required;
       let openValidate = !!this.form.$data.validateForm.find(d => d === prop);
 
       // 添加图层
@@ -92,39 +90,42 @@ export default {
       let rules;
       if (this.layer) {
         this.layer.forEach(da => {
-          let node;
           da.data &&
             da.data.length &&
             da.data.forEach(d => {
-              if (prop === d.position) {
-                let type = d.type || (da.view && da.view.type) || "popover"; // 展示类型
-                let effect = d.effect || (da.view && da.view.effect) || "light"; // 主题 or 颜色
-                let placement =
+              if (prop === d.prop) {
+                const type = d.type || (da.view && da.view.type) || "popover"; // 展示类型
+                let effect =
+                  d.effect || (da.view && da.view.effect) || "light"; // 主题 or 颜色
+                d.validator && effect === 'light' && (effect = 'error');
+                const placement =
                   d.placement || (da.view && da.view.placement) || "top"; // 展示位置
+                const trigger =
+                  d.trigger || (da.view && da.view.trigger) || "hover"; // 触发事件
+                let target = d.target || (da.view && da.view.target) || ""; // 指定触发元素
+                const order = d.order || (da.view && da.view.order) || 0; // 排序 数字越小越靠前
                 let data = d.data || ""; // 展示内容
-                let template =
+                const template =
                   d.template || (da.view && da.view.template) || ""; // 内容展示模板
                 template && (data = template(data));
-                let trigger =
-                  d.trigger || (da.view && da.view.trigger) || "hover"; // 触发事件
-                let icon = d.icon || (da.view && da.view.icon) || ""; // 触发目标不为 default 时，指定触发图标
-                let order = d.order || (da.view && da.view.order) || 0; // 图标排序 数字越小越靠前
-                let disable = d.disable || (da.view && da.view.disable) || false; // 是否禁用
+                let disable =
+                  d.disable || (da.view && da.view.disable) || false; // 是否禁用
                 let visibleArrow = true;
                 da.view &&
                   da.view.visibleArrow !== undefined &&
                   (visibleArrow = da.view.visibleArrow);
                 d.visibleArrow !== undefined && (visibleArrow = d.visibleArrow);
+                const isValidate = d.validator !== undefined || false;
 
-                let popoverSlot = !icon ? (
+                let popoverSlot = !target ? (
                   <div slot="reference">{tag}</div>
                 ) : (
                   ""
                 );
-                typeof icon === "function" &&
-                  (popoverSlot = <div slot="reference">{icon()}</div>);
+                typeof target === "function" &&
+                  (popoverSlot = <div slot="reference">{target()}</div>);
                 let triggerShow = da.show;
-                !icon && da.show === false && (disable = true);
+                !target && da.show === false && (disable = true);
 
                 if (type === "popover") {
                   nodeArr.push(
@@ -135,10 +136,11 @@ export default {
                       trigger={trigger}
                       effect={effect}
                       visibleArrow={visibleArrow}
-                      icon={icon}
+                      target={target}
                       order={order}
                       triggerShow={triggerShow}
                       disable={disable}
+                      isValidate={isValidate}
                     >
                       {popoverSlot}
                     </vue-popover>
@@ -150,7 +152,13 @@ export default {
       }
       nodes.push(
         <vue-col span={span}>
-          <vue-form-item prop={prop} label={label} label-width={labelWidth}>
+          <vue-form-item
+            prop={prop}
+            label={label}
+            label-width={labelWidth}
+            required={required}
+            gutter={layerGutter}
+          >
             {nodeArr}
           </vue-form-item>
         </vue-col>
@@ -158,16 +166,26 @@ export default {
     });
     return (
       <vue-col span={this.span}>
-        <vue-row>{nodes}</vue-row>
+        <div class="vue-form-line" style={{ marginBottom: rowledge }}>
+          {nodes}
+        </div>
       </vue-col>
     );
-  },
-  methods: {
-    nood() {}
   }
 };
 </script>
 
-<style lang="scss">
+<style lang="scss" scoped>
+.vue-form-line {
+  margin-bottom: 15px;
+  &:before {
+    display: table;
+    content: "";
+  }
+  &:after {
+    display: table;
+    content: "";
+    clear: both;
+  }
+}
 </style>
-

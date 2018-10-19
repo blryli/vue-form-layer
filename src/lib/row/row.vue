@@ -10,9 +10,6 @@ export default {
   props: {
     gutter: Number,
   },
-  data() {
-    return {};
-  },
   computed: {
     style() {
       const ret = {};
@@ -22,8 +19,7 @@ export default {
       }
       return ret;
     }
-  },
-  methods: {}
+  }
 };
 </script>
 

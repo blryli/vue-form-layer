@@ -2,13 +2,12 @@ var path = require('path')
 var webpack = require('webpack')
 
 module.exports = {
-  // entry: './src/main.js',
-  entry: './src/lib/index.js',
+  entry: process.env.NODE_ENV === 'production' ? './src/lib/index.js' : './src/main.js',
   output: {
     path: path.resolve(__dirname, './dist'),
     publicPath: '/dist/',
-    filename: 'vue-form.js',
-    library: 'VueForm',
+    filename: 'vue-form-layer.js',
+    library: 'VueFormLayer',
     libraryTarget: 'umd',
     umdNamedDefine: true
   },
@@ -34,11 +33,12 @@ module.exports = {
         loader: 'babel-loader',
         exclude: /node_modules/
       },
-      {
-        test: /\.(png|jpg|gif|svg)$/,
-        loader: 'file-loader',
+      { 
+        test: /\.(woff|woff2|eot|ttf|svg|jpg|png|gif)\??.*$/, 
+        loader: 'url-loader',
         options: {
-          name: '[name].[ext]?[hash]'
+          limit: 10000,
+          name: 'resourse/[name].[ext]'
         }
       }
     ]
