@@ -103,6 +103,7 @@ export default {
     box-sizing: border-box;
     font-size: inherit;
     outline: none;
+    width: 100%;
   }
 }
 </style>

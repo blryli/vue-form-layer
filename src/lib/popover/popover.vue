@@ -16,7 +16,7 @@
         {'vue-popover-wrap-hidden': !show}
       ]" ref="popover" role="popover" :style="effectStyle">
         <div class="vue-popover-arrow" v-if="visibleArrow"></div>
-        <vue-popover-content :content="content"></vue-popover-content>
+        <vue-popover-content :data="data"></vue-popover-content>
       </div>
     </transition>
   </div>
@@ -35,7 +35,7 @@ export default {
     },
     effect: [String, Object],
     // popover消息提示
-    content: [String, Object],
+    data: [String, Object],
     disable: {
       type: Boolean,
       default: false
@@ -71,14 +71,14 @@ export default {
   computed: {
     validatePopoverShow() {
       if (this.isValidate) {
-        return this.openValidate && this.content;
+        return this.openValidate && this.data;
       }
       return true;
     },
     triggerClass() {
       let clas;
       if (this.openValidate) {
-        clas = this.content ? "is-validate" : "is-success";
+        clas = this.data ? "is-validate" : "is-success";
       }
       return clas;
     },

@@ -59,14 +59,8 @@ export default {
               const fun = d.validator;
               const val = this.model[key] || this.$set(this.model, key, "");
               const cb = fun(val);
-              if (prop && d.prop === prop) {
+              if (prop && d.prop === prop || !prop) {
                 !this.validateForm.find(d => d === p) &&
-                    this.validateForm.push(p);
-                  this.$set(d, "data", cb);
-                  this.getValidate(da, d, cb);
-              } 
-              if (!prop) {
-                  !this.validateForm.find(d => d === p) &&
                     this.validateForm.push(p);
                   this.$set(d, "data", cb);
                   this.getValidate(da, d, cb);

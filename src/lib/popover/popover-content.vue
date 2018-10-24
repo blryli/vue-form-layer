@@ -2,10 +2,10 @@
 export default {
   name: "VuePopoverContent",
   props: {
-    content: [String, Object]
+    data: [String, Object]
   },
-  render() {
-    return <div class="vue-popover-content">{ this.content }</div>;
+  render(h) {
+    return h("div", { class: "vue-popover-content" }, [this.data]);
   }
 };
 </script>

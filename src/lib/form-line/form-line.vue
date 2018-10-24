@@ -68,9 +68,9 @@ export default {
           );
 
         nodes.push(
-          <vue-col span={overflowSpan}>
-            <vue-form-item>{tag}</vue-form-item>
-          </vue-col>
+          h("vue-col", { attrs: { span: overflowSpan } }, [
+            h("vue-form-item", {}, [tag])
+          ])
         );
         return;
       }
@@ -83,21 +83,19 @@ export default {
         "80px";
       let prop = this.cols[index].prop || "";
       let required = this.cols[index].required;
-      let openValidate = !!this.form.$data.validateForm.find(d => d === prop);
 
       // 添加图层
       let nodeArr = [];
-      let rules;
       if (this.layer) {
+        let openValidate = !!this.form.$data.validateForm.find(d => d === prop);
         this.layer.forEach(da => {
           da.data &&
             da.data.length &&
             da.data.forEach(d => {
               if (prop === d.prop) {
                 const type = d.type || (da.view && da.view.type) || "popover"; // 展示类型
-                let effect =
-                  d.effect || (da.view && da.view.effect) || "light"; // 主题 or 颜色
-                d.validator && effect === 'light' && (effect = 'error');
+                let effect = d.effect || (da.view && da.view.effect) || "light"; // 主题 or 颜色
+                d.validator && effect === "light" && (effect = "error");
                 const placement =
                   d.placement || (da.view && da.view.placement) || "top"; // 展示位置
                 const trigger =
@@ -107,7 +105,7 @@ export default {
                 let data = d.data || ""; // 展示内容
                 const template =
                   d.template || (da.view && da.view.template) || ""; // 内容展示模板
-                template && (data = template(data));
+                template && (data = template(data, h));
                 let disable =
                   d.disable || (da.view && da.view.disable) || false; // 是否禁用
                 let visibleArrow = true;
@@ -117,60 +115,64 @@ export default {
                 d.visibleArrow !== undefined && (visibleArrow = d.visibleArrow);
                 const isValidate = d.validator !== undefined || false;
 
-                let popoverSlot = !target ? (
-                  <div slot="reference">{tag}</div>
-                ) : (
-                  ""
-                );
+                let popoverSlot = !target
+                  ? h("div", { slot: "reference" }, [tag])
+                  : "";
                 typeof target === "function" &&
-                  (popoverSlot = <div slot="reference">{target()}</div>);
+                  (popoverSlot = h("div", { slot: "reference" }, [target(h)]));
                 let triggerShow = da.show;
                 !target && da.show === false && (disable = true);
 
                 if (type === "popover") {
                   nodeArr.push(
-                    <vue-popover
-                      content={data}
-                      openValidate={openValidate}
-                      placement={placement}
-                      trigger={trigger}
-                      effect={effect}
-                      visibleArrow={visibleArrow}
-                      target={target}
-                      order={order}
-                      triggerShow={triggerShow}
-                      disable={disable}
-                      isValidate={isValidate}
-                    >
-                      {popoverSlot}
-                    </vue-popover>
+                    h(
+                      "vue-popover",
+                      {
+                        attrs: {
+                          data: data,
+                          openValidate: openValidate,
+                          placement: placement,
+                          trigger: trigger,
+                          effect: effect,
+                          visibleArrow: visibleArrow,
+                          target: target,
+                          order: order,
+                          triggerShow: triggerShow,
+                          disable: disable,
+                          isValidate: isValidate
+                        }
+                      },
+                      [popoverSlot]
+                    )
                   );
                 }
               }
             });
         });
       }
+      let formItemTag = nodeArr.length ? nodeArr : tag;
       nodes.push(
-        <vue-col span={span}>
-          <vue-form-item
-            prop={prop}
-            label={label}
-            label-width={labelWidth}
-            required={required}
-            gutter={layerGutter}
-          >
-            {nodeArr}
-          </vue-form-item>
-        </vue-col>
+        h("vue-col", { attrs: { span: span } }, [
+          h(
+            "vue-form-item",
+            {
+              attrs: {
+                label: label,
+                labelWidth: labelWidth,
+                required: required,
+                gutter: layerGutter
+              }
+            },
+            [formItemTag]
+          )
+        ])
       );
     });
-    return (
-      <vue-col span={this.span}>
-        <div class="vue-form-line" style={{ marginBottom: rowledge }}>
-          {nodes}
-        </div>
-      </vue-col>
-    );
+    return h("vue-col", { span: this.span }, [
+      h("div", { class: "vue-form-line", style: { marginBottom: rowledge } }, [
+        nodes
+      ])
+    ]);
   }
 };
 </script>

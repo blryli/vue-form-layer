@@ -2,6 +2,14 @@
 
 > 快速组建，灵活调整结构，支持校验，支持自定义模板，支持不同图层展示
 
+### 演示
+
+[github pages](https://blryli.github.io/vue-form-layer/)
+
+[jsFiddle](https://jsfiddle.net/blryli/acxfpyv8/89/)
+
+[codepen](https://codepen.io/blryli/pen/gBdKwV)
+
 #### npm 安装
 
 ```js
@@ -91,7 +99,27 @@ export default {
 export default {
   data () {
     var dataFn = data => {
-      return // your component
+      return 
+        // your component
+        // vue1.0支持 this.$createElement("component", { attrs: { data: data } });
+        
+        // vue2.0支持jsx
+        // 可以直接写 <component data={data}></component>
+        // 或者写引入的组件
+        
+        // 不支持的可以
+            npm install\
+            babel-plugin-syntax-jsx\
+            babel-plugin-transform-vue-jsx\
+            babel-helper-vue-jsx-merge-props\
+            babel-preset-es2015\
+          --save-dev
+        // .babelrc
+            {
+              "presets": ["es2015"],
+              "plugins": ["transform-vue-jsx"]
+            }
+        // 然后就可以愉快地写jsx了
     };
     return {
       form: {},

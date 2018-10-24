@@ -19,8 +19,10 @@
 </template>
 
 <script>
+import Test from "./test.vue";
 export default {
   name: "app",
+  components: { Test },
   data() {
     var validateName = value => {
       if (value === "") {
@@ -39,15 +41,10 @@ export default {
       }
     };
     var targetFn = () => {
-      return <i class="el-icon-view" />;
+      return this.$createElement('span', {}, ['(?)']);
     };
     var dataFn = data => {
-      return (
-        <div>
-          <p>{data.content}</p>
-          <img style="width:100px;height:auto" src={data.img} />
-        </div>
-      );
+      return this.$createElement("test", { attrs: { data: data } });
     };
     return {
       value: true,
@@ -124,7 +121,7 @@ export default {
       });
     },
     validateResult(val) {
-      console.log('validateResult: ' + JSON.stringify(val));
+      console.log("validateResult: " + JSON.stringify(val));
     }
   }
 };
