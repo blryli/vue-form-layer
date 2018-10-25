@@ -6,9 +6,13 @@
 
 [github pages](https://blryli.github.io/vue-form-layer/)
 
-[jsFiddle](https://jsfiddle.net/blryli/acxfpyv8/89/)
+[jsFiddle apply to form](https://jsfiddle.net/blryli/wk0dzvjo/)
 
-[codepen](https://codepen.io/blryli/pen/gBdKwV)
+[jsFiddle apply to table](https://jsfiddle.net/blryli/acxfpyv8/)
+
+[codepen apply to form](https://codepen.io/blryli/pen/gBdKwV)
+
+[codepen apply to table](https://codepen.io/blryli/pen/VEVEJq)
 
 #### npm 安装
 
