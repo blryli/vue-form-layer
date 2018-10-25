@@ -54,7 +54,7 @@ export default {
     let offSet = tags.length - this.cols.length;
     const layerGutter = this.form.$props.layerGutter;
     const rowledge = this.form.$props.rowledge + "px";
-    tags.forEach((tag, index) => {
+    tags.length && tags.forEach((tag, index) => {
       if (!this.cols[index]) {
         let overflowSpan;
         !this.cols.length

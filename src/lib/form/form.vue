@@ -31,11 +31,11 @@ export default {
     this.layer && this.layer.forEach(d => {
       d.show === undefined && this.$set(d, "show", true);
     });
-    this.initData = JSON.parse(JSON.stringify(this.model));
+    this.initData = this.model && JSON.parse(JSON.stringify(this.model));
   },
   computed: {
     modelIsObject() {
-      return typeof this.model === 'object' && !Array.isArray(this.model);
+      return this.model && typeof this.model === 'object' && !Array.isArray(this.model);
     }
   },
   methods: {
@@ -122,6 +122,7 @@ export default {
       });
     },
     resetData(prop) {
+      if (!this.initData) return;
       if (Array.isArray(this.model)) {
         this.model.forEach((d, i) => {
           this.$set(d, prop, this.initData[i][prop] || "");

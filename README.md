@@ -49,8 +49,8 @@ Vue.use(VueFormLayer)
 ```html
 <vue-form :model="form" ref="form" :layer="layer">
     <vue-form-line 
-    :cols="[{ span: 10, label: '名字' },
-    { span: 10, label: '年龄']">
+    :cols="[{ span: 10, label: '名字', prop: '/form/name' },
+            { span: 10, label: '年龄', prop: '/form/age'}]">
         <input type="text" v-model="form.name">
         <input type="text" v-model="form.age">
     </vue-form-line>
@@ -90,8 +90,8 @@ export default {
 ```html
 <vue-form :model="form" ref="form" :layer="layer">
     <vue-form-line 
-    :cols="[{ span: 10, label: '名字' },
-    { span: 10, label: '年龄']">
+    :cols="[{ span: 10, label: '名字', prop: '/form/name' },
+            { span: 10, label: '年龄', prop: '/form/age'}]">
         <input type="text" v-model="form.name">
         <input type="text" v-model="form.age">
     </vue-form-line>
@@ -154,8 +154,8 @@ export default {
 ```html
 <vue-form :model="form" ref="form" :layer="layer">
     <vue-form-line 
-    :cols="[{ span: 10, label: '名字' },
-    { span: 10, label: '年龄']">
+    :cols="[{ span: 10, label: '名字', prop: '/form/name' },
+            { span: 10, label: '年龄', prop: '/form/age'}]">
         <input type="text" v-model="form.name" @blur="validate('/form/name')">
         <input type="text" v-model="form.age" @blur="validate('/form/age')">
     </vue-form-line>
