@@ -1,19 +1,57 @@
 <template>
   <div id="app">
-    <h2>基本使用</h2>
+    <h2>apply to form</h2>
     <p>
-      <el-switch v-model="value" @change="$refs['form'].changeShow('layer-1')" inactive-text="图层1" />
+      <el-switch v-model="value" @change="$refs['form'].changeShow('layer-1')" inactive-text="layer toogle visible" />
     </p>
-    <vue-form ref="form" :model="form" :layer="layer" @validate="validateResult">
-      <vue-form-line :cols="[{ span: 10, label: '名字', prop: '/form/name' },{ span: 10, label: '年龄', prop: '/form/age' }]">
+    <vue-form ref="form" :model="form" :layer="layer">
+      <vue-form-line :cols="[{ span: 10, label: 'name', prop: '/form/name' },{ span: 10, label: 'age', prop: '/form/age' }]">
         <el-input type="text" v-model="form.name" @blur="validateField('/form/name')" />
         <el-input type="text" v-model="form.age" @blur="validateField('/form/age')" />
       </vue-form-line>
+      <vue-form-line :cols="[{ span: 10, label: 'gender', prop: '/form/gender' }]">
+        <el-select v-model="form.gender" placeholder="请选择" clearable @change="validateField('/form/gender')">
+          <el-option label="Men" value="value1"></el-option>
+          <el-option label="women" value="value2"></el-option>
+        </el-select>
+      </vue-form-line>
     </vue-form>
     <p>
-      <el-button type="primary" @click="submitForm('form')">submitForm</el-button>
+      <el-button type="primary" @click="submitForm('form')">submit form</el-button>
       <el-button @click="$refs['form'].claerValidate()">claerValidate</el-button>
       <el-button @click="$refs['form'].resetFields()">resetForm</el-button>
+    </p>
+    <br />
+    <h2>apply to table</h2>
+    <vue-form ref="table" :model="tableData" :layer="tableLayer">
+      <el-table :data="tableData" style="width: 100%">
+        <el-table-column label="id">
+          <template slot-scope="scope">
+            <vue-form-line :cols="[{prop: `/tableData/${scope.$index}/id`}]">
+              <el-input type="text" v-model="scope.row.id" @blur="tableValidateField(`/tableData/${scope.$index}/id`)" />
+            </vue-form-line>
+          </template>
+        </el-table-column>
+        <el-table-column label="name">
+          <template slot-scope="scope">
+            <vue-form-line :cols="[{prop: `/tableData/${scope.$index}/name`}]">
+              <el-input type="text" v-model="scope.row.name" @blur="tableValidateField(`/tableData/${scope.$index}/name`)" />
+            </vue-form-line>
+          </template>
+        </el-table-column>
+        <el-table-column label="address">
+          <template slot-scope="scope">
+            <vue-form-line :cols="[{prop: `/tableData/${scope.$index}/address`}]">
+              <el-input type="text" v-model="scope.row.address" @blur="tableValidateField(`/tableData/${scope.$index}/address`)" />
+            </vue-form-line>
+          </template>
+        </el-table-column>
+      </el-table>
+    </vue-form>
+    <p>
+      <el-button type="primary" @click="submitForm('table')">submit table</el-button>
+      <el-button @click="$refs['table'].claerValidate()">claerValidate</el-button>
+      <el-button @click="$refs['table'].resetFields()">resetForm</el-button>
     </p>
   </div>
 </template>
@@ -26,25 +64,56 @@ export default {
   data() {
     var validateName = value => {
       if (value === "") {
-        return "名字不能为空";
+        return "name is required";
       } else {
         return "";
       }
     };
     var validateAge = value => {
       if (value === "") {
-        return "年龄不能为空";
+        return "age is required";
       } else if (value < 18) {
-        return "年龄不能小于18";
+        return "age not less then 18";
+      } else {
+        return "";
+      }
+    };
+    var validateGender = value => {
+      if (!value) {
+        return "gender is required";
       } else {
         return "";
       }
     };
     var targetFn = () => {
-      return this.$createElement('span', {}, ['(?)']);
+      return this.$createElement("span", {}, ["(?)"]);
     };
     var dataFn = data => {
       return this.$createElement("test", { attrs: { data: data } });
+    };
+
+    var validateTableId = value => {
+      if (value === "") {
+        return "id is required";
+      } else {
+        return "";
+      }
+    };
+    var validateTableName = value => {
+      if (value === "") {
+        return "name is required";
+      } else {
+        return "";
+      }
+    };
+    var validateTableAddress = value => {
+      if (value === "") {
+        return "address is required";
+      } else if (value.length < 18) {
+        return "not less than 18 characters";
+      } else {
+        return "";
+      }
     };
     return {
       value: true,
@@ -81,28 +150,75 @@ export default {
           show: true,
           view: {
             type: "popover",
-            placement: "top",
-            trigger: "hover",
-            effect: "error",
             order: 0
           },
           data: [
             {
               prop: "/form/name",
-              type: "popover",
-              trigger: "hover",
               validator: validateName,
               data: ""
             },
             {
               prop: "/form/age",
-              type: "popover",
-              trigger: "hover",
-              effect: "info",
               validator: validateAge,
+              data: ""
+            },
+            {
+              prop: "/form/gender",
+              validator: validateGender,
               data: ""
             }
           ]
+        }
+      ],
+      tableLayer: [
+        {
+          id: "tableLayer",
+          show: true,
+          data: [
+            {
+              prop: "/tableData/0/id",
+              validator: validateTableId,
+              data: ""
+            },
+            {
+              prop: "/tableData/0/name",
+              validator: validateTableName,
+              data: ""
+            },
+            {
+              prop: "/tableData/0/address",
+              validator: validateTableAddress,
+              data: ""
+            },
+            {
+              prop: "/tableData/1/id",
+              validator: validateTableId,
+              data: ""
+            },
+            {
+              prop: "/tableData/1/name",
+              validator: validateTableName,
+              data: ""
+            },
+            {
+              prop: "/tableData/1/address",
+              validator: validateTableAddress,
+              data: ""
+            }
+          ]
+        }
+      ],
+      tableData: [
+        {
+          id: "",
+          name: "",
+          address: "Guangdong Shenzhen Baoan"
+        },
+        {
+          id: "6666",
+          name: "",
+          address: ""
         }
       ]
     };
@@ -120,8 +236,8 @@ export default {
         }
       });
     },
-    validateResult(val) {
-      console.log("validateResult: " + JSON.stringify(val));
+    tableValidateField(prop) {
+      this.$refs["table"].validateField(prop);
     }
   }
 };
@@ -136,6 +252,9 @@ export default {
 }
 input {
   width: 100%;
+}
+.el-select{
+  display: block;
 }
 </style>
 

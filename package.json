@@ -1,7 +1,7 @@
 {
   "name": "vue-form-layer",
   "description": "A vue2.0 vue-form-layer component-form",
-  "version": "1.0.5",
+  "version": "1.0.6",
   "author": "lizhili <405549416@qq.com>",
   "license": "MIT",
   "private": false,
@@ -15,7 +15,6 @@
     "build": "cross-env NODE_ENV=production webpack --progress --hide-modules"
   },
   "dependencies": {
-    "element-ui": "^2.4.8",
     "vue": "^2.5.11"
   },
   "browserslist": [
@@ -24,6 +23,7 @@
     "not ie <= 8"
   ],
   "devDependencies": {
+    "element-ui": "^2.4.8",
     "babel-core": "^6.26.0",
     "babel-loader": "^7.1.2",
     "babel-preset-env": "^1.6.0",

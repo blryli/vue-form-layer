@@ -93,59 +93,7 @@ export default {
             da.data.length &&
             da.data.forEach(d => {
               if (prop === d.prop) {
-                const type = d.type || (da.view && da.view.type) || "popover"; // 展示类型
-                let effect = d.effect || (da.view && da.view.effect) || "light"; // 主题 or 颜色
-                d.validator && effect === "light" && (effect = "error");
-                const placement =
-                  d.placement || (da.view && da.view.placement) || "top"; // 展示位置
-                const trigger =
-                  d.trigger || (da.view && da.view.trigger) || "hover"; // 触发事件
-                let target = d.target || (da.view && da.view.target) || ""; // 指定触发元素
-                const order = d.order || (da.view && da.view.order) || 0; // 排序 数字越小越靠前
-                let data = d.data || ""; // 展示内容
-                const template =
-                  d.template || (da.view && da.view.template) || ""; // 内容展示模板
-                template && (data = template(data, h));
-                let disable =
-                  d.disable || (da.view && da.view.disable) || false; // 是否禁用
-                let visibleArrow = true;
-                da.view &&
-                  da.view.visibleArrow !== undefined &&
-                  (visibleArrow = da.view.visibleArrow);
-                d.visibleArrow !== undefined && (visibleArrow = d.visibleArrow);
-                const isValidate = d.validator !== undefined || false;
-
-                let popoverSlot = !target
-                  ? h("div", { slot: "reference" }, [tag])
-                  : "";
-                typeof target === "function" &&
-                  (popoverSlot = h("div", { slot: "reference" }, [target(h)]));
-                let triggerShow = da.show;
-                !target && da.show === false && (disable = true);
-
-                if (type === "popover") {
-                  nodeArr.push(
-                    h(
-                      "vue-popover",
-                      {
-                        attrs: {
-                          data: data,
-                          openValidate: openValidate,
-                          placement: placement,
-                          trigger: trigger,
-                          effect: effect,
-                          visibleArrow: visibleArrow,
-                          target: target,
-                          order: order,
-                          triggerShow: triggerShow,
-                          disable: disable,
-                          isValidate: isValidate
-                        }
-                      },
-                      [popoverSlot]
-                    )
-                  );
-                }
+                this.getNodeArr(nodeArr, d, da, h, tag, openValidate);
               }
             });
         });
@@ -173,6 +121,57 @@ export default {
         nodes
       ])
     ]);
+  },
+  methods: {
+    getNodeArr(nodeArr, d, da, h, tag, openValidate) {
+      const type = d.type || (da.view && da.view.type) || "popover"; // 展示类型
+      let effect = d.effect || (da.view && da.view.effect) || "light"; // 主题 or 颜色
+      d.validator && effect === "light" && (effect = "error");
+      const placement = d.placement || (da.view && da.view.placement) || "top"; // 展示位置
+      const trigger = d.trigger || (da.view && da.view.trigger) || "hover"; // 触发事件
+      let target = d.target || (da.view && da.view.target) || ""; // 指定触发元素
+      const order = d.order || (da.view && da.view.order) || 0; // 排序 数字越小越靠前
+      let data = d.data || ""; // 展示内容
+      const template = d.template || (da.view && da.view.template) || ""; // 内容展示模板
+      template && (data = template(data, h));
+      let disable = d.disable || (da.view && da.view.disable) || false; // 是否禁用
+      let visibleArrow = true;
+      da.view &&
+        da.view.visibleArrow !== undefined &&
+        (visibleArrow = da.view.visibleArrow);
+      d.visibleArrow !== undefined && (visibleArrow = d.visibleArrow);
+      const isValidate = d.validator !== undefined || false;
+
+      let popoverSlot = !target ? h("div", { slot: "reference" }, [tag]) : "";
+      typeof target === "function" &&
+        (popoverSlot = h("div", { slot: "reference" }, [target(h)]));
+      let triggerShow = da.show;
+      !target && da.show === false && (disable = true);
+      d.validator && d.data && (openValidate = true);
+      if (type === "popover") {
+        nodeArr.push(
+          h(
+            "vue-popover",
+            {
+              attrs: {
+                data: data,
+                openValidate: openValidate,
+                placement: placement,
+                trigger: trigger,
+                effect: effect,
+                visibleArrow: visibleArrow,
+                target: target,
+                order: order,
+                triggerShow: triggerShow,
+                disable: disable,
+                isValidate: isValidate
+              }
+            },
+            [popoverSlot]
+          )
+        );
+      }
+    }
   }
 };
 </script>
