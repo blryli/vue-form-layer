@@ -166,11 +166,29 @@ export default {
 <script>
 export default {
   data () {
-    var validateName = value => {
+    let style = {
+      message: "",
+      effect: "#67c23a",
+      disable: true,
+      borderColor: "#67c23a"
+    };
+    var recalculateView = () => {
+      return { effect: "#f56c6c", disable: false, borderColor: "#f56c6c" };
+    };
+    var recalculateName = value => {
       if (value === "") {
-        return "名字不能为空";
+        return "name is required";
       } else {
-        return "";
+        return style;
+      }
+    };
+    var recalculateAge = value => {
+      if (value === "") {
+        return "age is required";
+      } else if (value < 18) {
+        return {message: "age not less then 18", effect: 'blue'};
+      } else {
+        return style;
       }
     };
     return {
@@ -179,6 +197,10 @@ export default {
         {
           id: "layer-1",
           show: true,
+          view: {
+            disable: true,
+            recalculate: recalculateView
+          },
           data: [
             {
               prop: "/form/name",
@@ -187,7 +209,7 @@ export default {
             },
             {
               prop: "/form/age",
-              data: ""
+              data: recalculateAge
             }
           ]
         },
@@ -196,7 +218,7 @@ export default {
   },
   methods: {
     validate(prop) {
-      this.$refs['form'].validate(prop);
+      this.$refs['form'].validateField(prop);
     }
   }
 }
@@ -218,16 +240,10 @@ export default {
 |  方法名 |    说明                    |   参数      |
 |-------- |------                      |------       |
 |changeShow  |改变图层展示状态            |图层ID       |
-|validate |对整个表单进行校验的方法，参数为一个回调函数|Function(callback: Function(boolean))|
-|validateField |对部分表单字段进行校验的方法|prop: string|
-|clearValidate |移除表单项的校验结果。传入待移除的表单项的 prop 属性组成的数组，如不传则移除整个表单的校验结果|props: array|
-|resetFields |对表单进行重置，将所有字段值重置为初始值并移除校验结果。传入待移除的表单项的 prop 属性组成的数组，如不传则移除整个表单进行重置|props: array|
-
-### vue-form Events
-
-|  事件名称 |    说明                    |   回调参数      |
-|-------- |------                      |------       |
-|validate  |任一表单项被校验后触发, type有两种类型 error/info，info错误信息不影响表单校验结果  |表单校验结果 array: [{prop, type, message}]     |
+|recalculate |对整个表单进行重算的方法，参数为id是进行重算的图层ID，第二个参数是回调函数|Function(id, callback: Function(boolean))|
+|recalculateField |对部分表单字段进行重算的方法，参数为字段prop，不传参数则进行全局重算|prop: string|
+|clearCalculate |移除表单项的重算结果。传入待移除的表单项的 prop 属性组成的数组，如不传则移除整个表单的重算结果|props: array|
+|resetFields |对表单进行重置，将所有字段值重置为初始值并移除重算结果。传入待移除的表单项的 prop 属性组成的数组，如不传则移除整个表单进行重置|props: array|
 
 ### vue-form layer 图层
 
@@ -245,7 +261,8 @@ export default {
 | type       | 图层展示类型   | string   | popover  | popover    |
 | order      | 图层横向排序，数字越小越靠前   | number   | -  | 0 |
 | effect     | 主题或颜色，如果传入色值则主题颜色为该色值 | string  |  light/dark/info/error  | light   |
-| validator     | 校验规则 (value) => {return message} | function  |  -  | -   |
+| borderColor| 默认item的border颜色 | string  |  -  | "#ccc"   |
+| recalculate| 默认重算规则 (value) => {return {effect: 主题颜色, disable: 是否禁用, borderColor: 边框颜色}，当字段重算没有传入这些参数的时候生效 | function  |  -  | -   |
 | placement  | 展示位置   | string   | top/right/bottom/left  | top    |
 | trigger    | 触发方式   | string   | hover/focus/click  | hover    |
 | target    | 默认为传入form-line的dom，target存在时会修改触发目标，(data) => {return 模板/组件 }   | function   | -  | 传入form-line的dom |
@@ -261,6 +278,7 @@ export default {
 | prop       | 使用该配置的prop字段，如不传则该配置不会作用于任何字段  | - | -  | -    |
 | data       | 展示数据，传入模板template则通过模板展示数据，object/array类型需要传模板 | string/object/array | -  | -   |
 | template   | 数据展示模板 (data) => {return 模板/组件 } | function | -  | top    |
+| recalculate| 字段重算规则 (value) => {return {message: 展示文字，effect: 主题颜色, disable: 是否禁用, borderColor: 边框颜色} | function  |  -  | -   |
 
 ### vue-form-line Attributes
 

@@ -2,15 +2,15 @@
   <div id="app">
     <h2>apply to form</h2>
     <p>
-      <el-switch v-model="value" @change="$refs['form'].changeShow('layer-1')" inactive-text="layer toogle visible" />
+      <el-switch v-model="value" @change="$refs['form'].changeShow('layer-2')" inactive-text="layer toogle visible" />
     </p>
     <vue-form ref="form" :model="form" :layer="layer">
       <vue-form-line :cols="[{ span: 10, label: 'name', prop: '/form/name' },{ span: 10, label: 'age', prop: '/form/age' }]">
-        <el-input type="text" v-model="form.name" @blur="validateField('/form/name')" />
-        <el-input type="text" v-model="form.age" @blur="validateField('/form/age')" />
+        <el-input type="text" v-model="form.name" @blur="recalculateField('/form/name')" />
+        <el-input type="text" v-model="form.age" @blur="recalculateField('/form/age')" />
       </vue-form-line>
       <vue-form-line :cols="[{ span: 10, label: 'gender', prop: '/form/gender' }]">
-        <el-select v-model="form.gender" placeholder="请选择" clearable @change="validateField('/form/gender')">
+        <el-select v-model="form.gender" placeholder="请选择" clearable @change="recalculateField('/form/gender')">
           <el-option label="Men" value="value1"></el-option>
           <el-option label="women" value="value2"></el-option>
         </el-select>
@@ -18,8 +18,8 @@
     </vue-form>
     <p>
       <el-button type="primary" @click="submitForm('form')">submit form</el-button>
-      <el-button @click="$refs['form'].claerValidate()">claerValidate</el-button>
-      <el-button @click="$refs['form'].resetFields()">resetForm</el-button>
+      <el-button @click="$refs['form'].clearCalculate()">clearCalculate</el-button>
+      <el-button @click="$refs['form'].resetFields()">resetFields</el-button>
     </p>
     <br />
     <h2>apply to table</h2>
@@ -28,30 +28,30 @@
         <el-table-column label="id">
           <template slot-scope="scope">
             <vue-form-line :cols="[{prop: `/tableData/${scope.$index}/id`}]">
-              <el-input type="text" v-model="scope.row.id" @blur="tableValidateField(`/tableData/${scope.$index}/id`)" />
+              <el-input type="text" v-model="scope.row.id" @blur="tableRecalculateField(`/tableData/${scope.$index}/id`)" />
             </vue-form-line>
           </template>
         </el-table-column>
         <el-table-column label="name">
           <template slot-scope="scope">
             <vue-form-line :cols="[{prop: `/tableData/${scope.$index}/name`}]">
-              <el-input type="text" v-model="scope.row.name" @blur="tableValidateField(`/tableData/${scope.$index}/name`)" />
+              <el-input type="text" v-model="scope.row.name" @blur="tableRecalculateField(`/tableData/${scope.$index}/name`)" />
             </vue-form-line>
           </template>
         </el-table-column>
         <el-table-column label="address">
           <template slot-scope="scope">
             <vue-form-line :cols="[{prop: `/tableData/${scope.$index}/address`}]">
-              <el-input type="text" v-model="scope.row.address" @blur="tableValidateField(`/tableData/${scope.$index}/address`)" />
+              <el-input type="text" v-model="scope.row.address" @blur="tableRecalculateField(`/tableData/${scope.$index}/address`)" />
             </vue-form-line>
           </template>
         </el-table-column>
       </el-table>
     </vue-form>
     <p>
-      <el-button type="primary" @click="submitForm('table')">submit table</el-button>
-      <el-button @click="$refs['table'].claerValidate()">claerValidate</el-button>
-      <el-button @click="$refs['table'].resetFields()">resetForm</el-button>
+      <el-button type="primary" @click="submitTable('table')">submit table</el-button>
+      <el-button @click="$refs['table'].clearCalculate()">clearCalculate</el-button>
+      <el-button @click="$refs['table'].resetFields()">resetFields</el-button>
     </p>
   </div>
 </template>
@@ -62,27 +62,36 @@ export default {
   name: "app",
   components: { Test },
   data() {
-    var validateName = value => {
+    let style = {
+      message: "",
+      effect: "#67c23a",
+      disable: true,
+      borderColor: "#67c23a"
+    };
+    var recalculateView = () => {
+      return { effect: "#f56c6c", disable: false, borderColor: "#f56c6c" };
+    };
+    var recalculateName = value => {
       if (value === "") {
         return "name is required";
       } else {
-        return "";
+        return style;
       }
     };
-    var validateAge = value => {
+    var recalculateAge = value => {
       if (value === "") {
         return "age is required";
       } else if (value < 18) {
-        return "age not less then 18";
+        return {message: "age not less then 18", effect: 'blue'};
       } else {
-        return "";
+        return style;
       }
     };
-    var validateGender = value => {
+    var recalculateGender = value => {
       if (!value) {
         return "gender is required";
       } else {
-        return "";
+        return style;
       }
     };
     var targetFn = () => {
@@ -92,27 +101,30 @@ export default {
       return this.$createElement("test", { attrs: { data: data } });
     };
 
-    var validateTableId = value => {
+    var recalculateTableView = () => {
+      return { effect: "#f56c6c", disable: false, borderColor: "#f56c6c" };
+    };
+    var recalculateTableId = value => {
       if (value === "") {
         return "id is required";
       } else {
-        return "";
+        return style;
       }
     };
-    var validateTableName = value => {
+    var recalculateTableName = value => {
       if (value === "") {
         return "name is required";
       } else {
-        return "";
+        return style;
       }
     };
-    var validateTableAddress = value => {
+    var recalculateTableAddress = value => {
       if (value === "") {
         return "address is required";
       } else if (value.length < 18) {
         return "not less than 18 characters";
       } else {
-        return "";
+        return style;
       }
     };
     return {
@@ -149,23 +161,23 @@ export default {
           id: "layer-2",
           show: true,
           view: {
-            type: "popover",
-            order: 0
+            disable: true,
+            recalculate: recalculateTableView
           },
           data: [
             {
               prop: "/form/name",
-              validator: validateName,
+              recalculate: recalculateName,
               data: ""
             },
             {
               prop: "/form/age",
-              validator: validateAge,
+              recalculate: recalculateAge,
               data: ""
             },
             {
               prop: "/form/gender",
-              validator: validateGender,
+              recalculate: recalculateGender,
               data: ""
             }
           ]
@@ -175,35 +187,39 @@ export default {
         {
           id: "tableLayer",
           show: true,
+          view: {
+            disable: true,
+            recalculate: recalculateView
+          },
           data: [
             {
               prop: "/tableData/0/id",
-              validator: validateTableId,
+              recalculate: recalculateTableId,
               data: ""
             },
             {
               prop: "/tableData/0/name",
-              validator: validateTableName,
+              recalculate: recalculateTableName,
               data: ""
             },
             {
               prop: "/tableData/0/address",
-              validator: validateTableAddress,
+              recalculate: recalculateTableAddress,
               data: ""
             },
             {
               prop: "/tableData/1/id",
-              validator: validateTableId,
+              recalculate: recalculateTableId,
               data: ""
             },
             {
               prop: "/tableData/1/name",
-              validator: validateTableName,
+              recalculate: recalculateTableName,
               data: ""
             },
             {
               prop: "/tableData/1/address",
-              validator: validateTableAddress,
+              recalculate: recalculateTableAddress,
               data: ""
             }
           ]
@@ -224,21 +240,30 @@ export default {
     };
   },
   methods: {
-    validateField(prop) {
-      this.$refs["form"].validateField(prop);
+    recalculateField(prop) {
+      this.$refs["form"].recalculateField(prop);
     },
     submitForm(formName) {
-      this.$refs[formName].validate(valid => {
+      this.$refs[formName].recalculate('layer-2', valid => {
         if (valid) {
-          console.log("submit");
+          console.log("form submit");
         } else {
-          console.log("error submit!!");
+          console.log("form error submit!!");
         }
       });
     },
-    tableValidateField(prop) {
-      this.$refs["table"].validateField(prop);
-    }
+    tableRecalculateField(prop) {
+      this.$refs["table"].recalculateField(prop);
+    },
+    submitTable(formName) {
+      this.$refs[formName].recalculate('tableLayer', valid => {
+        if (valid) {
+          console.log("table submit");
+        } else {
+          console.log("table error submit!!");
+        }
+      });
+    },
   }
 };
 </script>
@@ -253,7 +278,7 @@ export default {
 input {
   width: 100%;
 }
-.el-select{
+.el-select {
   display: block;
 }
 </style>

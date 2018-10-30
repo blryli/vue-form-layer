@@ -22,15 +22,16 @@ export default {
   },
   data() {
     return {
+      layerCopy: null,
       initData: null,
-      validateForm: [],
-      validateResult: []
+      recalculateArr: []
     };
   },
   created() {
-    this.layer && this.layer.forEach(d => {
-      d.show === undefined && this.$set(d, "show", true);
+    this.layer && this.layer.forEach(da => {
+      da.show === undefined && this.$set(da, "show", true);
     });
+    this.layerCopy = this.model && JSON.parse(JSON.stringify(this.layer));
     this.initData = this.model && JSON.parse(JSON.stringify(this.model));
   },
   computed: {
@@ -47,16 +48,29 @@ export default {
           hasId = true;
         }
       });
-      !hasId && console.log(`not find ${id} in layer`);
+      !hasId && console.error(`not find ${id} in layer`);
     },
-    validate(callback) {
-      this.validateField();
-      callback(this.validateResult.findIndex(d => d.type === 'error' && d.message) === -1);
+    recalculate(id, callback) {
+      if (typeof callback !== 'function') {
+        console.error('recalculate 方法 回调参数必须是 函数');
+        return;
+      }
+      if (!id) {
+        console.error('recalculate 方法 必须传入 layer ID');
+        return;
+      }
+      this.recalculateField();
+      let valid = true;
+      this.layer.forEach(da => {
+        if (da.id === id) {
+          da.data.find(d => d.data) && (valid = false);
+        }
+      })
+      callback(valid);
     },
     setData(prop, d, da) {
       const p = prop || d.prop;
       const key = p.substring(p.lastIndexOf("/") + 1);
-      const fun = d.validator;
       let val = "";
       if (this.modelIsObject) {
         val = this.model[key] || this.$set(this.model, key, "");
@@ -65,57 +79,80 @@ export default {
         const index = parseInt(arr[arr.length - 2]);
         val = this.model[index][key];
       }
-      const cb = fun(val);
+      const fieldCallback = d.recalculate && d.recalculate(val) || null;
+      const viewCallback = da.view && da.view.recalculate && da.view.recalculate(val) || null;
+      let data;
+      let effect;
+      let disable = false;
+      let borderColor;
+      if (typeof fieldCallback === "string") {
+        data = fieldCallback || "";
+        effect = viewCallback && viewCallback.effect || "";
+        disable = viewCallback &&  viewCallback.disable !== undefined && typeof viewCallback.disable === "boolean" && viewCallback.disable;
+        borderColor = viewCallback && viewCallback.borderColor;
+      } else if (typeof fieldCallback === "object") {
+        Array.isArray(fieldCallback) && console.error('recalculate 返回值必须是 字符串 或 对象');
+        data = fieldCallback.message !== undefined && fieldCallback.message || "";
+        effect = fieldCallback.effect || viewCallback && viewCallback.effect || "";
+        fieldCallback.disable !== undefined && typeof fieldCallback.disable === "boolean" && (disable = fieldCallback.disable);
+        fieldCallback.disable === undefined && viewCallback &&  viewCallback.disable !== undefined && typeof viewCallback.disable === "boolean" && (disable = viewCallback.disable);
+        borderColor = fieldCallback.borderColor || viewCallback && viewCallback.borderColor;
+      } else {
+        console.error('recalculate 返回值必须是 string 或 object')
+      }
       if (prop && d.prop === prop || !prop) {
-        !this.validateForm.find(d => d === p) &&
-            this.validateForm.push(p);
-          this.$set(d, "data", cb);
-          this.getValidate(da, d, cb);
+        !this.recalculateArr.find(d => d === p) &&
+          this.recalculateArr.push(p);
+          this.$set(d, "data", data);
+          effect && this.$set(d, "effect", effect);
+          disable !== undefined && this.$set(d, "disable", disable);
+          borderColor && this.$set(d, "borderColor", borderColor);
       }
     },
-    validateField(prop) {
+    recalculateField(prop) {
       this.layer && this.layer.forEach(da => {
         if (da.show) {
           da.data.forEach(d => {
-            if (d.validator !== undefined) {
+            if (d.recalculate !== undefined && typeof d.recalculate === "function") {
               this.setData(prop, d, da);
             }
           });
         }
       });
-      this.validateResult && this.$emit('validate', this.validateResult.filter(d => d.type === 'error'));
     },
-    getValidate(da, d, cb) {
-      const effect = d.effect || (da.view && da.view.effect) || 'error';
-      if (this.validateResult.length) {
-        const index = this.validateResult.findIndex(result => result.key === d.prop);
-        index !== -1 ? this.$set(this.validateResult[index], 'message', cb) : this.validateResult.push({ key: d.prop, type: effect, message: cb });
-      } else {
-        this.validateResult.push({ key: d.prop, type: effect, message: cb });
-      }
-    },
-    claerValidate(props = [], reset) {
-      !props.length && (this.validateForm = []);
-      this.layer && this.layer.forEach(da => {
-        da.data.forEach(d => {
-          if (d.validator !== undefined) {
-            const prop = reset
+    clearCalculate(props = [], resetModel) {
+      !props.length && (this.recalculateArr = []);
+      this.layer && this.layer.forEach((da, idx) => {
+        this.$set(da.view, "disable", this.layerCopy[idx].view.disable);
+        da.data.forEach((d, i) => {
+          if (d.recalculate !== undefined) {
+            const prop = resetModel
               ? d.prop.substring(d.prop.lastIndexOf("/") + 1)
               : null;
+            const copyD = this.layerCopy[idx].data[i];
+            const copyDa = this.layerCopy[idx];
+            const data = copyD.data || '';
+            const effect = copyD.effect || copyDa.view && copyDa.view.effect || '';
+            const disable = copyD.disable !== undefined && copyD.disable || copyDa.view && copyDa.view.disable !== undefined && copyDa.view.disable || false;
+            const borderColor = copyD.borderColor || copyDa.view && copyDa.view.borderColor || '';
             if (props.length) {
               if (props.find(prop => prop === d.prop)) {
-                let index = this.validateForm.findIndex(
+                let index = this.recalculateArr.findIndex(
                   prop => prop === d.prop
                 );
-                reset && this.resetData(prop);;
-                this.$set(d, "data", "");
-                this.validateForm.splice(index, 1);
+                resetModel && this.resetData(prop);;
+                this.$set(d, "data", data);
+                this.$set(d, "effect", effect);
+                this.$set(d, "disable", disable);
+                this.$set(d, "borderColor", borderColor);
+                this.recalculateArr.splice(index, 1);
               }
             } else {
-              if (reset) {
-                this.resetData(prop);
-              }
-              this.$set(d, "data", "");
+              resetModel && this.resetData(prop);
+              this.$set(d, "data", data);
+              this.$set(d, "effect", effect);
+              this.$set(d, "disable", disable);
+              this.$set(d, "borderColor", borderColor);
             }
           }
         });
@@ -132,7 +169,7 @@ export default {
       }
     },
     resetFields(props = []) {
-      this.claerValidate(props, true);
+      this.clearCalculate(props, true);
     }
   }
 };

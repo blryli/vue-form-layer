@@ -16,7 +16,11 @@ export default {
     label: String,
     labelWidth: String,
     required: Boolean,
-    gutter: Number
+    gutter: Number,
+    borderColor: {
+      type: String,
+      default: "#ccc"
+    }
   },
   computed: {
     style() {
@@ -25,6 +29,7 @@ export default {
         ret.marginLeft = `-${this.gutter / 2}px`;
         ret.marginRight = ret.marginLeft;
         ret["--marginLeft"] = `${this.gutter / 2}px`;
+        ret["--borderColor"] = this.borderColor;
       }
       return ret;
     }
@@ -49,18 +54,6 @@ export default {
   }
   .vue-popover-trigger {
     position: relative;
-    &.is-validate {
-      input,
-      input:focus {
-        border-color: var(--bgColor);
-      }
-    }
-    &.is-success {
-      input,
-      input:focus {
-        border-color: #67c23a;
-      }
-    }
   }
   &.is-required > .vue-form-item__label:before {
     content: "*";
@@ -99,11 +92,25 @@ export default {
   input {
     -webkit-appearance: none;
     border: 1px solid;
-    border-color: #ccc;
+    border-color: var(--borderColor);
     box-sizing: border-box;
     font-size: inherit;
     outline: none;
     width: 100%;
+    &:focus {
+      border-color: #409eff;
+    }
+    &:hover {
+      border-color: #bbb;
+    }
+  }
+  .is-recalculate {
+    input {
+      &:focus,
+      &:hover {
+        border-color: var(--borderColor);
+      }
+    }
   }
 }
 </style>

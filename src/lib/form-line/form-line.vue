@@ -83,17 +83,19 @@ export default {
         "80px";
       let prop = this.cols[index].prop || "";
       let required = this.cols[index].required;
+      let borderColor;
 
       // 添加图层
       let nodeArr = [];
       if (this.layer) {
-        let openValidate = !!this.form.$data.validateForm.find(d => d === prop);
+        let isRecalculate = !!this.form.$data.recalculateArr.find(d => d === prop);
         this.layer.forEach(da => {
           da.data &&
             da.data.length &&
             da.data.forEach(d => {
               if (prop === d.prop) {
-                this.getNodeArr(nodeArr, d, da, h, tag, openValidate);
+                borderColor = d.borderColor || (da.view && da.view.borderColor) || "#ccc"; // border 颜色
+                this.getNodeArr(nodeArr, d, da, h, tag, isRecalculate);
               }
             });
         });
@@ -108,7 +110,8 @@ export default {
                 label: label,
                 labelWidth: labelWidth,
                 required: required,
-                gutter: layerGutter
+                gutter: layerGutter,
+                borderColor: borderColor
               }
             },
             [formItemTag]
@@ -116,38 +119,37 @@ export default {
         ])
       );
     });
-    return h("vue-col", { span: this.span }, [
+    return h("vue-col", { attrs: {span: this.span} }, [
       h("div", { class: "vue-form-line", style: { marginBottom: rowledge } }, [
         nodes
       ])
     ]);
   },
   methods: {
-    getNodeArr(nodeArr, d, da, h, tag, openValidate) {
+    getNodeArr(nodeArr, d, da, h, tag, isRecalculate, borderColor) {
       const type = d.type || (da.view && da.view.type) || "popover"; // 展示类型
       let effect = d.effect || (da.view && da.view.effect) || "light"; // 主题 or 颜色
-      d.validator && effect === "light" && (effect = "error");
+      d.recalculate && effect === "light" && (effect = "error");
       const placement = d.placement || (da.view && da.view.placement) || "top"; // 展示位置
       const trigger = d.trigger || (da.view && da.view.trigger) || "hover"; // 触发事件
       let target = d.target || (da.view && da.view.target) || ""; // 指定触发元素
       const order = d.order || (da.view && da.view.order) || 0; // 排序 数字越小越靠前
       let data = d.data || ""; // 展示内容
       const template = d.template || (da.view && da.view.template) || ""; // 内容展示模板
-      template && (data = template(data, h));
-      let disable = d.disable || (da.view && da.view.disable) || false; // 是否禁用
+      template && (data = template(data));
+      let disable;
+      disable =  d.disable !== undefined ? d.disable : da.view && da.view.disable !== undefined ?  da.view.disable : false; // 是否禁用
       let visibleArrow = true;
       da.view &&
         da.view.visibleArrow !== undefined &&
         (visibleArrow = da.view.visibleArrow);
       d.visibleArrow !== undefined && (visibleArrow = d.visibleArrow);
-      const isValidate = d.validator !== undefined || false;
 
       let popoverSlot = !target ? h("div", { slot: "reference" }, [tag]) : "";
       typeof target === "function" &&
-        (popoverSlot = h("div", { slot: "reference" }, [target(h)]));
+        (popoverSlot = h("div", { slot: "reference" }, [target()]));
       let triggerShow = da.show;
-      !target && da.show === false && (disable = true);
-      d.validator && d.data && (openValidate = true);
+      da.show === false && (disable = true);
       if (type === "popover") {
         nodeArr.push(
           h(
@@ -155,7 +157,7 @@ export default {
             {
               attrs: {
                 data: data,
-                openValidate: openValidate,
+                isRecalculate: isRecalculate,
                 placement: placement,
                 trigger: trigger,
                 effect: effect,
@@ -163,8 +165,7 @@ export default {
                 target: target,
                 order: order,
                 triggerShow: triggerShow,
-                disable: disable,
-                isValidate: isValidate
+                disable: disable
               }
             },
             [popoverSlot]

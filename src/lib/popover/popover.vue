@@ -1,6 +1,6 @@
 <template>
   <div class="vue-popover" :class="effectClass" :style="popoverStyle">
-    <div class="vue-popover-trigger" ref="trigger" :class="triggerClass" :style="triggerStyle">
+    <div class="vue-popover-trigger" ref="trigger" :class="{'is-recalculate': isRecalculate}" :style="triggerStyle">
       <slot name="reference">
         <div v-if="typeof target === 'string'" class="vue-popover-trigger__target" :class="'trigger__target-'+target"></div>
       </slot>
@@ -35,7 +35,7 @@ export default {
     },
     effect: [String, Object],
     // popover消息提示
-    data: [String, Object],
+    data: [String, Object, Array],
     disable: {
       type: Boolean,
       default: false
@@ -54,9 +54,8 @@ export default {
       default: 0
     },
     rules: Object,
-    openValidate: Boolean,
-    triggerShow: Boolean,
-    isValidate: Boolean
+    isRecalculate: Boolean,
+    triggerShow: Boolean
   },
   data() {
     return {
@@ -69,19 +68,6 @@ export default {
     };
   },
   computed: {
-    validatePopoverShow() {
-      if (this.isValidate) {
-        return this.openValidate && this.data;
-      }
-      return true;
-    },
-    triggerClass() {
-      let clas;
-      if (this.openValidate) {
-        clas = this.data ? "is-validate" : "is-success";
-      }
-      return clas;
-    },
     effectClass() {
       let effect = this.effect ? `is-${this.effect}` : "is-light";
       !this.target && (effect += " vue-popover-main");
@@ -96,7 +82,6 @@ export default {
     },
     triggerStyle() {
       let style = {};
-      if (!this.target) return style;
       style.width = this.triggerShow ? "auto" : 0;
       style.height = this.triggerShow ? "auto" : 0;
       style.visibility = this.triggerShow ? "visible" : "hidden";
@@ -196,13 +181,13 @@ export default {
   },
   methods: {
     toggle() {
-      this.validatePopoverShow && !this.disable && (this.show = !this.show);
+      !this.disable && (this.show = !this.show);
     },
     doShow() {
-      this.validatePopoverShow && !this.disable && (this.show = true);
+      !this.disable && (this.show = true);
     },
     doHide() {
-      this.validatePopoverShow && !this.disable && (this.show = false);
+      !this.disable && (this.show = false);
     },
     getPosition(placement, popover, triger, trigerOffsetLeft, trigerOffsetTop) {
       // 通过placement计算出位子
