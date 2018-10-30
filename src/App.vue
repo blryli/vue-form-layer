@@ -2,7 +2,7 @@
   <div id="app">
     <h2>apply to form</h2>
     <p>
-      <el-switch v-model="value" @change="$refs['form'].changeShow('layer-2')" inactive-text="layer toogle visible" />
+      <el-switch v-model="value" @change="$refs['form'].changeShow('layer-1')" inactive-text="layer toogle visible" />
     </p>
     <vue-form ref="form" :model="form" :layer="layer">
       <vue-form-line :cols="[{ span: 10, label: 'name', prop: '/form/name' },{ span: 10, label: 'age', prop: '/form/age' }]">
@@ -162,7 +162,7 @@ export default {
           show: true,
           view: {
             disable: true,
-            recalculate: recalculateTableView
+            recalculate: recalculateView
           },
           data: [
             {
@@ -189,7 +189,7 @@ export default {
           show: true,
           view: {
             disable: true,
-            recalculate: recalculateView
+            recalculate: recalculateTableView
           },
           data: [
             {

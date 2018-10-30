@@ -240,7 +240,7 @@ export default {
 |  方法名 |    说明                    |   参数      |
 |-------- |------                      |------       |
 |changeShow  |改变图层展示状态            |图层ID       |
-|recalculate |对整个表单进行重算的方法，参数为id是进行重算的图层ID，第二个参数是回调函数|Function(id, callback: Function(boolean))|
+|recalculate |对整个表单进行重算的方法，参数id是进行重算的图层ID，第二个参数是回调函数|Function(id, callback: Function(boolean))|
 |recalculateField |对部分表单字段进行重算的方法，参数为字段prop，不传参数则进行全局重算|prop: string|
 |clearCalculate |移除表单项的重算结果。传入待移除的表单项的 prop 属性组成的数组，如不传则移除整个表单的重算结果|props: array|
 |resetFields |对表单进行重置，将所有字段值重置为初始值并移除重算结果。传入待移除的表单项的 prop 属性组成的数组，如不传则移除整个表单进行重置|props: array|
