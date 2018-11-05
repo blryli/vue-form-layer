@@ -5,7 +5,8 @@ import FormItem from './form-item';
 import Popover from './popover';
 import Row from './row';
 import Col from './col';
-import PopoverContent from './popover-content';
+import Content from './content';
+import VueText from './text';
 
 const components = [
   Form,
@@ -14,7 +15,8 @@ const components = [
   Popover,
   Row,
   Col,
-  PopoverContent
+  Content,
+  VueText
 ];
 
 const VueForm = function (Vue, opts = {}) {

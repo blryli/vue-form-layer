@@ -3,7 +3,7 @@
     <label class="vue-form-item__label" :style="{width: labelWidth}" v-if="label">
       <slot name="label">{{label}}</slot>
     </label>
-    <div class="vue-form-item__content" :style="style">
+    <div class="vue-form-item__content" :class="{'is-recalculate': isRecalculate}" :style="style">
       <slot></slot>
     </div>
   </div>
@@ -17,10 +17,7 @@ export default {
     labelWidth: String,
     required: Boolean,
     gutter: Number,
-    borderColor: {
-      type: String,
-      default: "#ccc"
-    }
+    isRecalculate: Boolean,
   },
   computed: {
     style() {
@@ -29,7 +26,6 @@ export default {
         ret.marginLeft = `-${this.gutter / 2}px`;
         ret.marginRight = ret.marginLeft;
         ret["--marginLeft"] = `${this.gutter / 2}px`;
-        ret["--borderColor"] = this.borderColor;
       }
       return ret;
     }
@@ -104,7 +100,7 @@ export default {
       border-color: #bbb;
     }
   }
-  .is-recalculate {
+  &.is-recalculate {
     input {
       &:focus,
       &:hover {

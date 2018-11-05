@@ -1,6 +1,6 @@
 <template>
   <div class="vue-popover" :class="effectClass" :style="popoverStyle">
-    <div class="vue-popover-trigger" ref="trigger" :class="{'is-recalculate': isRecalculate}" :style="triggerStyle">
+    <div class="vue-popover-trigger" ref="trigger" :style="triggerStyle">
       <slot name="reference">
         <div v-if="typeof target === 'string'" class="vue-popover-trigger__target" :class="'trigger__target-'+target"></div>
       </slot>
@@ -12,11 +12,11 @@
         {'vue-popover-wrap-left':  placement === 'left'},
         {'vue-popover-wrap-right':  placement === 'right'},
         {'vue-popover-wrap-bottom': placement === 'bottom'},
-        {'vue-popover-wrap-visible': show},
+        {'vue-popover-wrap-visible': show || showAlways},
         {'vue-popover-wrap-hidden': !show}
       ]" ref="popover" role="popover" :style="effectStyle">
         <div class="vue-popover-arrow" v-if="visibleArrow"></div>
-        <vue-popover-content :data="data"></vue-popover-content>
+        <vue-content :data="data"></vue-content>
       </div>
     </transition>
   </div>
@@ -36,7 +36,7 @@ export default {
     effect: [String, Object],
     // popover消息提示
     data: [String, Object, Array],
-    disable: {
+    disabled: {
       type: Boolean,
       default: false
     },
@@ -53,9 +53,16 @@ export default {
       type: Number,
       default: 0
     },
-    rules: Object,
-    isRecalculate: Boolean,
-    triggerShow: Boolean
+    triggerShow: Boolean,
+    borderColor: {
+      type: String,
+      default: "#ccc"
+    },
+    showAlways: Boolean,
+    positions: {
+      type: Array,
+      default: () => []
+    }
   },
   data() {
     return {
@@ -64,19 +71,21 @@ export default {
         top: 0,
         left: 0
       },
-      show: true
+      show: true,
+      addedBody: false
     };
   },
   computed: {
     effectClass() {
       let effect = this.effect ? `is-${this.effect}` : "is-light";
-      !this.target && (effect += " vue-popover-main");
+      typeof this.target !== "function" && this.target !== "why" && this.target !== "warn" && (effect += " vue-popover-main");
       return effect;
     },
     popoverStyle() {
       let style = {
         order: this.order,
-        "--bgColor": this.effectStyle["--bgColor"]
+        "--bgColor": this.effectStyle["--bgColor"],
+        "--borderColor": this.borderColor
       };
       return style;
     },
@@ -126,7 +135,7 @@ export default {
         }
       } else if (typeof this.effect === "object") {
         if (Array.isArray(this.effect)) {
-          console.log("effect 只能是对象或字符串");
+          console.error("effect 只能是对象或字符串");
         } else {
           style["--borderColor"] = this.effect.borderColor
             ? this.effect.borderColor
@@ -137,67 +146,86 @@ export default {
           style["--color"] = this.effect.olor ? this.effect.olor : "#303133";
         }
       } else {
-        console.log("effect 只能是对象或字符串");
+        console.error("effect 只能是对象或字符串");
       }
       return style;
     }
   },
   watch: {
-    show: function(val) {
+    show(val) {
       if (val) {
-        this.show && document.body.appendChild(this.$refs.popover);
-        const popover = this.$refs.popover;
-        let triger = this.$refs.trigger;
-        const trigerOffsetLeft = this.offset(triger).left;
-        const trigerOffsetTop = this.offset(triger).top;
-
-        // 可视窗口坐标
-        let viewTop = document.body.scrollTop;
-        let viewRight = document.body.clientWidth + document.body.scrollLeft;
-        let viewBottom = document.body.clientWidth + document.body.scrollTop;
-        let viewLeft = document.body.scrollLeft;
-
-        // 气泡坐标
-        let popoverTop = popover.offsetTop;
-        let popoverRight = popover.offsetLeft + popover.offsetWidth;
-        let popoverBottom = popover.offsetTop + popover.offsetHeight;
-        let popoverLeft = popover.offsetLeft;
-
-        this.getPosition(
-          this.placement,
-          popover,
-          triger,
-          trigerOffsetLeft,
-          trigerOffsetTop
-        );
-
-        popover.style.top = this.position.top + "px";
-        popover.style.left = this.position.left + "px";
+        this.calculateCoordinate();
         this.$emit("show");
       } else {
         this.$emit("hide");
       }
+    },
+    data(val) {
+      this.showAlways && this.calculateCoordinate();
     }
   },
   methods: {
     toggle() {
-      !this.disable && (this.show = !this.show);
+      !this.disabled && (this.show = !this.show);
     },
     doShow() {
-      !this.disable && (this.show = true);
+      !this.disabled && (this.show = true);
     },
     doHide() {
-      !this.disable && (this.show = false);
+      !this.disabled && (this.show = false);
+      this.$emit('position', null)
+    },
+    calculateCoordinate() {
+      if ((!this.addedBody && this.show || this.showAlways)) {
+        document.body.appendChild(this.$refs.popover)
+        this.addedBody = true;
+      }
+      const popover = this.$refs.popover;
+      let triger = this.$refs.trigger;
+      const trigerOffsetLeft = this.offset(triger).left;
+      const trigerOffsetTop = this.offset(triger).top;
+
+      // 可视窗口坐标
+      let viewTop = document.body.scrollTop;
+      let viewRight = document.body.clientWidth + document.body.scrollLeft;
+      let viewBottom = document.body.clientWidth + document.body.scrollTop;
+      let viewLeft = document.body.scrollLeft;
+
+      // 气泡坐标
+      let popoverTop = popover.offsetTop;
+      let popoverRight = popover.offsetLeft + popover.offsetWidth;
+      let popoverBottom = popover.offsetTop + popover.offsetHeight;
+      let popoverLeft = popover.offsetLeft;
+
+      this.getPosition(
+        this.placement,
+        popover,
+        triger,
+        trigerOffsetLeft,
+        trigerOffsetTop
+      );
+
+      popover.style.top = this.position.top + "px";
+      popover.style.left = this.position.left + "px";
+
+      let posHeight = this.position;
+      posHeight.width = popover.offsetWidth;
+      posHeight.height = popover.offsetHeight;
+      this.$emit('position', posHeight);
+      // console.log('popover >> ' + 'top: ' + popover.style.top + 'left: ' + popover.style.left)
     },
     getPosition(placement, popover, triger, trigerOffsetLeft, trigerOffsetTop) {
       // 通过placement计算出位子
+      const lastPosition = this.positions.length ? this.positions[this.positions.length - 1] : null;
       switch (placement) {
         case "top":
+          this.positions.length && (trigerOffsetTop = lastPosition.top);
           this.position.left =
             trigerOffsetLeft - popover.offsetWidth / 2 + triger.offsetWidth / 2;
           this.position.top = trigerOffsetTop - popover.offsetHeight - 8;
           break;
         case "left":
+          this.positions.length && (trigerOffsetLeft = lastPosition.left);
           this.position.left = trigerOffsetLeft - popover.offsetWidth - 8;
           this.position.top =
             trigerOffsetTop +
@@ -210,14 +238,16 @@ export default {
             trigerOffsetTop +
             triger.offsetHeight / 2 -
             popover.offsetHeight / 2;
+            this.positions.length && (this.position.left = lastPosition.left + lastPosition.width + 8);
           break;
         case "bottom":
           this.position.left =
             trigerOffsetLeft - popover.offsetWidth / 2 + triger.offsetWidth / 2;
           this.position.top = trigerOffsetTop + triger.offsetHeight + 8;
+          this.positions.length && (this.position.top = lastPosition.top + lastPosition.height + 8);
           break;
         default:
-          console.log("Wrong placement prop");
+          console.error("Wrong placement prop");
       }
     },
     offset(target) {
@@ -236,6 +266,10 @@ export default {
     }
   },
   mounted() {
+    if (this.showAlways) {
+      this.calculateCoordinate();
+      return;
+    }
     if (!this.$refs.popover) {
       return console.error(
         "Couldn't find popover ref in your component that uses popoverMixin."

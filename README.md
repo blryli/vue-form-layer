@@ -169,11 +169,11 @@ export default {
     let style = {
       message: "",
       effect: "#67c23a",
-      disable: true,
+      disabled: true,
       borderColor: "#67c23a"
     };
     var recalculateView = () => {
-      return { effect: "#f56c6c", disable: false, borderColor: "#f56c6c" };
+      return { effect: "#f56c6c", disabled: false, borderColor: "#f56c6c" };
     };
     var recalculateName = value => {
       if (value === "") {
@@ -198,7 +198,7 @@ export default {
           id: "layer-1",
           show: true,
           view: {
-            disable: true,
+            disabled: true,
             recalculate: recalculateView
           },
           data: [
@@ -258,15 +258,16 @@ export default {
 
 |    参数    |    说明   |   类型   |  可选值  |默认值|
 | ---------  | ---------| -------- | ------ | ----- |
-| type       | 图层展示类型   | string   | popover  | popover    |
+| type       | 图层展示类型   | string   | popover/text  | popover    |
 | order      | 图层横向排序，数字越小越靠前   | number   | -  | 0 |
 | effect     | 主题或颜色，如果传入色值则主题颜色为该色值 | string  |  light/dark/info/error  | light   |
 | borderColor| 默认item的border颜色 | string  |  -  | "#ccc"   |
-| recalculate| 默认重算规则 (value) => {return {effect: 主题颜色, disable: 是否禁用, borderColor: 边框颜色}，当字段重算没有传入这些参数的时候生效 | function  |  -  | -   |
+| recalculate| 默认重算规则 (value) => {return {effect: 主题颜色, disabled: 是否禁用, borderColor: 边框颜色}，当字段重算没有传入这些参数的时候生效 | function  |  -  | -   |
 | placement  | 展示位置   | string   | top/right/bottom/left  | top    |
 | trigger    | 触发方式   | string   | hover/focus/click  | hover    |
-| target    | 默认为传入form-line的dom，target存在时会修改触发目标，(data) => {return 模板/组件 }   | function   | -  | 传入form-line的dom |
-| disable    | popover是否禁用  | boolean   | -  | false |
+| target    | 默认为default(传入form-line的dom)，target存在时会修改触发目标，(data) => {return 模板/组件 },多个图层同时指向default时，默认错位显示   | function   | -  | default |
+| disabled    | popover是否禁用  | boolean   | -  | false |
+| showAlways    | popover是否总是显示  | boolean   | -  | false |
 | visible-arrow | 是否显示popover箭头  | boolean   | -  | true |
 
 ### layer data 图层item配置
@@ -278,7 +279,7 @@ export default {
 | prop       | 使用该配置的prop字段，如不传则该配置不会作用于任何字段  | - | -  | -    |
 | data       | 展示数据，传入模板template则通过模板展示数据，object/array类型需要传模板 | string/object/array | -  | -   |
 | template   | 数据展示模板 (data) => {return 模板/组件 } | function | -  | top    |
-| recalculate| 字段重算规则 (value) => {return {message: 展示文字，effect: 主题颜色, disable: 是否禁用, borderColor: 边框颜色} | function  |  -  | -   |
+| recalculate| 字段重算规则 (value) => {return {message: 展示文字，effect: 主题颜色, disabled: 是否禁用, borderColor: 边框颜色} | function  |  -  | -   |
 
 ### vue-form-line Attributes
 
