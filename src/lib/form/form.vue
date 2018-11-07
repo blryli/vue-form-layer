@@ -11,10 +11,7 @@ export default {
     model: [Object, Array],
     layer: Array,
     labelWidth: String,
-    layerGutter: {
-      type: Number,
-      default: 6
-    },
+    layerGutter: Number,
     rowledge: {
       type: Number,
       default: 15
@@ -31,8 +28,8 @@ export default {
     this.layer && this.layer.length && this.layer.forEach(da => {
       da.show === undefined && this.$set(da, "show", true);
     });
-    this.layerCopy = this.layer && JSON.parse(JSON.stringify(this.layer));
-    this.initData = this.model && JSON.parse(JSON.stringify(this.model));
+    this.layer && (this.layerCopy = JSON.parse(JSON.stringify(this.layer)));
+    this.model && (this.initData = JSON.parse(JSON.stringify(this.model)));
   },
   computed: {
     modelIsObject() {
@@ -42,8 +39,8 @@ export default {
   methods: {
     changeShow(id) {
       let hasId = false;
-      this.layer && this.layer.forEach(d => {
-        if (d.id === id) {
+      this.layer && this.layer.length && this.layer.forEach(d => {
+        if (d.id && d.id === id) {
           this.$set(d, "show", !d.show);
           hasId = true;
         }
@@ -123,7 +120,7 @@ export default {
     clearCalculate(props = [], resetModel) {
       !props.length && (this.recalculateArr = []);
       this.layer && this.layer.forEach((da, idx) => {
-        this.$set(da.view, "disabled", this.layerCopy[idx].view.disabled);
+        da.view && this.$set(da.view, "disabled", this.layerCopy[idx].view.disabled);
         da.data.forEach((d, i) => {
           if (d.recalculate !== undefined) {
             const prop = resetModel

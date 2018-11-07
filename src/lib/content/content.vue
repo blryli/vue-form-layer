@@ -5,7 +5,7 @@ export default {
     data: [String, Object]
   },
   render(h) {
-    return h("div", { class: "vue-content" }, [this.data]);
+    return h("div", {}, [this.data]);
   }
 };
 </script>

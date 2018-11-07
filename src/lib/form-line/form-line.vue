@@ -25,7 +25,7 @@ export default {
   },
   data() {
     return {
-      positions: []
+      positions: {}
     };
   },
   computed: {
@@ -136,13 +136,14 @@ export default {
                     d.effect || (da.view && da.view.effect) || "light"; // 主题 or 颜色
                   d.recalculate && effect === "light" && (effect = "error");
                   const placement =
-                    d.placement || (da.view && da.view.placement) || "top"; // 展示位置
+                    d.placement || (da.view && da.view.placement) || undefined; // 展示位置
                   const trigger =
                     d.trigger || (da.view && da.view.trigger) || "hover"; // 触发事件
                   let target =
                     d.target || (da.view && da.view.target) || "default"; // 指定触发元素
                   const order = d.order || (da.view && da.view.order) || 0; // 排序 数字越小越靠前
                   const showAlways = d.showAlways || (da.view && da.view.showAlways) || false; // 总是显示
+                  const enterable = d.enterable || (da.view && da.view.enterable) || false; // 鼠标可移入
                   let data = d.data || ""; // 展示内容
                   const template =
                     d.template || (da.view && da.view.template) || ""; // 内容展示模板
@@ -202,6 +203,7 @@ export default {
                           disabled: disabled,
                           borderColor: borderColor,
                           showAlways: showAlways,
+                          enterable: enterable,
                           positions: this.positions
                         },
                         on: {
@@ -253,9 +255,13 @@ export default {
                         attrs: {
                           data: data,
                           gutter: layerGutter,
+                          placement: placement,
                           disabled: disabled,
                           effect: effect,
                           borderColor: borderColor
+                        },
+                        on: {
+                          position: this.setPosition
                         }
                       },
                       [layerTypeSlot]
@@ -313,7 +319,16 @@ export default {
   },
   methods: {
     setPosition(position) {
-      position ? this.positions.push(position) : this.positions = [];
+      if (position) {
+        if (this.positions[position.placement]) {
+          this.positions[position.placement].push(position.position)
+        } else {
+          this.positions[position.placement] = [];
+          this.positions[position.placement].push(position.position);
+        }
+      } else {
+        this.positions = {};
+      }
     }
   }
 };

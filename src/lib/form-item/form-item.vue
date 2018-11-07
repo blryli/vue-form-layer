@@ -17,16 +17,22 @@ export default {
     labelWidth: String,
     required: Boolean,
     gutter: Number,
-    isRecalculate: Boolean,
+    isRecalculate: Boolean
+  },
+  data() {
+    return {
+      formItemLayerLength: null
+    }
   },
   computed: {
     style() {
       const ret = {};
-      if (this.gutter) {
-        ret.marginLeft = `-${this.gutter / 2}px`;
-        ret.marginRight = ret.marginLeft;
-        ret["--marginLeft"] = `${this.gutter / 2}px`;
-      }
+      this.formItemLayerLength = this.$slots.default.length;
+      const gutter = this.gutter ? this.gutter : this.formItemLayerLength > 1 ? 6 : 0;
+      ret.marginLeft = `-${gutter / 2}px`;
+      ret.marginRight = ret.marginLeft;
+      ret["--marginLeft"] = `${gutter / 2}px`;
+      ret["--borderColor"] = "#ccc";
       return ret;
     }
   }
@@ -93,11 +99,11 @@ export default {
     font-size: inherit;
     outline: none;
     width: 100%;
-    &:focus {
-      border-color: #409eff;
-    }
     &:hover {
       border-color: #bbb;
+    }
+    &:focus {
+      border-color: #409eff;
     }
   }
   &.is-recalculate {

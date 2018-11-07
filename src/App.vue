@@ -1,19 +1,11 @@
 <template>
   <div id="app">
     <h2>apply to form validate</h2>
-    <p>
-      <el-switch v-model="viewType" inactive-text="switcher show type" />
-    </p>
-    <vue-form ref="form1" :model="form" :layer="layer1" :rowledge="22">
+    <p><el-switch v-model="viewType" inactive-text="switcher show type" /></p>
+    <vue-form ref="form1" :model="form1" :layer="layer1" :rowledge="22">
       <vue-form-line :cols="[{ span: 10, label: 'name', prop: '/form/name' },{ span: 10, label: 'age', prop: '/form/age' }]">
-        <el-input type="text" v-model="form.name" @blur="recalculateField('/form/name')" />
-        <el-input type="text" v-model="form.age" @blur="recalculateField('/form/age')" />
-      </vue-form-line>
-      <vue-form-line :cols="[{ span: 10, label: 'gender', prop: '/form/gender' }]">
-        <el-select v-model="form.gender" placeholder="请选择" clearable @change="recalculateField('/form/gender')">
-          <el-option label="Men" value="value1"></el-option>
-          <el-option label="women" value="value2"></el-option>
-        </el-select>
+        <el-input type="text" v-model="form1.name" @blur="recalculateField('/form/name')" />
+        <el-input type="text" v-model="form1.age" @blur="recalculateField('/form/age')" />
       </vue-form-line>
     </vue-form>
     <p>
@@ -26,16 +18,10 @@
     <p>
       <el-switch v-model="value" @change="$refs['form2'].changeShow('layerTooltip')" inactive-text="layer toogle visible" />
     </p>
-    <vue-form ref="form2" :model="form" :layer="layer2">
+    <vue-form ref="form2" :model="form2" :layer="layer2">
       <vue-form-line :cols="[{ span: 10, label: 'name', prop: '/form/name' },{ span: 10, label: 'age', prop: '/form/age' }]">
-        <el-input type="text" v-model="form.name" />
-        <el-input type="text" v-model="form.age" />
-      </vue-form-line>
-      <vue-form-line :cols="[{ span: 10, label: 'gender', prop: '/form/gender' }]">
-        <el-select v-model="form.gender" placeholder="请选择" clearable @change="recalculateField('/form/gender')">
-          <el-option label="Men" value="value1"></el-option>
-          <el-option label="women" value="value2"></el-option>
-        </el-select>
+        <el-input type="text" v-model="form2.name" />
+        <el-input type="text" v-model="form2.age" />
       </vue-form-line>
     </vue-form>
     <br />
@@ -78,11 +64,6 @@ import Test from "./test.vue";
 export default {
   name: "app",
   components: { Test },
-  watch: {
-    viewType(val) {
-      this.layer1[0].view.type = val ? "popover" : "text";
-    }
-  },
   data() {
     let style = {
       message: "",
@@ -92,9 +73,6 @@ export default {
     };
     var recalculateView = () => {
       return { effect: "red", disabled: false, borderColor: "red" };
-    };
-    var recalculateView2 = () => {
-      return { effect: "blue", disabled: false, borderColor: "blue" };
     };
     var recalculateName = value => {
       if (value === "") {
@@ -119,34 +97,14 @@ export default {
         return style;
       }
     };
-    var recalculateName2 = value => {
-      if (value === "") {
-        return "name is 必填";
-      } else {
-        return style;
-      }
-    };
-    var recalculateAge2 = value => {
-      if (value === "") {
-        return "age is 必填";
-      } else if (value < 18) {
-        return { message: "年龄不能小于 18", effect: "blue" };
-      } else {
-        return style;
-      }
-    };
-    var recalculateGender2 = value => {
-      if (!value) {
-        return "gender is 必填";
-      } else {
-        return style;
-      }
-    };
     var targetFn = () => {
       return this.$createElement("span", {}, ["(?)"]);
     };
-    var recalculateAge2TP = (data) => {
-      return this.$createElement("div", {}, [this.$createElement('div', {}, ['message']),this.$createElement('div', {}, [data])]);
+    var recalculateAge2TP = data => {
+      return this.$createElement("div", {}, [
+        this.$createElement("div", {}, ["message"]),
+        this.$createElement("div", {}, [data])
+      ]);
     };
     var dataFn = data => {
       return this.$createElement("test", { attrs: { data: data } });
@@ -179,37 +137,10 @@ export default {
       }
     };
     return {
-      viewType: false,
       value: true,
-      form: { name: "blryli" },
+      form1: { name: "blryli" },
+      form2: {},
       layer1: [
-        {
-          id: "layerValidate2",
-          show: true,
-          view: {
-            disabled: true,
-            type: "text",
-            recalculate: recalculateView2,
-            placement: 'top'
-          },
-          data: [
-            {
-              prop: "/form/name",
-              recalculate: recalculateName2,
-              data: ""
-            },
-            {
-              prop: "/form/age",
-              recalculate: recalculateAge2,
-              data: ""
-            },
-            {
-              prop: "/form/gender",
-              recalculate: recalculateGender2,
-              data: ""
-            }
-          ]
-        },
         {
           id: "layerValidate",
           show: true,
@@ -217,7 +148,8 @@ export default {
             disabled: true,
             type: "popover",
             recalculate: recalculateView,
-            placement: 'top'
+            placement: "top"
+            // target: targetFn
           },
           data: [
             {
@@ -229,40 +161,11 @@ export default {
               prop: "/form/age",
               recalculate: recalculateAge,
               template: recalculateAge2TP,
-              data: ""
-            },
-            {
-              prop: "/form/gender",
-              recalculate: recalculateGender,
+              enterable: true,
               data: ""
             }
           ]
-        },
-        {
-          id: "layerValidate1",
-          show: true,
-          view: {
-            type: "popover",
-            placement: 'right',
-            target: 'why',
-            // showAlways: true
-          },
-          data: [
-            {
-              prop: "/form/name",
-              data: "I am name"
-            },
-            {
-              prop: "/form/age",
-              data: "I am age"
-            },
-            {
-              prop: "/form/gender",
-              data: "I am gender",
-            }
-          ]
-        },
-        
+        }
       ],
       layer2: [
         {
