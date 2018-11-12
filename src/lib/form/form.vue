@@ -5,6 +5,8 @@
 </template>
 
 <script>
+import { generateId } from "../../utils/util";
+
 export default {
   name: "VueForm",
   props: {

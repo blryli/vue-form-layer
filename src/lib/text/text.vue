@@ -6,7 +6,7 @@
 </template>
 
 <script>
-import { offset } from "../../utils/util";
+import { offset, EventListener, scroll } from "../../utils/util";
 
 export default {
   name: "VueText",
@@ -30,11 +30,14 @@ export default {
       position: {
         top: 0,
         left: 0
-      }
+      },
+      addedBody: false
     };
   },
   mounted() {
     this.calculateCoordinate();
+    this._scrollEvent = EventListener(window, "scroll", this.windowScroll);
+    this._resizeEvent = EventListener(window, "resize", this.windowResize);
   },
   watch: {
     data(val) {
@@ -72,9 +75,19 @@ export default {
     }
   },
   methods: {
+    windowScroll() {
+      this.calculateCoordinate();
+    },
+    windowResize() {
+      this.calculateCoordinate();
+    },
     calculateCoordinate() {
       if (!this.$refs["vueTextContent"]) {
         return;
+      }
+      if (!this.addedBody) {
+        document.body.appendChild(this.$refs["vueTextContent"].$el);
+        this.addedBody = true;
       }
       const popover = this.$refs["vueTextContent"].$el;
       let triger = this.$refs.vueText;
@@ -101,8 +114,8 @@ export default {
         trigerOffsetTop
       );
 
-      popover.style.top = this.position.top + "px";
-      popover.style.left = this.position.left + "px";
+      popover.style.top = this.position.top - scroll().top + "px";
+      popover.style.left = this.position.left - scroll().left + "px";
     },
     getPosition(placement, popover, triger, trigerOffsetLeft, trigerOffsetTop) {
       switch (placement) {
@@ -124,6 +137,14 @@ export default {
         default:
           console.error("placement 必须是 top/right/bottom");
       }
+    }
+  },
+  beforeDestroy() {
+    if (this._scrollEvent) {
+      this._scrollEvent.remove();
+    }
+    if (this._resizeEvent) {
+      this._resizeEvent.remove();
     }
   }
 };

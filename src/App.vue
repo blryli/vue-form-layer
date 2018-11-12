@@ -1,7 +1,6 @@
 <template>
   <div id="app">
     <h2>apply to form validate</h2>
-    <p><el-switch v-model="viewType" inactive-text="switcher show type" /></p>
     <vue-form ref="form1" :model="form1" :layer="layer1" :rowledge="22">
       <vue-form-line :cols="[{ span: 10, label: 'name', prop: '/form/name' },{ span: 10, label: 'age', prop: '/form/age' }]">
         <el-input type="text" v-model="form1.name" @blur="recalculateField('/form/name')" />
@@ -142,14 +141,11 @@ export default {
       form2: {},
       layer1: [
         {
-          id: "layerValidate",
           show: true,
           view: {
             disabled: true,
             type: "popover",
-            recalculate: recalculateView,
-            placement: "top"
-            // target: targetFn
+            recalculate: recalculateView
           },
           data: [
             {
@@ -160,9 +156,8 @@ export default {
             {
               prop: "/form/age",
               recalculate: recalculateAge,
-              template: recalculateAge2TP,
-              enterable: true,
-              data: ""
+              data: "",
+              enterable: true
             }
           ]
         }

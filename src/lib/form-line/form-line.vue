@@ -25,7 +25,9 @@ export default {
   },
   data() {
     return {
-      positions: {}
+      positions: {},
+      target: '',
+      prop: ''
     };
   },
   computed: {
@@ -75,7 +77,7 @@ export default {
             ? (overflowSpan = 24 / slotNodes.length)
             : (overflowSpan = (24 - this.colSpan) / offSet);
           this.colSpan === 24 &&
-            console.log(
+            console.debug(
               `《${
                 this.cols[0].name
               }》 所在行，节点空间不足，导致部分节点不能正确展示，请调整列宽度 cols`
@@ -112,7 +114,7 @@ export default {
               da.data.length &&
               da.data.forEach(d => {
                 if (prop === d.prop) {
-                  let target = d.target || da.view.target || "default";
+                  let target = d.target || da.view && da.view.target || "default";
                   target === "default" && typeof target !== "function" && (targetUseDefault = true);
                   targetUseDefaultDetails.push({
                     idx: idx,
@@ -144,6 +146,10 @@ export default {
                   const order = d.order || (da.view && da.view.order) || 0; // 排序 数字越小越靠前
                   const showAlways = d.showAlways || (da.view && da.view.showAlways) || false; // 总是显示
                   const enterable = d.enterable || (da.view && da.view.enterable) || false; // 鼠标可移入
+                  const popoverClass = d.popoverClass || (da.view && da.view.popoverClass) || ''; // 鼠标可移入
+                  let hideDelay;
+                  da.view && da.view.hideDelay !== undefined && typeof da.view.hideDelay === 'number' && da.view.hideDelay >= 0 && (hideDelay = da.view.hideDelay)
+                  d.hideDelay !== undefined && typeof d.hideDelay === 'number' && d.hideDelay >= 0 && (hideDelay = d.hideDelay)
                   let data = d.data || ""; // 展示内容
                   const template =
                     d.template || (da.view && da.view.template) || ""; // 内容展示模板
@@ -204,7 +210,12 @@ export default {
                           borderColor: borderColor,
                           showAlways: showAlways,
                           enterable: enterable,
-                          positions: this.positions
+                          popoverClass: popoverClass,
+                          hideDelay: hideDelay,
+                          positions: this.positions,
+                          prop: prop,
+                          oldProp: this.prop,
+                          oldTarget: this.target
                         },
                         on: {
                           position: this.setPosition
@@ -319,16 +330,30 @@ export default {
   },
   methods: {
     setPosition(position) {
-      if (position) {
+      if (typeof position === 'object') {
         if (this.positions[position.placement]) {
-          this.positions[position.placement].push(position.position)
+          if (this.prop === position.position.prop && this.target === position.position.target) {
+            this.positions[position.placement].push(position.position);
+          } else {
+            this.target = position.position.target;
+            this.prop = position.position.prop;
+            this.positions[position.placement] = [];
+            this.positions[position.placement].push(position.position);
+          }
         } else {
+          this.target = position.position.target;
+          this.prop = position.position.prop;
           this.positions[position.placement] = [];
           this.positions[position.placement].push(position.position);
         }
       } else {
-        this.positions = {};
+        for (const key in this.positions) {
+          const da = this.positions[key];
+          const index = da.findIndex(d => d.id === position);
+          index !== -1 && da.splice(index, 1);
+        }
       }
+      // console.log(JSON.stringify(this.positions))
     }
   }
 };

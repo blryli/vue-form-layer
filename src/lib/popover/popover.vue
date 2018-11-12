@@ -7,13 +7,13 @@
     </div>
     <transition name="fade">
       <div class="vue-popover-wrap" :class="[
-      effectClass,
+        popoverClass,
         {'vue-popover-wrap-top':   placement === 'top'},
         {'vue-popover-wrap-left':  placement === 'left'},
         {'vue-popover-wrap-right':  placement === 'right'},
         {'vue-popover-wrap-bottom': placement === 'bottom'},
         {'vue-popover-wrap-visible': show || showAlways},
-        {'vue-popover-wrap-hidden': !show}
+        {'vue-popover-wrap-hidden': !show || disabled}
       ]" ref="popover" role="popover" :style="effectStyle"
       @mouseenter="mouseenterWrap" @mouseleave="mouseleaveWrap">
         <div class="vue-popover-arrow" v-if="visibleArrow"></div>
@@ -24,7 +24,7 @@
 </template>
 
 <script>
-import { EventListener, offset } from "../../utils/util";
+import { EventListener, offset, scroll, generateId } from "../../utils/util";
 
 export default {
   name: "VuePopover",
@@ -61,7 +61,15 @@ export default {
     },
     showAlways: Boolean,
     positions: Object,
-    enterable: Boolean
+    enterable: Boolean,
+    popoverClass: String,
+    hideDelay: {
+      type: Number,
+      default: 200
+    },
+    prop: String,
+    oldProp: String,
+    oldTarget: String
   },
   data() {
     return {
@@ -72,11 +80,13 @@ export default {
       },
       show: false,
       addedBody: false,
-      timeoutPending: null,
-      useClose: true
+      timeoutPending: null
     };
   },
   computed: {
+    id() {
+      return `${this.prop}-${generateId()}`;
+    },
     effectClass() {
       let effect = this.effect ? `is-${this.effect}` : "is-light";
       typeof this.target !== "function" && this.target !== "why" && this.target !== "warn" && (effect += " vue-popover-main");
@@ -159,7 +169,7 @@ export default {
         this.$emit("show");
       } else {
         this.$emit("hide");
-        this.$emit('position', null)
+        this.$emit('position', this.id)
       }
     },
     data(val) {
@@ -194,9 +204,9 @@ export default {
         if (this.enterable) {
           this.timeoutPending = setTimeout(() => {
             this.show = false;
-          }, 200);
+          }, this.hideDelay);
         } else {
-            this.show = false;
+          this.show = false;
         }
       }
     },
@@ -239,19 +249,21 @@ export default {
         trigerOffsetLeft,
         trigerOffsetTop
       );
-
-      popover.style.top = this.position.top + "px";
-      popover.style.left = this.position.left + "px";
+      popover.style.top = scroll().top ? this.position.top - scroll().top + "px" : this.position.top + "px";
+      popover.style.left = scroll().left ? this.position.left - scroll().left + "px" : this.position.left + "px";
 
       let position = this.position;
+      position.id = this.id;
       position.width = popover.offsetWidth;
       position.height = popover.offsetHeight;
+      position.target = typeof this.target === 'string' ? this.target : 'function';
+      position.prop = this.prop;
       this.$emit('position', {placement: this.placement, position: position});
       // console.log('popover >> ' + 'top: ' + popover.style.top + 'left: ' + popover.style.left)
     },
     getPosition(placement, popover, triger, trigerOffsetLeft, trigerOffsetTop) {
       // 通过placement计算出位子
-      const lastPosition = this.positions[placement] && this.positions[placement].length ? this.positions[placement][this.positions[placement].length - 1] : null;
+      const lastPosition = this.prop === this.oldProp && this.target === this.oldTarget && this.positions[placement] && this.positions[placement].length ? this.positions[placement][this.positions[placement].length - 1] : null;
       switch (placement) {
         case "top":
           lastPosition && (trigerOffsetTop = lastPosition.top);
