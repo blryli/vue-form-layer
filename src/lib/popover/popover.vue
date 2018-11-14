@@ -13,7 +13,7 @@
         {'vue-popover-wrap-right':  placement === 'right'},
         {'vue-popover-wrap-bottom': placement === 'bottom'},
         {'vue-popover-wrap-visible': show || showAlways},
-        {'vue-popover-wrap-hidden': !show || disabled}
+        {'vue-popover-wrap-hidden': (!showAlways && !show) || (!showAlways && disabled)}
       ]" ref="popover" role="popover" :style="effectStyle"
       @mouseenter="mouseenterWrap" @mouseleave="mouseleaveWrap">
         <div class="vue-popover-arrow" v-if="visibleArrow"></div>
@@ -25,6 +25,7 @@
 
 <script>
 import { EventListener, offset, scroll, generateId } from "../../utils/util";
+import { removeBody } from "../../utils/dom";
 
 export default {
   name: "VuePopover",
@@ -60,16 +61,18 @@ export default {
       default: "#ccc"
     },
     showAlways: Boolean,
-    positions: Object,
+    positions: {
+      type: Array,
+      default: () => []
+    },
     enterable: Boolean,
     popoverClass: String,
     hideDelay: {
       type: Number,
-      default: 200
+      default: 0
     },
     prop: String,
-    oldProp: String,
-    oldTarget: String
+    isRecalculate: Boolean
   },
   data() {
     return {
@@ -165,18 +168,30 @@ export default {
   watch: {
     show(val) {
       if (val) {
-        this.calculateCoordinate();
         this.$emit("show");
+        this.popoverAddedBody();
+        if (this.isRecalculate) {
+          this.$emit('position', {id: this.id});
+          this.calculateCoordinate();
+        }
       } else {
         this.$emit("hide");
-        this.$emit('position', this.id)
       }
     },
     data(val) {
-      this.showAlways && val && this.calculateCoordinate();
+      if (this.showAlways && val) {
+        this.$emit('position', {id: this.id});
+        this.calculateCoordinate();
+      }
     }
   },
   methods: {
+    popoverAddedBody() {
+      if (!this.addedBody && (this.show || this.showAlways)) {
+        document.body.appendChild(this.$refs.popover)
+        this.addedBody = true;
+      }
+    },
     triggerClick(e) {
       const popover = this.$refs.popover;
       const triger = this.$refs.trigger;
@@ -201,13 +216,9 @@ export default {
     },
     doHide() {
       if (!this.disabled && this.trigger !== 'click') {
-        if (this.enterable) {
-          this.timeoutPending = setTimeout(() => {
-            this.show = false;
-          }, this.hideDelay);
-        } else {
+        this.timeoutPending = setTimeout(() => {
           this.show = false;
-        }
+        }, this.hideDelay);
       }
     },
     mouseenterWrap() {
@@ -221,12 +232,10 @@ export default {
       }
     },
     calculateCoordinate() {
-      if ((!this.addedBody && (this.show || this.showAlways))) {
-        document.body.appendChild(this.$refs.popover)
-        this.addedBody = true;
-      }
       const popover = this.$refs.popover;
       const triger = this.$refs.trigger;
+      if(!popover || !triger || this.positions.find(d => d.id === this.id)) return;
+      this.popoverAddedBody();
       const trigerOffsetLeft = offset(triger).left;
       const trigerOffsetTop = offset(triger).top;
 
@@ -258,12 +267,14 @@ export default {
       position.height = popover.offsetHeight;
       position.target = typeof this.target === 'string' ? this.target : 'function';
       position.prop = this.prop;
-      this.$emit('position', {placement: this.placement, position: position});
+      position.placement = this.placement;
+      this.$emit('position', position);
       // console.log('popover >> ' + 'top: ' + popover.style.top + 'left: ' + popover.style.left)
     },
     getPosition(placement, popover, triger, trigerOffsetLeft, trigerOffsetTop) {
       // 通过placement计算出位子
-      const lastPosition = this.prop === this.oldProp && this.target === this.oldTarget && this.positions[placement] && this.positions[placement].length ? this.positions[placement][this.positions[placement].length - 1] : null;
+      const index = this.$findLastIndex(this.positions, d => d.prop === this.prop && d.target === this.target && d.placement === this.placement);
+      const lastPosition = index !== -1 && this.positions[index] || null;
       switch (placement) {
         case "top":
           lastPosition && (trigerOffsetTop = lastPosition.top);
@@ -296,33 +307,45 @@ export default {
         default:
           console.error("Wrong placement prop");
       }
+    },
+    windowScroll() {
+      this.calculateCoordinate();
+    },
+    windowResize() {
+      this.calculateCoordinate();
     }
   },
   mounted() {
-    if (this.showAlways) {
+    this.$nextTick(() => {
       this.calculateCoordinate();
-      return;
-    }
-    if (!this.$refs.popover) {
-      return console.error(
-        "Couldn't find popover ref in your component that uses popoverMixin."
-      );
-    }
-    // 获取监听对象
-    let triger = this.$refs.trigger;
-    // 根据trigger监听特定事件
-    if (this.trigger === "hover") {
-      this._mouseenterEvent = EventListener(triger, "mouseenter", this.doShow);
-      this._mouseleaveEvent = EventListener(triger, "mouseleave", this.doHide);
-    } else if (this.trigger === "focus") {
-      this._focusEvent = EventListener(triger, "focus", this.doShow);
-      this._blurEvent = EventListener(triger, "blur", this.doHide);
-    } else {
-      this._clickEvent = EventListener(window, "click", this.triggerClick);
-    }
+      this._scrollEvent = EventListener(window, "scroll", this.windowScroll);
+      this._resizeEvent = EventListener(window, "resize", this.windowResize);
+      if (this.showAlways) {
+        return;
+      }
+      if (!this.$refs.popover) {
+        return console.error(
+          "Couldn't find popover ref in your component that uses popoverMixin."
+        );
+      }
+      // 获取监听对象
+      let triger = this.$refs.trigger;
+      // 根据trigger监听特定事件
+      if (this.trigger === "hover") {
+        this._mouseenterEvent = EventListener(triger, "mouseenter", this.doShow);
+        this._mouseleaveEvent = EventListener(triger, "mouseleave", this.doHide);
+      } else if (this.trigger === "focus") {
+        this._focusEvent = EventListener(triger, "focus", this.doShow);
+        this._blurEvent = EventListener(triger, "blur", this.doHide);
+      } else {
+        this._clickEvent = EventListener(window, "click", this.triggerClick);
+      }
+    })
   },
   // 在组件销毁前移除监听，释放内存
   beforeDestroy() {
+    this._scrollEvent.remove();
+    this._resizeEvent.remove();
     if (this._blurEvent) {
       this._blurEvent.remove();
       this._focusEvent.remove();
@@ -331,7 +354,8 @@ export default {
       this._mouseenterEvent.remove();
       this._mouseleaveEvent.remove();
     }
-    if (this._clickEvent) this._clickEvent.remove();
+    this._clickEvent && this._clickEvent.remove();
+    removeBody(this, 'popover');
   }
 };
 </script>

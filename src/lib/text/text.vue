@@ -7,6 +7,7 @@
 
 <script>
 import { offset, EventListener, scroll } from "../../utils/util";
+import { removeBody } from "../../utils/dom";
 
 export default {
   name: "VueText",
@@ -33,11 +34,6 @@ export default {
       },
       addedBody: false
     };
-  },
-  mounted() {
-    this.calculateCoordinate();
-    this._scrollEvent = EventListener(window, "scroll", this.windowScroll);
-    this._resizeEvent = EventListener(window, "resize", this.windowResize);
   },
   watch: {
     data(val) {
@@ -75,12 +71,6 @@ export default {
     }
   },
   methods: {
-    windowScroll() {
-      this.calculateCoordinate();
-    },
-    windowResize() {
-      this.calculateCoordinate();
-    },
     calculateCoordinate() {
       if (!this.$refs["vueTextContent"]) {
         return;
@@ -137,15 +127,25 @@ export default {
         default:
           console.error("placement 必须是 top/right/bottom");
       }
+    },
+    windowScroll() {
+      this.calculateCoordinate();
+    },
+    windowResize() {
+      this.calculateCoordinate();
     }
   },
+  mounted() {
+    this.$nextTick(() => {
+      this.calculateCoordinate();
+      this._scrollEvent = EventListener(window, "scroll", this.windowScroll);
+      this._resizeEvent = EventListener(window, "resize", this.windowResize);
+    })
+  },
   beforeDestroy() {
-    if (this._scrollEvent) {
-      this._scrollEvent.remove();
-    }
-    if (this._resizeEvent) {
-      this._resizeEvent.remove();
-    }
+    this._scrollEvent.remove();
+    this._resizeEvent.remove();
+    removeBody(this, 'vueTextContent');
   }
 };
 </script>
@@ -172,10 +172,6 @@ export default {
   .vue-text-content {
     top: -20px;
     left: 0;
-  }
-}
-.vue-text__right {
-  .vue-text-content {
   }
 }
 </style>

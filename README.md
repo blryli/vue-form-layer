@@ -156,8 +156,8 @@ export default {
     <vue-form-line 
     :cols="[{ span: 10, label: '名字', prop: '/form/name' },
             { span: 10, label: '年龄', prop: '/form/age'}]">
-        <input type="text" v-model="form.name" @blur="validate('/form/name')">
-        <input type="text" v-model="form.age" @blur="validate('/form/age')">
+        <input type="text" v-model="form.name" @blur="recalculateField('/form/name')">
+        <input type="text" v-model="form.age" @blur="recalculateField('/form/age')">
     </vue-form-line>
 </vue-form>
 ```
@@ -204,12 +204,13 @@ export default {
           data: [
             {
               prop: "/form/name",
-              validator: validateName,
+              recalculate: recalculateName,
               data: ""
             },
             {
               prop: "/form/age",
-              data: recalculateAge
+              recalculate: recalculateAge,
+              data: ""
             }
           ]
         },
@@ -217,8 +218,8 @@ export default {
     }
   },
   methods: {
-    validate(prop) {
-      this.$refs['form'].validateField(prop);
+    recalculateField(prop) {
+      this.$refs['form'].recalculateField(prop);
     }
   }
 }
@@ -263,7 +264,7 @@ export default {
 | borderColor| 默认item的border颜色 | string  |  -  | "#ccc"   |
 | recalculate| 默认重算规则 (value) => {return {effect: 主题颜色, disabled: 是否禁用, borderColor: 边框颜色}，当字段重算没有传入这些参数的时候生效 | function  |  -  | -   |
 | placement  | 展示位置   | string   | top/right/bottom/left  | top    |
-| target    | 默认为default(传入form-line的dom)，target存在时会修改触发目标，(data) => {return 模板/组件 },多个图层同时指向default时，默认错位显示   | function   | -  | default |
+| target    | 默认为default(传入form-line的dom)，target存在时会修改触发目标，(data) => {return 模板/组件 },多个图层同时指向default时，默认错位显示   | string/function   | why/warn  | default |
 | disabled    | 是否禁用  | boolean   | -  | false |
 | order      | 图层横向排序，数字越小越靠前   | number   | -  | 0 |
 | trigger    | popover触发方式   | string   | hover/focus/click  | hover    |

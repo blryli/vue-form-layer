@@ -164,16 +164,12 @@ export default {
       ],
       layer2: [
         {
-          id: "layerTooltip",
-          show: true,
-          view: {
-            type: "popover"
-          },
+          id: 'layerTooltip',
           data: [
             {
               prop: "/form/name",
               data: "我的名字是什么",
-              target: targetFn
+              target: 'why'
             },
             {
               prop: "/form/age",
@@ -183,7 +179,7 @@ export default {
                 content: "我的女神结婚了"
               },
               template: dataFn,
-              target: "why"
+              target: 'why'
             }
           ]
         }

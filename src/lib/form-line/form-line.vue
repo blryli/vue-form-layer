@@ -1,15 +1,6 @@
 <script>
-Array.prototype.fakeFindIndex = function(cb, context) {
-  let array = this;
+import { EventListener } from "../../utils/util";
 
-  for (let i = 0; i < array.length; i++) {
-    const element = array[i];
-    if (cb.call(context, element, i, array)) {
-      return i;
-    }
-  }
-  return -1;
-};
 export default {
   name: "VueFormLine",
   props: {
@@ -25,9 +16,7 @@ export default {
   },
   data() {
     return {
-      positions: {},
-      target: '',
-      prop: ''
+      positions: []
     };
   },
   computed: {
@@ -154,6 +143,7 @@ export default {
                   const template =
                     d.template || (da.view && da.view.template) || ""; // 内容展示模板
                   template && (data = template(data));
+                  const isRecalculate = !!d.recalculate;
                   let disabled;
                   disabled =
                     d.disabled !== undefined
@@ -185,7 +175,7 @@ export default {
                           slotNode
                         ]);
                       } else {
-                        let lastIndex = targetUseDefaultDetails.fakeFindIndex(
+                        let lastIndex = this.$findLastIndex(targetUseDefaultDetails, 
                           d => d.VNode
                         );
                         layerTypeSlot = h("div", { slot: "reference" }, [
@@ -214,8 +204,7 @@ export default {
                           hideDelay: hideDelay,
                           positions: this.positions,
                           prop: prop,
-                          oldProp: this.prop,
-                          oldTarget: this.target
+                          isRecalculate: isRecalculate
                         },
                         on: {
                           position: this.setPosition
@@ -232,7 +221,7 @@ export default {
                         nodeArr.push(popover);
                       } else {
                         if (targetUseDefaultDetails[idx].targetUseDefault) {
-                          let lastIndex = targetUseDefaultDetails.fakeFindIndex(
+                          let lastIndex = this.$findLastIndex(targetUseDefaultDetails, 
                             d => d.VNode
                           );
                           targetUseDefaultDetails[lastIndex].VNode = popover;
@@ -252,7 +241,7 @@ export default {
                       } else {
                         let lastIndex;
                         if (targetUseDefaultDetails[idx].targetUseDefault) {
-                          let lastIndex = targetUseDefaultDetails.fakeFindIndex(
+                          let lastIndex = this.$findLastIndex(targetUseDefaultDetails, 
                             d => d.VNode
                           );
                           layerTypeSlot =
@@ -285,7 +274,7 @@ export default {
                           (targetUseDefaultDetails[idx].VNode = popover);
                         nodeArr.push(popover);
                       } else {
-                        let lastIndex = targetUseDefaultDetails.fakeFindIndex(
+                        let lastIndex = this.$findLastIndex(targetUseDefaultDetails, 
                           d => d.VNode
                         );
                         targetUseDefaultDetails[lastIndex].VNode = popover;
@@ -330,31 +319,29 @@ export default {
   },
   methods: {
     setPosition(position) {
-      if (typeof position === 'object') {
-        if (this.positions[position.placement]) {
-          if (this.prop === position.position.prop && this.target === position.position.target) {
-            this.positions[position.placement].push(position.position);
-          } else {
-            this.target = position.position.target;
-            this.prop = position.position.prop;
-            this.positions[position.placement] = [];
-            this.positions[position.placement].push(position.position);
-          }
-        } else {
-          this.target = position.position.target;
-          this.prop = position.position.prop;
-          this.positions[position.placement] = [];
-          this.positions[position.placement].push(position.position);
-        }
+      if (position.width) {
+        !this.positions.find(d => d.id === position.id) && this.positions.push(position);
       } else {
-        for (const key in this.positions) {
-          const da = this.positions[key];
-          const index = da.findIndex(d => d.id === position);
-          index !== -1 && da.splice(index, 1);
-        }
+          const index = this.positions.findIndex(d => d.id === position.id);
+          index !== -1 && this.positions.splice(index, 1);
       }
       // console.log(JSON.stringify(this.positions))
+    },
+    windowScroll() {
+      this.positions = [];
+    },
+    windowResize() {
+      this.positions = [];
     }
+  },
+  mounted() {
+    this.positions = [];
+    this._scrollEvent = EventListener(window, "scroll", this.windowScroll);
+    this._resizeEvent = EventListener(window, "resize", this.windowResize);
+  },
+  beforeDestroy() {
+    this._scrollEvent && this._scrollEvent.remove();
+    this._resizeEvent && this._resizeEvent.remove();
   }
 };
 </script>

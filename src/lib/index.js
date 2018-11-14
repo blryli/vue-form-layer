@@ -23,6 +23,15 @@ const VueForm = function (Vue, opts = {}) {
   components.forEach(component => {
     Vue.component(component.name, component);
   });
+  Vue.prototype.$findLastIndex = function(array, cb, context) {
+    for (let i = 0; i < array.length; i++) {
+      const element = array[i];
+      if (cb.call(context, element, i, array)) {
+        return i;
+      }
+    }
+    return -1;
+  };
 }
 
 if (typeof window !== 'undefined' && window.Vue) {
