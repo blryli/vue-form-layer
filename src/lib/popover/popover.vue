@@ -8,10 +8,10 @@
     <transition name="fade">
       <div class="vue-popover-wrap" :class="[
         popoverClass,
-        {'vue-popover-wrap-top':   placement === 'top'},
-        {'vue-popover-wrap-left':  placement === 'left'},
-        {'vue-popover-wrap-right':  placement === 'right'},
-        {'vue-popover-wrap-bottom': placement === 'bottom'},
+        {'vue-popover-wrap-top': momentPlacement === 'top'},
+        {'vue-popover-wrap-left': momentPlacement === 'left'},
+        {'vue-popover-wrap-right': momentPlacement === 'right'},
+        {'vue-popover-wrap-bottom': momentPlacement === 'bottom'},
         {'vue-popover-wrap-visible': show || showAlways},
         {'vue-popover-wrap-hidden': (!showAlways && !show) || (!showAlways && disabled)}
       ]" ref="popover" role="popover" :style="effectStyle"
@@ -24,8 +24,8 @@
 </template>
 
 <script>
-import { EventListener, offset, scroll, generateId } from "../../utils/util";
-import { removeBody } from "../../utils/dom";
+import { offset, scroll, generateId } from "../../utils/util";
+import { on, off, removeBody } from "../../utils/dom";
 
 export default {
   name: "VuePopover",
@@ -71,8 +71,7 @@ export default {
       type: Number,
       default: 0
     },
-    prop: String,
-    isRecalculate: Boolean
+    prop: String
   },
   data() {
     return {
@@ -83,7 +82,9 @@ export default {
       },
       show: false,
       addedBody: false,
-      timeoutPending: null
+      timeoutPending: null,
+      momentPlacement: this.placement,
+      fristShowAlways: false
     };
   },
   computed: {
@@ -167,22 +168,18 @@ export default {
   },
   watch: {
     show(val) {
+      if (this.showAlways) return;
       if (val) {
         this.$emit("show");
         this.popoverAddedBody();
-        if (this.isRecalculate) {
-          this.$emit('position', {id: this.id});
-          this.calculateCoordinate();
-        }
+        this.calculateCoordinate();
       } else {
         this.$emit("hide");
+        this.$emit('position', {id: this.id});
       }
     },
     data(val) {
-      if (this.showAlways && val) {
-        this.$emit('position', {id: this.id});
-        this.calculateCoordinate();
-      }
+      this.showAlways && val && this.calculateCoordinate();
     }
   },
   methods: {
@@ -231,51 +228,36 @@ export default {
         }, 200);
       }
     },
-    calculateCoordinate() {
+    calculateCoordinate(momentPlacement) {
       const popover = this.$refs.popover;
       const triger = this.$refs.trigger;
-      if(!popover || !triger || this.positions.find(d => d.id === this.id)) return;
+      momentPlacement = momentPlacement || this.placement;
+      if(!popover || !triger) return;
       this.popoverAddedBody();
-      const trigerOffsetLeft = offset(triger).left;
-      const trigerOffsetTop = offset(triger).top;
-
-      // 可视窗口坐标
-      let viewTop = document.body.scrollTop;
-      let viewRight = document.body.clientWidth + document.body.scrollLeft;
-      let viewBottom = document.body.clientWidth + document.body.scrollTop;
-      let viewLeft = document.body.scrollLeft;
-
-      // 气泡坐标
-      let popoverTop = popover.offsetTop;
-      let popoverRight = popover.offsetLeft + popover.offsetWidth;
-      let popoverBottom = popover.offsetTop + popover.offsetHeight;
-      let popoverLeft = popover.offsetLeft;
-
-      this.getPosition(
-        this.placement,
-        popover,
-        triger,
-        trigerOffsetLeft,
-        trigerOffsetTop
-      );
-      popover.style.top = scroll().top ? this.position.top - scroll().top + "px" : this.position.top + "px";
-      popover.style.left = scroll().left ? this.position.left - scroll().left + "px" : this.position.left + "px";
-
-      let position = this.position;
-      position.id = this.id;
-      position.width = popover.offsetWidth;
-      position.height = popover.offsetHeight;
-      position.target = typeof this.target === 'string' ? this.target : 'function';
-      position.prop = this.prop;
-      position.placement = this.placement;
-      this.$emit('position', position);
-      // console.log('popover >> ' + 'top: ' + popover.style.top + 'left: ' + popover.style.left)
-    },
-    getPosition(placement, popover, triger, trigerOffsetLeft, trigerOffsetTop) {
-      // 通过placement计算出位子
-      const index = this.$findLastIndex(this.positions, d => d.prop === this.prop && d.target === this.target && d.placement === this.placement);
-      const lastPosition = index !== -1 && this.positions[index] || null;
-      switch (placement) {
+      let trigerOffsetLeft = offset(triger).left;
+      let trigerOffsetTop = offset(triger).top;
+      if (this.showAlways) {
+        const isFrist = this.positions.find(d => d.prop === this.prop && d.target === this.target && d.placement === momentPlacement);
+        !isFrist && (this.fristShowAlways = true);
+        if (this.showAlways && this.positions.find(d => d.id === this.id) && !this.fristShowAlways) {
+          this.$emit('position', {id: this.id});
+        }
+      }
+      const fristIndex = this.positions.findIndex(d => d.prop === this.prop && d.target === this.target && d.placement === momentPlacement);
+      const sameArr = this.positions.filter(d => d.prop === this.prop && d.target === this.target && d.placement === momentPlacement);
+      let index;
+      if (fristIndex !== -1 && (sameArr.length > 1 || !sameArr.find(d => d.id === this.id))) {
+        const fx = momentPlacement === 'top' || momentPlacement === 'bottom' ? 'top' : 'left';
+        const arr = sameArr.map(d => d[fx]);
+        const min = Math.min.apply(null, arr);
+        const max = Math.max.apply(null, arr);
+        const val = momentPlacement === 'top' || momentPlacement === 'left' ? min : max
+        index = this.positions.findIndex(d => d.prop === this.prop && d.target === this.target && d.placement === momentPlacement && d[fx] === val);
+        this.positions[index].id === this.id && (index = -1);
+      }
+      const lastPosition = fristIndex !== -1 && index !== -1 && (!this.fristShowAlways || this.fristShowAlways && this.placement !== momentPlacement) && this.positions[index] || null;
+      
+      switch (momentPlacement) {
         case "top":
           lastPosition && (trigerOffsetTop = lastPosition.top);
           this.position.left =
@@ -307,19 +289,76 @@ export default {
         default:
           console.error("Wrong placement prop");
       }
+      this.changeDirection(momentPlacement);
+      popover.style.top = scroll().top ? this.position.top - scroll().top + "px" : this.position.top + "px";
+      popover.style.left = scroll().left ? this.position.left - scroll().left + "px" : this.position.left + "px";
+
+      this.setPosition(popover);
+    },
+    changeDirection(momentPlacement) {
+      let triggerOffsetLeft = offset(trigger).left;
+      const popover = this.$refs.popover;
+      const trigger = this.$refs.trigger;
+      switch (momentPlacement) {
+        case "top":
+          if (this.position.top - scroll().top < 25) {
+            momentPlacement = this.momentPlacement = 'bottom';
+            this.calculateCoordinate('bottom');
+          } else {
+            momentPlacement = this.momentPlacement = 'top';
+          }
+          break;
+        case "left":
+          if (this.position.left - scroll().left < 25) {
+            momentPlacement = this.momentPlacement = 'right';
+            this.calculateCoordinate('right');
+          } else {
+            momentPlacement = this.momentPlacement = 'left';
+          }
+          break;
+        case "right":
+          if (window.innerWidth - (this.position.left + popover.offsetWidth - scroll().left) < 25) {
+            momentPlacement = this.momentPlacement = 'left';
+            this.calculateCoordinate('left');
+          } else {
+            momentPlacement = this.momentPlacement = 'right';
+          }
+          break;
+        case "bottom":
+          if (window.innerHeight - (this.position.top + popover.offsetHeight - scroll().top) < 25) {
+            momentPlacement = this.momentPlacement = 'top';
+            this.calculateCoordinate('top');
+          } else {
+            momentPlacement = this.momentPlacement = 'bottom';
+          }
+          break;
+        default:
+          console.error("Wrong placement prop");
+      }
+    },
+    setPosition(popover) {
+      let position = this.position;
+      position.id = this.id;
+      position.width = popover.offsetWidth;
+      position.height = popover.offsetHeight;
+      position.target = typeof this.target === 'string' ? this.target : this.$getFuncName(this.target);
+      position.prop = this.prop;
+      position.showAlways = this.showAlways;
+      position.placement = this.momentPlacement;
+      this.$emit('position', position);
     },
     windowScroll() {
-      this.calculateCoordinate();
+      this.showAlways && this.calculateCoordinate();
     },
     windowResize() {
-      this.calculateCoordinate();
+      this.showAlways && this.calculateCoordinate();
     }
   },
   mounted() {
     this.$nextTick(() => {
-      this.calculateCoordinate();
-      this._scrollEvent = EventListener(window, "scroll", this.windowScroll);
-      this._resizeEvent = EventListener(window, "resize", this.windowResize);
+      this.showAlways && this.calculateCoordinate();
+      on(window, "scroll", this.windowScroll);
+      on(window, "resize", this.windowResize);
       if (this.showAlways) {
         return;
       }
@@ -328,33 +367,27 @@ export default {
           "Couldn't find popover ref in your component that uses popoverMixin."
         );
       }
-      // 获取监听对象
-      let triger = this.$refs.trigger;
-      // 根据trigger监听特定事件
+      const triger = this.$refs.trigger;
       if (this.trigger === "hover") {
-        this._mouseenterEvent = EventListener(triger, "mouseenter", this.doShow);
-        this._mouseleaveEvent = EventListener(triger, "mouseleave", this.doHide);
+        on(triger, "mouseenter", this.doShow);
+        on(triger, "mouseleave", this.doHide);
       } else if (this.trigger === "focus") {
-        this._focusEvent = EventListener(triger, "focus", this.doShow);
-        this._blurEvent = EventListener(triger, "blur", this.doHide);
+        on(triger, "focus", this.doShow);
+        on(triger, "blur", this.doHide);
       } else {
-        this._clickEvent = EventListener(window, "click", this.triggerClick);
+        on(window, "click", this.triggerClick);
       }
     })
   },
-  // 在组件销毁前移除监听，释放内存
-  beforeDestroy() {
-    this._scrollEvent.remove();
-    this._resizeEvent.remove();
-    if (this._blurEvent) {
-      this._blurEvent.remove();
-      this._focusEvent.remove();
-    }
-    if (this._mouseenterEvent) {
-      this._mouseenterEvent.remove();
-      this._mouseleaveEvent.remove();
-    }
-    this._clickEvent && this._clickEvent.remove();
+  destroyed() {
+    const triger = this.$refs.trigger;
+    off(window, "scroll", this.windowScroll);
+    off(window, "resize", this.windowResize);
+    off(window, "click", this.triggerClick);
+    off(triger, "mouseenter", this.doShow);
+    off(triger, "mouseleave", this.doHide);
+    off(triger, "focus", this.doShow);
+    off(triger, "blur", this.doHide);
     removeBody(this, 'popover');
   }
 };

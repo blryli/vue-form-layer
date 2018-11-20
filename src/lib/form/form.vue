@@ -40,6 +40,7 @@ export default {
   },
   methods: {
     changeShow(id) {
+      !id && console.error(`changeShow 方法必须传入 layer ID`);
       let hasId = false;
       this.layer && this.layer.length && this.layer.forEach(d => {
         if (d.id && d.id === id) {

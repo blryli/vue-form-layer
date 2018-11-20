@@ -1,6 +1,5 @@
 <script>
-import { EventListener } from "../../utils/util";
-
+import { offset, scroll, generateId } from "../../utils/util";
 export default {
   name: "VueFormLine",
   props: {
@@ -188,6 +187,7 @@ export default {
                       "vue-popover",
                       {
                         attrs: {
+                          type: type,
                           data: data,
                           placement: placement,
                           trigger: trigger,
@@ -203,11 +203,10 @@ export default {
                           popoverClass: popoverClass,
                           hideDelay: hideDelay,
                           positions: this.positions,
-                          prop: prop,
-                          isRecalculate: isRecalculate
+                          prop: prop
                         },
                         on: {
-                          position: this.setPosition
+                          position: this.setPositions
                         }
                       },
                       [layerTypeSlot]
@@ -261,7 +260,7 @@ export default {
                           borderColor: borderColor
                         },
                         on: {
-                          position: this.setPosition
+                          position: this.setPositions
                         }
                       },
                       [layerTypeSlot]
@@ -318,30 +317,15 @@ export default {
     ]);
   },
   methods: {
-    setPosition(position) {
-      if (position.width) {
-        !this.positions.find(d => d.id === position.id) && this.positions.push(position);
+    setPositions(position) {
+      const index = this.positions.findIndex(d => d.id === position.id);
+      if (position.prop) {
+        this.positions.find(d => d.id === position.id) ? this.positions.splice(index, 1, position) : this.positions.push(position);
       } else {
-          const index = this.positions.findIndex(d => d.id === position.id);
-          index !== -1 && this.positions.splice(index, 1);
+        index !== -1 && this.positions.splice(index, 1);
       }
       // console.log(JSON.stringify(this.positions))
-    },
-    windowScroll() {
-      this.positions = [];
-    },
-    windowResize() {
-      this.positions = [];
     }
-  },
-  mounted() {
-    this.positions = [];
-    this._scrollEvent = EventListener(window, "scroll", this.windowScroll);
-    this._resizeEvent = EventListener(window, "resize", this.windowResize);
-  },
-  beforeDestroy() {
-    this._scrollEvent && this._scrollEvent.remove();
-    this._resizeEvent && this._resizeEvent.remove();
   }
 };
 </script>

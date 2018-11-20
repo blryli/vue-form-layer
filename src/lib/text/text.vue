@@ -6,8 +6,8 @@
 </template>
 
 <script>
-import { offset, EventListener, scroll } from "../../utils/util";
-import { removeBody } from "../../utils/dom";
+import { offset, scroll } from "../../utils/util";
+import { on, off, removeBody } from "../../utils/dom";
 
 export default {
   name: "VueText",
@@ -79,46 +79,20 @@ export default {
         document.body.appendChild(this.$refs["vueTextContent"].$el);
         this.addedBody = true;
       }
-      const popover = this.$refs["vueTextContent"].$el;
+      const text = this.$refs["vueTextContent"].$el;
       let triger = this.$refs.vueText;
       const trigerOffsetLeft = offset(triger).left;
       const trigerOffsetTop = offset(triger).top;
 
-      // 可视窗口坐标
-      let viewTop = document.body.scrollTop;
-      let viewRight = document.body.clientWidth + document.body.scrollLeft;
-      let viewBottom = document.body.clientWidth + document.body.scrollTop;
-      let viewLeft = document.body.scrollLeft;
-
-      // 气泡坐标
-      let popoverTop = popover.offsetTop;
-      let popoverRight = popover.offsetLeft + popover.offsetWidth;
-      let popoverBottom = popover.offsetTop + popover.offsetHeight;
-      let popoverLeft = popover.offsetLeft;
-
-      this.getPosition(
-        this.placement,
-        popover,
-        triger,
-        trigerOffsetLeft,
-        trigerOffsetTop
-      );
-
-      popover.style.top = this.position.top - scroll().top + "px";
-      popover.style.left = this.position.left - scroll().left + "px";
-    },
-    getPosition(placement, popover, triger, trigerOffsetLeft, trigerOffsetTop) {
-      switch (placement) {
+      switch (this.placement) {
         case "top":
           this.position.left = trigerOffsetLeft;
-          this.position.top = trigerOffsetTop - popover.offsetHeight - 3;
+          this.position.top = trigerOffsetTop - text.offsetHeight - 3;
           break;
         case "right":
           this.position.left = trigerOffsetLeft + triger.offsetWidth + 3;
           this.position.top =
-            trigerOffsetTop +
-            triger.offsetHeight / 2 -
-            popover.offsetHeight / 2;
+            trigerOffsetTop + triger.offsetHeight / 2 - text.offsetHeight / 2;
           break;
         case "bottom":
           this.position.left = trigerOffsetLeft;
@@ -127,6 +101,9 @@ export default {
         default:
           console.error("placement 必须是 top/right/bottom");
       }
+
+      text.style.top = this.position.top - scroll().top + "px";
+      text.style.left = this.position.left - scroll().left + "px";
     },
     windowScroll() {
       this.calculateCoordinate();
@@ -138,14 +115,14 @@ export default {
   mounted() {
     this.$nextTick(() => {
       this.calculateCoordinate();
-      this._scrollEvent = EventListener(window, "scroll", this.windowScroll);
-      this._resizeEvent = EventListener(window, "resize", this.windowResize);
-    })
+      on(window, "scroll", this.windowScroll);
+      on(window, "resize", this.windowResize);
+    });
   },
-  beforeDestroy() {
-    this._scrollEvent.remove();
-    this._resizeEvent.remove();
-    removeBody(this, 'vueTextContent');
+  destroyed() {
+    off(window, "scroll", this.windowScroll);
+    off(window, "resize", this.windowResize);
+    removeBody(this, "vueTextContent");
   }
 };
 </script>

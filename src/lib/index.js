@@ -23,15 +23,20 @@ const VueForm = function (Vue, opts = {}) {
   components.forEach(component => {
     Vue.component(component.name, component);
   });
-  Vue.prototype.$findLastIndex = function(array, cb, context) {
-    for (let i = 0; i < array.length; i++) {
-      const element = array[i];
-      if (cb.call(context, element, i, array)) {
+
+  Vue.prototype.$findLastIndex = function (array, cd) {
+    for (let i = array.length - 1; i >= 0; i--) {
+      const element = [array[i]];
+      if (element.find(cd)) {
         return i;
       }
     }
     return -1;
   };
+
+  Vue.prototype.$getFuncName = function (func) {
+    return func.name || func.toString().match(/function\s*([^(]*)\(/)[1]
+  }
 }
 
 if (typeof window !== 'undefined' && window.Vue) {
