@@ -115,7 +115,7 @@ export default {
   mounted() {
     this.$nextTick(() => {
       this.calculateCoordinate();
-      on(window, "scroll", this.windowScroll);
+      this.listenScroll && on(window, "scroll", this.windowScroll);
       on(window, "resize", this.windowResize);
     });
   },

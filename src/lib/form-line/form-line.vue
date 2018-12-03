@@ -57,6 +57,7 @@ export default {
     let offSet = slotNodes.length - this.cols.length;
     const layerGutter = this.form.$props.layerGutter;
     const rowledge = this.form.$props.rowledge + "px";
+    const listenScroll = this.form.$props.listenScroll;
     slotNodes.length &&
       slotNodes.forEach((slotNode, index) => {
         if (!this.cols[index]) {
@@ -203,7 +204,8 @@ export default {
                           popoverClass: popoverClass,
                           hideDelay: hideDelay,
                           positions: this.positions,
-                          prop: prop
+                          prop: prop,
+                          listenScroll: listenScroll
                         },
                         on: {
                           position: this.setPositions
@@ -257,7 +259,8 @@ export default {
                           placement: placement,
                           disabled: disabled,
                           effect: effect,
-                          borderColor: borderColor
+                          borderColor: borderColor,
+                          listenScroll: listenScroll
                         },
                         on: {
                           position: this.setPositions

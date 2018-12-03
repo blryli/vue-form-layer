@@ -141,6 +141,7 @@ export default {
       form2: {},
       layer1: [
         {
+          id: 'formLayer',
           show: true,
           view: {
             disabled: true,
@@ -245,7 +246,7 @@ export default {
       this.$refs["form1"].recalculateField(prop);
     },
     submitForm(formName) {
-      this.$refs[formName].recalculate("layerValidate", valid => {
+      this.$refs[formName].recalculate("formLayer", valid => {
         if (valid) {
           console.log("form submit");
         } else {

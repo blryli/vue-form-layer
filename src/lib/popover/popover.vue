@@ -71,7 +71,8 @@ export default {
       type: Number,
       default: 0
     },
-    prop: String
+    prop: String,
+    listenScroll: Boolean
   },
   data() {
     return {
@@ -289,7 +290,7 @@ export default {
         default:
           console.error("Wrong placement prop");
       }
-      this.changeDirection(momentPlacement);
+      this.listenScroll && this.changeDirection(momentPlacement);
       popover.style.top = scroll().top ? this.position.top - scroll().top + "px" : this.position.top + "px";
       popover.style.left = scroll().left ? this.position.left - scroll().left + "px" : this.position.left + "px";
 
@@ -357,7 +358,7 @@ export default {
   mounted() {
     this.$nextTick(() => {
       this.showAlways && this.calculateCoordinate();
-      on(window, "scroll", this.windowScroll);
+      this.listenScroll && on(window, "scroll", this.windowScroll);
       on(window, "resize", this.windowResize);
       if (this.showAlways) {
         return;
@@ -401,7 +402,7 @@ export default {
 .vue-popover-wrap {
   visibility: hidden;
   position: fixed;
-  z-index: 1000;
+  z-index: 3000;
   opacity: 0;
   padding: 10px;
   line-height: 1.2;
