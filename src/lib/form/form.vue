@@ -20,8 +20,9 @@ export default {
     },
     listenScroll: {
       type: Boolean,
-      default: false
-    }
+      default: true
+    },
+    listenScrollID: String
   },
   data() {
     return {

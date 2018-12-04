@@ -69,10 +69,11 @@ export default {
     popoverClass: String,
     hideDelay: {
       type: Number,
-      default: 0
+      default: 200
     },
     prop: String,
-    listenScroll: Boolean
+    listenScroll: Boolean,
+    listenScrollID: String
   },
   data() {
     return {
@@ -85,7 +86,10 @@ export default {
       addedBody: false,
       timeoutPending: null,
       momentPlacement: this.placement,
-      fristShowAlways: false
+      fristShowAlways: false,
+      scrollTarget: null,
+      scrollTop: scroll().top,
+      scrollLeft: scroll().left
     };
   },
   computed: {
@@ -192,9 +196,9 @@ export default {
     },
     triggerClick(e) {
       const popover = this.$refs.popover;
-      const triger = this.$refs.trigger;
-      if (!popover || !triger || !e.target) return;
-      if (triger.contains(e.target)) {
+      const trigger = this.$refs.trigger;
+      if (!popover || !trigger || !e.target) return;
+      if (trigger.contains(e.target)) {
         !this.disabled && (this.show = !this.show)
       } else if (popover.contains(e.target)) {
         return;
@@ -231,12 +235,12 @@ export default {
     },
     calculateCoordinate(momentPlacement) {
       const popover = this.$refs.popover;
-      const triger = this.$refs.trigger;
+      const trigger = this.$refs.trigger;
       momentPlacement = momentPlacement || this.placement;
-      if(!popover || !triger) return;
+      if(!popover || !trigger) return;
       this.popoverAddedBody();
-      let trigerOffsetLeft = offset(triger).left;
-      let trigerOffsetTop = offset(triger).top;
+      let triggerOffsetLeft = offset(trigger).left;
+      let triggerOffsetTop = offset(trigger).top;
       if (this.showAlways) {
         const isFrist = this.positions.find(d => d.prop === this.prop && d.target === this.target && d.placement === momentPlacement);
         !isFrist && (this.fristShowAlways = true);
@@ -260,39 +264,39 @@ export default {
       
       switch (momentPlacement) {
         case "top":
-          lastPosition && (trigerOffsetTop = lastPosition.top);
+          lastPosition && (triggerOffsetTop = lastPosition.top);
           this.position.left =
-            trigerOffsetLeft - popover.offsetWidth / 2 + triger.offsetWidth / 2;
-          this.position.top = trigerOffsetTop - popover.offsetHeight - 12;
+            triggerOffsetLeft - popover.offsetWidth / 2 + trigger.offsetWidth / 2;
+          this.position.top = triggerOffsetTop - popover.offsetHeight - 12;
           break;
         case "left":
-          lastPosition && (trigerOffsetLeft = lastPosition.left);
-          this.position.left = trigerOffsetLeft - popover.offsetWidth - 12;
+          lastPosition && (triggerOffsetLeft = lastPosition.left);
+          this.position.left = triggerOffsetLeft - popover.offsetWidth - 12;
           this.position.top =
-            trigerOffsetTop +
-            triger.offsetHeight / 2 -
+            triggerOffsetTop +
+            trigger.offsetHeight / 2 -
             popover.offsetHeight / 2;
           break;
         case "right":
-          this.position.left = trigerOffsetLeft + triger.offsetWidth + 12;
+          this.position.left = triggerOffsetLeft + trigger.offsetWidth + 12;
           this.position.top =
-            trigerOffsetTop +
-            triger.offsetHeight / 2 -
+            triggerOffsetTop +
+            trigger.offsetHeight / 2 -
             popover.offsetHeight / 2;
             lastPosition && (this.position.left = lastPosition.left + lastPosition.width + 12);
           break;
         case "bottom":
           this.position.left =
-            trigerOffsetLeft - popover.offsetWidth / 2 + triger.offsetWidth / 2;
-          this.position.top = trigerOffsetTop + triger.offsetHeight + 12;
+            triggerOffsetLeft - popover.offsetWidth / 2 + trigger.offsetWidth / 2;
+          this.position.top = triggerOffsetTop + trigger.offsetHeight + 12;
           lastPosition && (this.position.top = lastPosition.top + lastPosition.height + 12);
           break;
         default:
           console.error("Wrong placement prop");
       }
       this.listenScroll && this.changeDirection(momentPlacement);
-      popover.style.top = scroll().top ? this.position.top - scroll().top + "px" : this.position.top + "px";
-      popover.style.left = scroll().left ? this.position.left - scroll().left + "px" : this.position.left + "px";
+      popover.style.top = this.scrollTop ? this.position.top - this.scrollTop + "px" : this.position.top + "px";
+      popover.style.left = this.scrollLeft ? this.position.left - this.scrollLeft + "px" : this.position.left + "px";
 
       this.setPosition(popover);
     },
@@ -302,7 +306,8 @@ export default {
       const trigger = this.$refs.trigger;
       switch (momentPlacement) {
         case "top":
-          if (this.position.top - scroll().top < 25) {
+          const allHeight = offset(trigger).top - this.scrollTop + trigger.offsetHeight + popover.offsetHeight;
+          if (this.position.top - this.scrollTop < 10 && window.innerHeight - allHeight > 10) {
             momentPlacement = this.momentPlacement = 'bottom';
             this.calculateCoordinate('bottom');
           } else {
@@ -310,7 +315,7 @@ export default {
           }
           break;
         case "left":
-          if (this.position.left - scroll().left < 25) {
+          if (this.position.left - this.scrollLeft < 10 && window.innerWidth - (this.position.left + popover.offsetWidth - this.scrollLeft) < 10) {
             momentPlacement = this.momentPlacement = 'right';
             this.calculateCoordinate('right');
           } else {
@@ -318,7 +323,7 @@ export default {
           }
           break;
         case "right":
-          if (window.innerWidth - (this.position.left + popover.offsetWidth - scroll().left) < 25) {
+          if (this.position.left - this.scrollLeft < 10 && window.innerWidth - (this.position.left + popover.offsetWidth - this.scrollLeft) < 10) {
             momentPlacement = this.momentPlacement = 'left';
             this.calculateCoordinate('left');
           } else {
@@ -326,7 +331,7 @@ export default {
           }
           break;
         case "bottom":
-          if (window.innerHeight - (this.position.top + popover.offsetHeight - scroll().top) < 25) {
+          if (window.innerHeight - allHeight > 10 && this.position.top - this.scrollTop < 10) {
             momentPlacement = this.momentPlacement = 'top';
             this.calculateCoordinate('top');
           } else {
@@ -349,6 +354,8 @@ export default {
       this.$emit('position', position);
     },
     windowScroll() {
+      this.scrollTop = this.scrollTarget ? this.scrollTarget.scrollTop + scroll().top : scroll().top;
+      this.scrollLeft = this.scrollTarget ? this.scrollTarget.scrollLeft + scroll().left : scroll().left;
       this.showAlways && this.calculateCoordinate();
     },
     windowResize() {
@@ -357,8 +364,13 @@ export default {
   },
   mounted() {
     this.$nextTick(() => {
+      this.scrollTarget = document.getElementById(this.listenScrollID) || null;
+
       this.showAlways && this.calculateCoordinate();
-      this.listenScroll && on(window, "scroll", this.windowScroll);
+      if (this.listenScroll) {
+        on(window, "scroll", this.windowScroll);
+        this.scrollTarget && on(this.scrollTarget, "scroll", this.windowScroll);
+      }
       on(window, "resize", this.windowResize);
       if (this.showAlways) {
         return;
@@ -368,27 +380,28 @@ export default {
           "Couldn't find popover ref in your component that uses popoverMixin."
         );
       }
-      const triger = this.$refs.trigger;
+      const trigger = this.$refs.trigger;
       if (this.trigger === "hover") {
-        on(triger, "mouseenter", this.doShow);
-        on(triger, "mouseleave", this.doHide);
+        on(trigger, "mouseenter", this.doShow);
+        on(trigger, "mouseleave", this.doHide);
       } else if (this.trigger === "focus") {
-        on(triger, "focus", this.doShow);
-        on(triger, "blur", this.doHide);
+        on(trigger, "focus", this.doShow);
+        on(trigger, "blur", this.doHide);
       } else {
         on(window, "click", this.triggerClick);
       }
     })
   },
-  destroyed() {
-    const triger = this.$refs.trigger;
+  beforeDestroy() {
+    const trigger = this.$refs.trigger;
     off(window, "scroll", this.windowScroll);
+    this.scrollTarget && off(this.scrollTarget, "scroll", this.windowScroll);
     off(window, "resize", this.windowResize);
     off(window, "click", this.triggerClick);
-    off(triger, "mouseenter", this.doShow);
-    off(triger, "mouseleave", this.doHide);
-    off(triger, "focus", this.doShow);
-    off(triger, "blur", this.doHide);
+    off(trigger, "mouseenter", this.doShow);
+    off(trigger, "mouseleave", this.doHide);
+    off(trigger, "focus", this.doShow);
+    off(trigger, "blur", this.doHide);
     removeBody(this, 'popover');
   }
 };

@@ -3,7 +3,7 @@
     <label class="vue-form-item__label" :style="{width: labelWidth}" v-if="label">
       <slot name="label">{{label}}</slot>
     </label>
-    <div class="vue-form-item__content" :class="{'is-recalculate': isRecalculate}" :style="style">
+    <div ref="formItemContent" class="vue-form-item__content" :class="{'is-recalculate': isRecalculate}" :style="style">
       <slot></slot>
     </div>
   </div>

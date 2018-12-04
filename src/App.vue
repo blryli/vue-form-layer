@@ -152,7 +152,7 @@ export default {
             {
               prop: "/form/name",
               recalculate: recalculateName,
-              data: ""
+              data: "",
             },
             {
               prop: "/form/age",

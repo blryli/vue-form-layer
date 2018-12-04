@@ -1,13 +1,11 @@
 <template>
-  <div class="vue-text" :style="textStyle" ref="vueText" :class="'vue-text__'+placement">
+  <div class="vue-text" :style="textStyle" ref="vueText">
     <slot></slot>
-    <vue-content class="vue-text-content" v-if="!disabled" ref="vueTextContent" :style="style" :data="data"></vue-content>
+    <vue-content class="vue-text-content" :class="'vue-text__'+placement" v-if="!disabled" ref="vueTextContent" :style="style" :data="data"></vue-content>
   </div>
 </template>
 
 <script>
-import { offset, scroll } from "../../utils/util";
-import { on, off, removeBody } from "../../utils/dom";
 
 export default {
   name: "VueText",
@@ -27,11 +25,6 @@ export default {
   },
   data() {
     return {
-      textContentWidth: 0,
-      position: {
-        top: 0,
-        left: 0
-      },
       addedBody: false
     };
   },
@@ -76,53 +69,39 @@ export default {
         return;
       }
       if (!this.addedBody) {
-        document.body.appendChild(this.$refs["vueTextContent"].$el);
+        this.formItem.$refs.formItemContent.appendChild(this.$refs["vueTextContent"].$el);
         this.addedBody = true;
       }
       const text = this.$refs["vueTextContent"].$el;
-      let triger = this.$refs.vueText;
-      const trigerOffsetLeft = offset(triger).left;
-      const trigerOffsetTop = offset(triger).top;
+      const triger = this.$refs.vueText;
 
       switch (this.placement) {
         case "top":
-          this.position.left = trigerOffsetLeft;
-          this.position.top = trigerOffsetTop - text.offsetHeight - 3;
+          text.style.top = - text.offsetHeight - 3 + 'px';
           break;
         case "right":
-          this.position.left = trigerOffsetLeft + triger.offsetWidth + 3;
-          this.position.top =
-            trigerOffsetTop + triger.offsetHeight / 2 - text.offsetHeight / 2;
+          text.style.width = text.offsetWidth + 'px';
+          text.style.left = triger.offsetWidth + 3 + 'px';
           break;
         case "bottom":
-          this.position.left = trigerOffsetLeft;
-          this.position.top = trigerOffsetTop + triger.offsetHeight;
+          break;
+        case "left":
+          text.style.width = text.offsetWidth + 'px';
+          text.style.left = - text.offsetWidth - 3 + 'px';
           break;
         default:
-          console.error("placement 必须是 top/right/bottom");
+          console.error("placement 必须是 top/right/bottom/left");
       }
 
-      text.style.top = this.position.top - scroll().top + "px";
-      text.style.left = this.position.left - scroll().left + "px";
-    },
-    windowScroll() {
-      this.calculateCoordinate();
-    },
-    windowResize() {
-      this.calculateCoordinate();
     }
   },
   mounted() {
     this.$nextTick(() => {
       this.calculateCoordinate();
-      this.listenScroll && on(window, "scroll", this.windowScroll);
-      on(window, "resize", this.windowResize);
     });
   },
-  destroyed() {
-    off(window, "scroll", this.windowScroll);
-    off(window, "resize", this.windowResize);
-    removeBody(this, "vueTextContent");
+  beforeDestroy() {
+    this.$refs["vueTextContent"].$el.parentNode === this.formItem.$refs.formItemContent && this.formItem.$refs.formItemContent.removeChild(this.$refs["vueTextContent"].$el);
   }
 };
 </script>
@@ -133,22 +112,22 @@ export default {
   width: 100%;
 }
 .vue-text-content {
-  position: fixed;
+  position: absolute;
   padding: var(--padding);
   color: var(--color);
   font-size: 12px;
 }
-.vue-text__bottom {
-  .vue-text-content {
+.vue-text-content {
+  top: 0;
+  left: 0;
+  &.vue-text__bottom {
     top: 100%;
     left: 0;
     padding-top: 2px;
   }
-}
-.vue-text__top {
-  .vue-text-content {
-    top: -20px;
-    left: 0;
+  &.vue-text__right, &.vue-text__left {
+    top: 50%;
+    transform: translate(0, -50%);
   }
 }
 </style>

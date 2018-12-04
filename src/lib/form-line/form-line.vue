@@ -58,6 +58,7 @@ export default {
     const layerGutter = this.form.$props.layerGutter;
     const rowledge = this.form.$props.rowledge + "px";
     const listenScroll = this.form.$props.listenScroll;
+    const listenScrollID = this.form.$props.listenScrollID;
     slotNodes.length &&
       slotNodes.forEach((slotNode, index) => {
         if (!this.cols[index]) {
@@ -205,7 +206,8 @@ export default {
                           hideDelay: hideDelay,
                           positions: this.positions,
                           prop: prop,
-                          listenScroll: listenScroll
+                          listenScroll: listenScroll,
+                          listenScrollID: listenScrollID
                         },
                         on: {
                           position: this.setPositions
