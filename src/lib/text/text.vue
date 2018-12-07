@@ -1,7 +1,7 @@
 <template>
   <div class="vue-text" :style="textStyle" ref="vueText">
     <slot></slot>
-    <vue-content class="vue-text-content" :class="'vue-text__'+placement" v-if="!disabled" ref="vueTextContent" :style="style" :data="data"></vue-content>
+    <vue-content class="vue-text-content" :class="'vue-text__'+placement" v-show="!disabled" ref="vueTextContent" :style="style" :data="data"></vue-content>
   </div>
 </template>
 
@@ -11,7 +11,6 @@ export default {
   name: "VueText",
   props: {
     data: [String, Object, Array],
-    gutter: Number,
     disabled: Boolean,
     effect: String,
     borderColor: {
@@ -28,13 +27,6 @@ export default {
       addedBody: false
     };
   },
-  watch: {
-    data(val) {
-      this.$nextTick(() => {
-        val && this.calculateCoordinate();
-      });
-    }
-  },
   computed: {
     textStyle() {
       const ret = {};
@@ -43,13 +35,6 @@ export default {
     },
     style() {
       const ret = {};
-      const formItemLayerLength = this.formItem.$data.formItemLayerLength;
-      const gutter = this.gutter
-        ? this.gutter
-        : formItemLayerLength > 1
-          ? 6
-          : 0;
-      ret["--padding"] = `0 ${gutter / 2}px`;
       ret["--color"] = this.effect;
       return ret;
     },
@@ -92,7 +77,6 @@ export default {
         default:
           console.error("placement 必须是 top/right/bottom/left");
       }
-
     }
   },
   mounted() {
@@ -123,7 +107,7 @@ export default {
   &.vue-text__bottom {
     top: 100%;
     left: 0;
-    padding-top: 2px;
+    padding-top: 3px;
   }
   &.vue-text__right, &.vue-text__left {
     top: 50%;

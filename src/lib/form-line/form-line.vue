@@ -7,6 +7,8 @@ export default {
       type: Array,
       default: () => []
     },
+    label: String,
+    required: Boolean,
     span: {
       type: Number,
       default: 24
@@ -59,6 +61,9 @@ export default {
     const rowledge = this.form.$props.rowledge + "px";
     const listenScroll = this.form.$props.listenScroll;
     const listenScrollID = this.form.$props.listenScrollID;
+    let formItemSlotNode;
+    let formItemSlotNodes = [];
+    let spanArr = [];
     slotNodes.length &&
       slotNodes.forEach((slotNode, index) => {
         if (!this.cols[index]) {
@@ -90,10 +95,12 @@ export default {
         let prop = this.cols[index].prop || "";
         let required = this.cols[index].required;
 
+        spanArr.push(span)
+
         // 添加图层
         let nodeArr = [];
         let isRecalculate;
-        let targetUseDefault; // 是否使用了传入节点
+        let targetUseDefault = false; // 是否使用了传入节点
         if (this.layer) {
           let targetUseDefaultDetails = []; // 使用传入模板节点对应关系
           isRecalculate = !!this.form.$data.recalculateArr.find(
@@ -144,7 +151,6 @@ export default {
                   const template =
                     d.template || (da.view && da.view.template) || ""; // 内容展示模板
                   template && (data = template(data));
-                  const isRecalculate = !!d.recalculate;
                   let disabled;
                   disabled =
                     d.disabled !== undefined
@@ -162,6 +168,10 @@ export default {
                   da.show === false && (disabled = true);
                   target === "default" && typeof target !== "function" && targetUseDefaultNum++;
                   let layerTypeSlot;
+                  const lastIndex = this.$findLastIndex(targetUseDefaultDetails, 
+                    d => d.VNode
+                  );
+                  const flex =  !this.label ? span / 10 : undefined;
                   if (type === "popover") {
                     let triggerShow = da.show;
                     if (typeof target === "function") {
@@ -176,9 +186,6 @@ export default {
                           slotNode
                         ]);
                       } else {
-                        let lastIndex = this.$findLastIndex(targetUseDefaultDetails, 
-                          d => d.VNode
-                        );
                         layerTypeSlot = h("div", { slot: "reference" }, [
                           targetUseDefaultDetails[lastIndex].VNode
                         ]);
@@ -207,7 +214,14 @@ export default {
                           positions: this.positions,
                           prop: prop,
                           listenScroll: listenScroll,
-                          listenScrollID: listenScrollID
+                          listenScrollID: listenScrollID,
+                          layerShow: da.show
+                        },
+                        class: {
+                          'is-recalculate': isRecalculate
+                        },
+                        style: {
+                          flex: flex
                         },
                         on: {
                           position: this.setPositions
@@ -219,14 +233,11 @@ export default {
                       nodeArr.push(popover);
                     } else {
                       if (targetUseDefaultNum <= 1) {
-                        targetUseDefaultDetails[idx].targetUseDefault &&
-                          (targetUseDefaultDetails[idx].VNode = popover);
+                        targetUseDefaultDetails[0].targetUseDefault &&
+                          (targetUseDefaultDetails[0].VNode = popover);
                         nodeArr.push(popover);
                       } else {
-                        if (targetUseDefaultDetails[idx].targetUseDefault) {
-                          let lastIndex = this.$findLastIndex(targetUseDefaultDetails, 
-                            d => d.VNode
-                          );
+                        if (targetUseDefaultDetails[lastIndex].targetUseDefault) {
                           targetUseDefaultDetails[lastIndex].VNode = popover;
                           nodeArr.push("");
                           nodeArr.splice(lastIndex, 1, popover);
@@ -242,11 +253,7 @@ export default {
                       if (targetUseDefaultNum <= 1) {
                         layerTypeSlot = slotNode;
                       } else {
-                        let lastIndex;
-                        if (targetUseDefaultDetails[idx].targetUseDefault) {
-                          let lastIndex = this.$findLastIndex(targetUseDefaultDetails, 
-                            d => d.VNode
-                          );
+                        if (targetUseDefaultDetails[lastIndex].targetUseDefault) {
                           layerTypeSlot =
                             targetUseDefaultDetails[lastIndex].VNode;
                         }
@@ -257,12 +264,14 @@ export default {
                       {
                         attrs: {
                           data: data,
-                          gutter: layerGutter,
                           placement: placement,
                           disabled: disabled,
                           effect: effect,
                           borderColor: borderColor,
                           listenScroll: listenScroll
+                        },
+                        class: {
+                          'is-recalculate': isRecalculate
                         },
                         on: {
                           position: this.setPositions
@@ -274,13 +283,10 @@ export default {
                       nodeArr.push(popover);
                     } else {
                       if (targetUseDefaultNum <= 1) {
-                        targetUseDefaultDetails[idx].targetUseDefault &&
-                          (targetUseDefaultDetails[idx].VNode = popover);
+                        targetUseDefaultDetails[0].targetUseDefault &&
+                          (targetUseDefaultDetails[0].VNode = popover);
                         nodeArr.push(popover);
                       } else {
-                        let lastIndex = this.$findLastIndex(targetUseDefaultDetails, 
-                          d => d.VNode
-                        );
                         targetUseDefaultDetails[lastIndex].VNode = popover;
                         nodeArr.push("");
                         nodeArr.splice(lastIndex, 1, popover);
@@ -291,30 +297,52 @@ export default {
               });
           });
         }
-        let formItemSlotNode;
         if (nodeArr.length) {
           formItemSlotNode = targetUseDefault ? [nodeArr] : [slotNode, nodeArr];
         } else {
           formItemSlotNode = [slotNode];
         }
+        if (!this.label) {
+          nodes.push(
+            h("vue-col", { attrs: { span: span } }, [
+              h(
+                "vue-form-item",
+                {
+                  attrs: {
+                    label: label,
+                    labelWidth: labelWidth,
+                    required: required
+                  }
+                },
+                formItemSlotNode
+              )
+            ])
+          );
+        } else {
+          formItemSlotNodes.push(formItemSlotNode)
+        }
+      });
+      if(this.label) {
+        formItemSlotNodes.forEach((d, i) => {
+          const flex =  spanArr[i] / 10;
+          formItemSlotNodes[i] = [h('div', {class: {'form-line--abreast': true}, style: { flex: flex }}, [d])]
+        })
         nodes.push(
-          h("vue-col", { attrs: { span: span } }, [
+          h("vue-col", { attrs: { span: this.span } }, [
             h(
               "vue-form-item",
               {
                 attrs: {
-                  label: label,
-                  labelWidth: labelWidth,
-                  required: required,
-                  gutter: layerGutter,
-                  isRecalculate: isRecalculate
+                  label: this.label,
+                  labelWidth: this.labelWidth || '80px',
+                  required: this.required
                 }
               },
-              formItemSlotNode
+              [formItemSlotNodes]
             )
           ])
         );
-      });
+      }
     return h("vue-col", { attrs: { span: this.span } }, [
       h("div", { class: "vue-form-line", style: { marginBottom: rowledge } }, [
         nodes
@@ -348,4 +376,5 @@ export default {
     clear: both;
   }
 }
+.form-line--abreast + .form-line--abreast{margin-left: -1px;}
 </style>

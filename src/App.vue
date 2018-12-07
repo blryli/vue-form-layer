@@ -1,8 +1,16 @@
 <template>
   <div id="app">
+    <h2>apply to form layou</h2>
+    <vue-form ref="formLayou" :model="formLayou" :rowledge="22">
+      <vue-form-line label="size" :cols="[{ span: 9 },{ span: 6 }, { span: 9 }]">
+        <el-input type="text" placeholder="long" v-model="formLayou.long" />
+        <el-input type="text" placeholder="width" v-model="formLayou.width" />
+        <el-input type="text" placeholder="height" v-model="formLayou.height" />
+      </vue-form-line>
+    </vue-form>
     <h2>apply to form validate</h2>
     <vue-form ref="form1" :model="form1" :layer="layer1" :rowledge="22">
-      <vue-form-line :cols="[{ span: 10, label: 'name', prop: '/form/name' },{ span: 10, label: 'age', prop: '/form/age' }]">
+      <vue-form-line :cols="[{ span: 12, label: 'name', prop: '/form/name' },{ span: 12, label: 'age', prop: '/form/age' }]">
         <el-input type="text" v-model="form1.name" @blur="recalculateField('/form/name')" />
         <el-input type="text" v-model="form1.age" @blur="recalculateField('/form/age')" />
       </vue-form-line>
@@ -18,7 +26,7 @@
       <el-switch v-model="value" @change="$refs['form2'].changeShow('layerTooltip')" inactive-text="layer toogle visible" />
     </p>
     <vue-form ref="form2" :model="form2" :layer="layer2">
-      <vue-form-line :cols="[{ span: 10, label: 'name', prop: '/form/name' },{ span: 10, label: 'age', prop: '/form/age' }]">
+      <vue-form-line :cols="[{ span: 12, label: 'name', prop: '/form/name' },{ span: 12, label: 'age', prop: '/form/age' }]">
         <el-input type="text" v-model="form2.name" />
         <el-input type="text" v-model="form2.age" />
       </vue-form-line>
@@ -137,7 +145,8 @@ export default {
     };
     return {
       value: true,
-      form1: { name: "blryli" },
+      formLayou: {},
+      form1: { name: "laowang" },
       form2: {},
       layer1: [
         {
@@ -155,10 +164,10 @@ export default {
               data: "",
             },
             {
+              type: 'text',
               prop: "/form/age",
               recalculate: recalculateAge,
-              data: "",
-              enterable: true
+              data: ""
             }
           ]
         }

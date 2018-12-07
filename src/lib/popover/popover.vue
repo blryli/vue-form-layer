@@ -12,8 +12,8 @@
         {'vue-popover-wrap-left': momentPlacement === 'left'},
         {'vue-popover-wrap-right': momentPlacement === 'right'},
         {'vue-popover-wrap-bottom': momentPlacement === 'bottom'},
-        {'vue-popover-wrap-visible': show || showAlways},
-        {'vue-popover-wrap-hidden': (!showAlways && !show) || (!showAlways && disabled)}
+        {'vue-popover-wrap-visible': layerShow && (show || showAlways)},
+        {'vue-popover-wrap-hidden': (!showAlways && !show) || (!showAlways && disabled) || !layerShow}
       ]" ref="popover" role="popover" :style="effectStyle"
       @mouseenter="mouseenterWrap" @mouseleave="mouseleaveWrap">
         <div class="vue-popover-arrow" v-if="visibleArrow"></div>
@@ -73,7 +73,8 @@ export default {
     },
     prop: String,
     listenScroll: Boolean,
-    listenScrollID: String
+    listenScrollID: String,
+    layerShow: Boolean
   },
   data() {
     return {
@@ -511,6 +512,7 @@ export default {
 .vue-popover-trigger__target {
   display: block;
   height: auto;
+  margin: 0 5px;
   &::before {
     display: block;
     width: 16px;

@@ -3,7 +3,7 @@
     <label class="vue-form-item__label" :style="{width: labelWidth}" v-if="label">
       <slot name="label">{{label}}</slot>
     </label>
-    <div ref="formItemContent" class="vue-form-item__content" :class="{'is-recalculate': isRecalculate}" :style="style">
+    <div ref="formItemContent" class="vue-form-item__content" :style="{'--borderColor': '#ccc'}">
       <slot></slot>
     </div>
   </div>
@@ -15,26 +15,10 @@ export default {
   props: {
     label: String,
     labelWidth: String,
-    required: Boolean,
-    gutter: Number,
-    isRecalculate: Boolean
+    required: Boolean
   },
   data() {
-    return {
-      formItemLayerLength: null
-    }
-  },
-  computed: {
-    style() {
-      const ret = {};
-      this.formItemLayerLength = this.$slots.default.length;
-      const gutter = this.gutter ? this.gutter : this.formItemLayerLength > 1 ? 6 : 0;
-      ret.marginLeft = `-${gutter / 2}px`;
-      ret.marginRight = ret.marginLeft;
-      ret["--marginLeft"] = `${gutter / 2}px`;
-      ret["--borderColor"] = "#ccc";
-      return ret;
-    }
+    return {}
   }
 };
 </script>
@@ -81,10 +65,6 @@ export default {
   flex-direction: row;
   align-items: center;
   flex-wrap: nowrap;
-  > * {
-    padding-left: var(--marginLeft);
-    padding-right: var(--marginLeft);
-  }
 }
 .vue-popover-main {
   flex: 1;
@@ -106,7 +86,7 @@ export default {
       border-color: #409eff;
     }
   }
-  &.is-recalculate {
+  .is-recalculate {
     input {
       &:focus,
       &:hover {

@@ -32,7 +32,7 @@ export default {
     };
   },
   created() {
-    this.logError(this.layer, 'layer') && this.layer.forEach(da => {
+    this.layer && this.layer.length && this.layer.forEach(da => {
       da.show === undefined && this.$set(da, "show", true);
     });
     this.$nextTick(() => {
@@ -40,16 +40,17 @@ export default {
       this.model && (this.initData = JSON.parse(JSON.stringify(this.model)));
     })
   },
-  computed: {
-    modelIsObject() {
-      return this.model && typeof this.model === 'object' && !Array.isArray(this.model);
-    }
-  },
   methods: {
+    initLayer() {
+      this.layer && (this.layerCopy = JSON.parse(JSON.stringify(this.layer)));
+    },
+    initModel() {
+      this.model && (this.initData = JSON.parse(JSON.stringify(this.model)));
+    },
     changeShow(id) {
       !id && console.error(`changeShow 方法必须传入 layer ID`);
       let hasId = false;
-      this.logError(this.layer, 'layer') && this.layer.forEach(d => {
+      this.layer && this.layer.length && this.layer.forEach(d => {
         if (d.id && d.id === id) {
           this.$set(d, "show", !d.show);
           hasId = true;
@@ -68,9 +69,9 @@ export default {
       }
       this.recalculateField();
       let valid = true;
-      this.logError(this.layer, 'layer') && this.layer.forEach(da => {
+      this.layer && this.layer.length && this.layer.forEach(da => {
         if (da.id === id) {
-          this.logError(da.data, 'data') && da.data.find(d => d.data) && (valid = false);
+          da.data && da.data.length && da.data.find(d => d.data) && (valid = false);
         }
       })
       callback(valid);
@@ -79,7 +80,7 @@ export default {
       const p = prop || d.prop;
       const key = p.substring(p.lastIndexOf("/") + 1);
       let val = "";
-      if (this.modelIsObject) {
+      if (this.model && typeof this.model === 'object' && !Array.isArray(this.model)) {
         val = this.model[key] || this.$set(this.model, key, "");
       } else {
         const arr = p.split('/');
@@ -117,9 +118,9 @@ export default {
       }
     },
     recalculateField(prop) {
-      this.logError(this.layer, 'layer') && this.layer.forEach(da => {
+      this.layer && this.layer.length && this.layer.forEach(da => {
         if (da.show) {
-          this.logError(da.data, 'data') && da.data.forEach(d => {
+          da.data && da.data.length && da.data.forEach(d => {
             if (d.recalculate !== undefined && typeof d.recalculate === "function") {
               this.setData(prop, d, da);
             }
@@ -129,9 +130,9 @@ export default {
     },
     clearCalculate(props = [], resetModel) {
       !props.length && (this.recalculateArr = []);
-      this.logError(this.layer, 'layer') && this.layer.forEach((da, idx) => {
+      this.layer && this.layer.length && this.layer.forEach((da, idx) => {
         da.view && this.$set(da.view, "disabled", this.layerCopy[idx].view.disabled);
-        this.logError(da.data, 'data') && da.data.forEach((d, i) => {
+        da.data && da.data.length && da.data.forEach((d, i) => {
           if (d.recalculate !== undefined) {
             const prop = resetModel
               ? d.prop.substring(d.prop.lastIndexOf("/") + 1)
@@ -168,7 +169,7 @@ export default {
     resetData(prop) {
       if (!this.initData) return;
       if (Array.isArray(this.model)) {
-        this.logError(this.model, 'model') && this.model.forEach((d, i) => {
+        this.model && this.model.length && this.model.forEach((d, i) => {
           this.$set(d, prop, this.initData[i][prop] || "");
         })
       } else {
@@ -177,17 +178,6 @@ export default {
     },
     resetFields(props = []) {
       this.clearCalculate(props, true);
-    },
-    logError(element, name) {
-      let pass = true;
-      if (!element) {
-        pass = false
-        console.error(`${name} is not find`);
-      } else if (!element.length) {
-        pass = false
-        console.error(`${name} is not length`);
-      }
-      return pass;
     }
   }
 };
