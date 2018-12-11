@@ -63,7 +63,6 @@ export default {
     const listenScrollID = this.form.$props.listenScrollID;
     let formItemSlotNode;
     let formItemSlotNodes = [];
-    let spanArr = [];
     slotNodes.length &&
       slotNodes.forEach((slotNode, index) => {
         if (!this.cols[index]) {
@@ -95,12 +94,11 @@ export default {
         let prop = this.cols[index].prop || "";
         let required = this.cols[index].required;
 
-        spanArr.push(span)
-
         // 添加图层
         let nodeArr = [];
         let isRecalculate;
         let targetUseDefault = false; // 是否使用了传入节点
+        let nodeOrder;
         if (this.layer) {
           let targetUseDefaultDetails = []; // 使用传入模板节点对应关系
           isRecalculate = !!this.form.$data.recalculateArr.find(
@@ -140,7 +138,7 @@ export default {
                     d.trigger || (da.view && da.view.trigger) || "hover"; // 触发事件
                   let target =
                     d.target || (da.view && da.view.target) || "default"; // 指定触发元素
-                  const order = d.order || (da.view && da.view.order) || 0; // 排序 数字越小越靠前
+                  const order = nodeOrder = d.order || (da.view && da.view.order) || 0; // 排序 数字越小越靠前
                   const showAlways = d.showAlways || (da.view && da.view.showAlways) || false; // 总是显示
                   const enterable = d.enterable || (da.view && da.view.enterable) || false; // 鼠标可移入
                   const popoverClass = d.popoverClass || (da.view && da.view.popoverClass) || ''; // 鼠标可移入
@@ -171,7 +169,6 @@ export default {
                   const lastIndex = this.$findLastIndex(targetUseDefaultDetails, 
                     d => d.VNode
                   );
-                  const flex =  !this.label ? span / 10 : undefined;
                   if (type === "popover") {
                     let triggerShow = da.show;
                     if (typeof target === "function") {
@@ -219,9 +216,6 @@ export default {
                         },
                         class: {
                           'is-recalculate': isRecalculate
-                        },
-                        style: {
-                          flex: flex
                         },
                         on: {
                           position: this.setPositions
@@ -319,28 +313,22 @@ export default {
             ])
           );
         } else {
-          formItemSlotNodes.push(formItemSlotNode)
+          formItemSlotNodes.push([h('vue-col', { attrs: { span: span }, class: {'form-line--abreast': true}, style: {order: nodeOrder} }, [formItemSlotNode])])
         }
       });
       if(this.label) {
-        formItemSlotNodes.forEach((d, i) => {
-          const flex =  spanArr[i] / 10;
-          formItemSlotNodes[i] = [h('div', {class: {'form-line--abreast': true}, style: { flex: flex }}, [d])]
-        })
         nodes.push(
-          h("vue-col", { attrs: { span: this.span } }, [
-            h(
-              "vue-form-item",
-              {
-                attrs: {
-                  label: this.label,
-                  labelWidth: this.labelWidth || '80px',
-                  required: this.required
-                }
-              },
-              [formItemSlotNodes]
-            )
-          ])
+          h(
+            "vue-form-item",
+            {
+              attrs: {
+                label: this.label,
+                labelWidth: this.labelWidth || '80px',
+                required: this.required
+              }
+            },
+            [formItemSlotNodes]
+          )
         );
       }
     return h("vue-col", { attrs: { span: this.span } }, [

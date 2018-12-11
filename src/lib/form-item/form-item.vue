@@ -62,6 +62,8 @@ export default {
   position: relative;
   font-size: 14px;
   display: flex;
+  flex-shrink: 0;
+  width: 100%;
   flex-direction: row;
   align-items: center;
   flex-wrap: nowrap;

@@ -2,12 +2,30 @@
   <div id="app">
     <h2>apply to form layou</h2>
     <vue-form ref="formLayou" :model="formLayou" :rowledge="22">
-      <vue-form-line label="size" :cols="[{ span: 9 },{ span: 6 }, { span: 9 }]">
+      <vue-form-line :cols="[{ span: 12, label: 'product' },{ span: 12, label: 'type' }]">
+        <el-input type="text" v-model="formLayou.product" />
+        <el-input type="text" v-model="formLayou.type" />
+      </vue-form-line>
+      <vue-form-line label="size" :cols="[{ span: 9 },{ span: 6 }, { span: 9 }]" :span="12">
         <el-input type="text" placeholder="long" v-model="formLayou.long" />
         <el-input type="text" placeholder="width" v-model="formLayou.width" />
         <el-input type="text" placeholder="height" v-model="formLayou.height" />
       </vue-form-line>
+      <vue-form-line :cols="[{ label: 'price' }]" :span="12">
+        <el-input type="text" v-model="formLayou.price" />
+      </vue-form-line>
     </vue-form>
+    <h2>apply to form tooltip</h2>
+    <p>
+      <el-switch v-model="value" @change="$refs['form2'].changeShow('layerTooltip')" inactive-text="layer toogle visible" />
+    </p>
+    <vue-form ref="form2" :model="form2" :layer="layer2">
+      <vue-form-line :cols="[{ span: 12, label: 'name', prop: '/form/name' },{ span: 12, label: 'age', prop: '/form/age' }]">
+        <el-input type="text" v-model="form2.name" />
+        <el-input type="text" v-model="form2.age" />
+      </vue-form-line>
+    </vue-form>
+    <br />
     <h2>apply to form validate</h2>
     <vue-form ref="form1" :model="form1" :layer="layer1" :rowledge="22">
       <vue-form-line :cols="[{ span: 12, label: 'name', prop: '/form/name' },{ span: 12, label: 'age', prop: '/form/age' }]">
@@ -21,18 +39,7 @@
       <el-button @click="$refs['form1'].resetFields()">resetFields</el-button>
     </p>
     <br />
-    <h2>apply to form tooltip</h2>
-    <p>
-      <el-switch v-model="value" @change="$refs['form2'].changeShow('layerTooltip')" inactive-text="layer toogle visible" />
-    </p>
-    <vue-form ref="form2" :model="form2" :layer="layer2">
-      <vue-form-line :cols="[{ span: 12, label: 'name', prop: '/form/name' },{ span: 12, label: 'age', prop: '/form/age' }]">
-        <el-input type="text" v-model="form2.name" />
-        <el-input type="text" v-model="form2.age" />
-      </vue-form-line>
-    </vue-form>
-    <br />
-    <h2>apply to table</h2>
+    <h2>apply to table validate</h2>
     <vue-form ref="table" :model="tableData" :layer="tableLayer" :rowledge="0">
       <el-table :data="tableData" style="width: 100%">
         <el-table-column label="id">

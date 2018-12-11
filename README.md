@@ -245,6 +245,8 @@ export default {
 |recalculateField |对部分表单字段进行重算的方法，参数为字段prop，不传参数则进行全局重算|prop: string|
 |clearCalculate |移除表单项的重算结果。传入待移除的表单项的 prop 属性组成的数组，如不传则移除整个表单的重算结果|props: array|
 |resetFields |对表单进行重置，将所有字段值重置为初始值并移除重算结果。传入待移除的表单项的 prop 属性组成的数组，如不传则移除整个表单进行重置|props: array|
+|initLayer |在异步获取layer数据,并有重算的场景使用，用于重置初始值，不使用则无法重置|-|
+|initModel |在异步获取model数据,并有重算的场景使用，用于重置初始值，不使用则无法重置|-|
 
 ### vue-form layer 图层
 
@@ -293,6 +295,8 @@ export default {
 | cols      | item布局配置  | array   | []    |
 | span      | form-line在一行分成24份中所占的份数  | number | 24 |
 | label-width | 表单域标签的宽度 | string | -     |
+| label | 子节点并排展示时使用，form-line设置label后，子节点设置的label将失效 | string | -     |
+| required | 子节点并排展示时使用 | boolean | false     |
 
 #### cols item布局配置
 
@@ -302,3 +306,4 @@ export default {
 | label     | item label名  | number | - |
 | prop | 校验的字段，在需要校验时是必须的 | string | -     |
 | label-width | 表单域标签的宽度 | string | "80px"     |
+| required | 是否必填 | boolean | false     |
