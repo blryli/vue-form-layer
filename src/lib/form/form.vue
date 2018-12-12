@@ -1,11 +1,11 @@
 <template>
-  <form class="vue-form">
+  <form ref="vueForm" class="vue-form" :class="formClass" :style="style">
     <slot></slot>
   </form>
 </template>
 
 <script>
-import { generateId } from "../../utils/util";
+import { on, off } from "../../utils/dom";
 
 export default {
   name: "VueForm",
@@ -13,10 +13,15 @@ export default {
     model: [Object, Array],
     layer: Array,
     labelWidth: String,
-    layerGutter: Number,
+    labelPosition: String,
+    itemGutter: Number,
+    response: {
+      type: Boolean,
+      default: true
+    },
     rowledge: {
       type: Number,
-      default: 15
+      default: 20
     },
     listenScroll: {
       type: Boolean,
@@ -28,8 +33,20 @@ export default {
     return {
       layerCopy: null,
       initData: null,
-      recalculateArr: []
+      recalculateArr: [],
+      isResponse: false
     };
+  },
+  computed: {
+    formClass() {
+      let formClass = '';
+      this.labelPosition && (formClass += `vue-form--label-${this.labelPosition}`);
+      this.response && this.isResponse && (formClass += ' vue-form-response')
+      return formClass;
+    },
+    style() {
+      return (this.itemGutter && `margin: 0 -${this.itemGutter/2}px`) || {}
+    }
   },
   created() {
     this.layer && this.layer.length && this.layer.forEach(da => {
@@ -178,6 +195,30 @@ export default {
     },
     resetFields(props = []) {
       this.clearCalculate(props, true);
+    },
+    windowResize() {
+      let width;
+      if (window.innerWidth) {
+        width = window.innerWidth;
+      } else if (document.body && document.body.clientWidth) {
+        width = document.body.clientWidth;
+      }
+      if (width <= 768) {
+        !this.isResponse && (this.isResponse = true)
+      } else {
+        this.isResponse && (this.isResponse = false)
+      }
+    }
+  },
+  mounted() {
+    if (this.response) {
+      this.windowResize();
+      on(window, "resize", this.windowResize);
+    }
+  },
+  beforeDestroy() {
+    if (this.response) {
+      on(window, "resize", this.windowResize);
     }
   }
 };

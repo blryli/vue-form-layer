@@ -57,42 +57,34 @@ export default {
       d.span && (hasSpan = false);
     });
     let offSet = slotNodes.length - this.cols.length;
-    const layerGutter = this.form.$props.layerGutter;
     const rowledge = this.form.$props.rowledge + "px";
+    const itemGutter = (this.form.$props.itemGutter && `0 ${this.form.$props.itemGutter/2}px`) || '';
     const listenScroll = this.form.$props.listenScroll;
     const listenScrollID = this.form.$props.listenScrollID;
+    const isResponse = this.form.$data.isResponse;
     let formItemSlotNode;
     let formItemSlotNodes = [];
     slotNodes.length &&
       slotNodes.forEach((slotNode, index) => {
-        if (!this.cols[index]) {
-          let overflowSpan;
-          !this.cols.length
-            ? (overflowSpan = 24 / slotNodes.length)
-            : (overflowSpan = (24 - this.colSpan) / offSet);
-          this.colSpan === 24 &&
-            console.debug(
-              `《${
-                this.cols[0].name
-              }》 所在行，节点空间不足，导致部分节点不能正确展示，请调整列宽度 cols`
-            );
-
-          nodes.push(
-            h("vue-col", { attrs: { span: overflowSpan } }, [
-              h("vue-form-item", {}, [slotNode])
-            ])
-          );
-          return;
+        let remainSpace = 24;
+        let remainNodeNum = slotNodes.length;
+        this.cols && this.cols.length && this.cols.forEach(d => {
+          if (d.span) {
+            remainSpace -= d.span;
+            remainNodeNum--;
+          };
+        })
+        let span, label, labelWidth, prop, required;
+        if (this.cols && this.cols.length && this.cols[index]) {
+          span = this.cols[index].span || remainSpace/remainNodeNum;
+          label = this.cols[index].label || '';
+          labelWidth = this.cols[index].labelWidth || this.labelWidth || this.form.$props.labelWidth || "80px";
+          prop = this.cols[index].prop || '';
+          required = this.cols[index].required || false;
+        } else {
+          span = remainSpace/remainNodeNum;
         }
-        let span = hasSpan ? 24 / this.cols.length : this.cols[index].span;
-        let label = this.cols[index].label;
-        let labelWidth =
-          this.cols[index].labelWidth ||
-          this.labelWidth ||
-          this.form.$props.labelWidth ||
-          "80px";
-        let prop = this.cols[index].prop || "";
-        let required = this.cols[index].required;
+        isResponse && (span = 24);
 
         // 添加图层
         let nodeArr = [];
@@ -297,8 +289,10 @@ export default {
           formItemSlotNode = [slotNode];
         }
         if (!this.label) {
+          let paddingBottom;
+          isResponse && index !== slotNodes.length - 1 && (paddingBottom = `${rowledge}`);
           nodes.push(
-            h("vue-col", { attrs: { span: span } }, [
+            h("vue-col", { attrs: { span: span }, style: {padding: itemGutter, paddingBottom: paddingBottom } }, [
               h(
                 "vue-form-item",
                 {
@@ -325,13 +319,16 @@ export default {
                 label: this.label,
                 labelWidth: this.labelWidth || '80px',
                 required: this.required
-              }
+              },
+              style: {padding: itemGutter}
             },
             [formItemSlotNodes]
           )
         );
       }
-    return h("vue-col", { attrs: { span: this.span } }, [
+    let span = this.span;
+    isResponse && (span = 24);
+    return h("vue-col", { attrs: { span: span } }, [
       h("div", { class: "vue-form-line", style: { marginBottom: rowledge } }, [
         nodes
       ])
@@ -364,5 +361,6 @@ export default {
     clear: both;
   }
 }
+
 .form-line--abreast + .form-line--abreast{margin-left: -1px;}
 </style>

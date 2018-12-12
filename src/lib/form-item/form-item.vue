@@ -54,7 +54,7 @@ export default {
   float: left;
   font-size: 14px;
   color: #606266;
-  padding: 0 12px 0 0;
+  padding-right: 12px;
   box-sizing: border-box;
 }
 .vue-form-item__content {
@@ -67,9 +67,6 @@ export default {
   flex-direction: row;
   align-items: center;
   flex-wrap: nowrap;
-}
-.vue-popover-main {
-  flex: 1;
 }
 
 .vue-form-item .vue-form-item__content {
@@ -95,6 +92,23 @@ export default {
         border-color: var(--borderColor);
       }
     }
+  }
+}
+
+.vue-form--label-left .vue-form-item__label{
+  text-align: left;
+}
+.vue-form--label-right .vue-form-item__label{
+  text-align: right;
+}
+.vue-form--label-top{
+  .vue-form-item {
+    display: block;
+  }
+  .vue-form-item__label{
+    text-align: left;
+    padding-right: 0;
+    padding-bottom: 10px;
   }
 }
 </style>

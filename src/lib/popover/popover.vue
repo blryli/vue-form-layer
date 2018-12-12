@@ -99,7 +99,6 @@ export default {
     },
     effectClass() {
       let effect = this.effect ? `is-${this.effect}` : "is-light";
-      typeof this.target !== "function" && this.target !== "why" && this.target !== "warn" && (effect += " vue-popover-main");
       return effect;
     },
     popoverStyle() {

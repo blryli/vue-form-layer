@@ -228,13 +228,15 @@ export default {
 
 ### vue-form Attributes
 
-|    参数    |    说明   |   类型   |默认值|
-| ---------  | ----------| -------- | ----- |
-| model      | form对象  | object   | -     |
-| layer      | 图层数组  | array    | -     |
-| label-width | 表单域标签的宽度 | string | -   |
-| layer-gutter | 图层的间隔 | number | 6    |
-| rowledge | line行距 | number | 15    |
+|    参数    |    说明      |   类型     |可选值  |默认值|
+| ---------  | ----------  | --------   |----  | ----- |
+| model      | form对象    | object     |-     | -     |
+| layer      | 图层数组    | array       |-     | -     |
+| label-width | 表单域标签的宽度 | string |-     | -   |
+| labelPosition | label的位置 | string  |left/right/top  | right    |
+| item-gutter | item之间的间隔 | number |-  | -    |
+| rowledge  | line行距       | number   | -     |20  |
+| response  | 表单响应式，只在手机端生效  | boolean   | -     |true  |
 
 ### vue-form Methods
 

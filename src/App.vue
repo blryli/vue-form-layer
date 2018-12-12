@@ -1,12 +1,13 @@
 <template>
   <div id="app">
     <h2>apply to form layou</h2>
-    <vue-form ref="formLayou" :model="formLayou" :rowledge="22">
-      <vue-form-line :cols="[{ span: 12, label: 'product' },{ span: 12, label: 'type' }]">
+    <vue-form ref="formLayou" :model="formLayou" :rowledge="24" labelPosition="top" :itemGutter="10">
+      <vue-form-line :cols="[{ label: 'product' },{ label: 'type' },{ label: 'type' }]">
         <el-input type="text" v-model="formLayou.product" />
         <el-input type="text" v-model="formLayou.type" />
+        <el-input type="text" v-model="formLayou.type" />
       </vue-form-line>
-      <vue-form-line label="size" :cols="[{ span: 9 },{ span: 6 }, { span: 9 }]" :span="12">
+      <vue-form-line label="size" :span="12">
         <el-input type="text" placeholder="long" v-model="formLayou.long" />
         <el-input type="text" placeholder="width" v-model="formLayou.width" />
         <el-input type="text" placeholder="height" v-model="formLayou.height" />
@@ -19,7 +20,7 @@
     <p>
       <el-switch v-model="value" @change="$refs['form2'].changeShow('layerTooltip')" inactive-text="layer toogle visible" />
     </p>
-    <vue-form ref="form2" :model="form2" :layer="layer2">
+    <vue-form ref="form2" :model="form2" :layer="layer2" :rowledge="24">
       <vue-form-line :cols="[{ span: 12, label: 'name', prop: '/form/name' },{ span: 12, label: 'age', prop: '/form/age' }]">
         <el-input type="text" v-model="form2.name" />
         <el-input type="text" v-model="form2.age" />
@@ -27,7 +28,7 @@
     </vue-form>
     <br />
     <h2>apply to form validate</h2>
-    <vue-form ref="form1" :model="form1" :layer="layer1" :rowledge="22">
+    <vue-form ref="form1" :model="form1" :layer="layer1" :rowledge="24">
       <vue-form-line :cols="[{ span: 12, label: 'name', prop: '/form/name' },{ span: 12, label: 'age', prop: '/form/age' }]">
         <el-input type="text" v-model="form1.name" @blur="recalculateField('/form/name')" />
         <el-input type="text" v-model="form1.age" @blur="recalculateField('/form/age')" />
@@ -166,6 +167,7 @@ export default {
           },
           data: [
             {
+              type: 'text',
               prop: "/form/name",
               recalculate: recalculateName,
               data: "",
@@ -291,13 +293,18 @@ export default {
   box-sizing: border-box;
 }
 #app {
-  padding: 40px;
+  padding: 10px;
 }
 input {
   width: 100%;
 }
 .el-select {
   display: block;
+}
+@media (min-width: 768px) { 
+  #app {
+    padding: 40px;
+  }
 }
 </style>
 
