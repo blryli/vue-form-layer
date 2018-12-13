@@ -275,8 +275,6 @@ export default {
 | hideDelay    | popover隐藏延时   | number   | -  | 200    |
 | showAlways    | popover是否总是显示  | boolean   | -  | false |
 | enterable    | 鼠标是否可移入popover  | boolean   | -  | false |
-| listenScroll    | popover是否监听滚动事件，改变展示方向，默认监听window  | boolean   | -  | true |
-| listenScrollID    | 如果listenScroll为true，传入了监听对象ID，则popover位置计算会兼顾window和传入对象  | string   | -  | null |
 | visible-arrow | 是否显示popover箭头  | boolean   | -  | true |
 
 ### layer data 图层item配置

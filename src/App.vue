@@ -193,9 +193,8 @@ export default {
             {
               prop: "/form/age",
               data: {
-                img:
-                  "https://timgsa.baidu.com/timg?image&quality=80&size=b9999_10000&sec=1539686532450&di=696011a53b2cb3dc27f3d220bf3f04cd&imgtype=0&src=http%3A%2F%2Fp1.ifengimg.com%2F2018_42%2FC03628FF6F4ED06948E0A488AD90E26E780BA05E_w981_h658.jpg",
-                content: "我的女神结婚了"
+                content: "fafa",
+                img: "../static/img/fafa.jpg"
               },
               template: dataFn,
               target: 'why'

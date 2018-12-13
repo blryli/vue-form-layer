@@ -22,12 +22,7 @@ export default {
     rowledge: {
       type: Number,
       default: 20
-    },
-    listenScroll: {
-      type: Boolean,
-      default: true
-    },
-    listenScrollID: String
+    }
   },
   data() {
     return {

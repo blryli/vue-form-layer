@@ -1,26 +1,24 @@
 <template>
-  <div class="vue-popover" :class="effectClass" :style="popoverStyle">
-    <div class="vue-popover-trigger" ref="trigger" :style="triggerStyle">
-      <slot name="reference">
-        <div v-if="typeof target === 'string'" class="vue-popover-trigger__target" :class="'trigger__target-'+target"></div>
-      </slot>
-    </div>
+  <span :style="style">
+    <slot>
+      <div v-if="typeof target === 'string'" ref="reference" class="vue-popover__reference vue-popover--reference-icon" :class="'vue-popover--reference-'+target"></div>
+    </slot>
     <transition name="fade">
       <div class="vue-popover-wrap" :class="[
-        popoverClass,
+        effectClass,
         {'vue-popover-wrap-top': momentPlacement === 'top'},
         {'vue-popover-wrap-left': momentPlacement === 'left'},
         {'vue-popover-wrap-right': momentPlacement === 'right'},
         {'vue-popover-wrap-bottom': momentPlacement === 'bottom'},
-        {'vue-popover-wrap-visible': layerShow && (show || showAlways)},
-        {'vue-popover-wrap-hidden': (!showAlways && !show) || (!showAlways && disabled) || !layerShow}
-      ]" ref="popover" role="popover" :style="effectStyle"
+        {'vue-popover-wrap-visible': layerShow && (show || showAlways) && !disabled},
+        {'vue-popover-wrap-hidden': !layerShow || (!show && !showAlways) || disabled }
+      ]" ref="popover" role="popover" :style="popoverStyle"
       @mouseenter="mouseenterWrap" @mouseleave="mouseleaveWrap">
         <div class="vue-popover-arrow" v-if="visibleArrow"></div>
         <vue-content :data="data"></vue-content>
       </div>
     </transition>
-  </div>
+  </span>
 </template>
 
 <script>
@@ -35,7 +33,10 @@ export default {
       type: String,
       default: "hover"
     },
-    effect: [String, Object],
+    effect: {
+      type: [String, Object],
+      default: 'light'
+    },
     // popover消息提示
     data: [String, Object, Array],
     disabled: {
@@ -55,7 +56,10 @@ export default {
       type: Number,
       default: 0
     },
-    triggerShow: Boolean,
+    layerShow: {
+      type: Boolean,
+      default: true
+    },
     borderColor: {
       type: String,
       default: "#ccc"
@@ -71,10 +75,7 @@ export default {
       type: Number,
       default: 200
     },
-    prop: String,
-    listenScroll: Boolean,
-    listenScrollID: String,
-    layerShow: Boolean
+    prop: String
   },
   data() {
     return {
@@ -88,9 +89,10 @@ export default {
       timeoutPending: null,
       momentPlacement: this.placement,
       fristShowAlways: false,
-      scrollTarget: null,
+      scrollTargets: [],
       scrollTop: scroll().top,
-      scrollLeft: scroll().left
+      scrollLeft: scroll().left,
+      reference: {}
     };
   },
   computed: {
@@ -99,24 +101,19 @@ export default {
     },
     effectClass() {
       let effect = this.effect ? `is-${this.effect}` : "is-light";
+      effect += ` ${this.popoverClass}`;
       return effect;
     },
-    popoverStyle() {
+    style() {
       let style = {
         order: this.order,
-        "--bgColor": this.effectStyle["--bgColor"],
+        "--bgColor": this.popoverStyle["--bgColor"],
         "--borderColor": this.borderColor
       };
+      this.target === 'default' && (style.width = '100%');
       return style;
     },
-    triggerStyle() {
-      let style = {};
-      style.width = this.triggerShow ? "auto" : 0;
-      style.height = this.triggerShow ? "auto" : 0;
-      style.visibility = this.triggerShow ? "visible" : "hidden";
-      return style;
-    },
-    effectStyle() {
+    popoverStyle() {
       let style = {
         "--borderColor": "#ccc",
         "--bgColor": "#fff",
@@ -183,6 +180,14 @@ export default {
         this.$emit('position', {id: this.id});
       }
     },
+    layerShow(val) {
+      console.log(val)
+      if (val) {
+        this.reference.style.display = 'block';
+      } else {
+        this.reference.style.display = 'none';
+      }
+    },
     data(val) {
       this.showAlways && val && this.calculateCoordinate();
     }
@@ -196,7 +201,7 @@ export default {
     },
     triggerClick(e) {
       const popover = this.$refs.popover;
-      const trigger = this.$refs.trigger;
+      const trigger = this.reference;
       if (!popover || !trigger || !e.target) return;
       if (trigger.contains(e.target)) {
         !this.disabled && (this.show = !this.show)
@@ -235,7 +240,7 @@ export default {
     },
     calculateCoordinate(momentPlacement) {
       const popover = this.$refs.popover;
-      const trigger = this.$refs.trigger;
+      const trigger = this.reference;
       momentPlacement = momentPlacement || this.placement;
       if(!popover || !trigger) return;
       this.popoverAddedBody();
@@ -294,16 +299,16 @@ export default {
         default:
           console.error("Wrong placement prop");
       }
-      this.listenScroll && this.changeDirection(momentPlacement);
+      this.changeDirection(momentPlacement);
       popover.style.top = this.scrollTop ? this.position.top - this.scrollTop + "px" : this.position.top + "px";
       popover.style.left = this.scrollLeft ? this.position.left - this.scrollLeft + "px" : this.position.left + "px";
 
-      this.setPosition(popover);
+      this.prop && this.setPosition(popover);
     },
     changeDirection(momentPlacement) {
       let triggerOffsetLeft = offset(trigger).left;
       const popover = this.$refs.popover;
-      const trigger = this.$refs.trigger;
+      const trigger = this.reference;
       switch (momentPlacement) {
         case "top":
           const allHeight = offset(trigger).top - this.scrollTop + trigger.offsetHeight + popover.offsetHeight;
@@ -354,8 +359,12 @@ export default {
       this.$emit('position', position);
     },
     windowScroll() {
-      this.scrollTop = this.scrollTarget ? this.scrollTarget.scrollTop + scroll().top : scroll().top;
-      this.scrollLeft = this.scrollTarget ? this.scrollTarget.scrollLeft + scroll().left : scroll().left;
+      this.scrollTop = scroll().top;
+      this.scrollLeft = scroll().left;
+      this.scrollTargets.forEach(d => {
+        this.scrollTop += d.scrollTop;
+        this.scrollLeft += d.scrollLeft;
+      })
       this.showAlways && this.calculateCoordinate();
     },
     windowResize() {
@@ -364,44 +373,49 @@ export default {
   },
   mounted() {
     this.$nextTick(() => {
-      this.scrollTarget = document.getElementById(this.listenScrollID) || null;
+      this.reference = (this.$slots.default && this.$slots.default[0].elm) || this.$refs.reference;
+      this.reference.classList.add('vue-popover__reference')
+      let parent = this.$el.parentNode;
+      while (parent !== document.body) {
+        if (parent.scrollHeight !== parent.offsetHeight) {
+          this.scrollTargets.push(parent);
+          on(parent, "scroll", this.windowScroll);
+        }
+        parent = parent.parentNode;
+      }
 
       this.showAlways && this.calculateCoordinate();
-      if (this.listenScroll) {
-        on(window, "scroll", this.windowScroll);
-        this.scrollTarget && on(this.scrollTarget, "scroll", this.windowScroll);
-      }
+      on(window, "scroll", this.windowScroll);
       on(window, "resize", this.windowResize);
-      if (this.showAlways) {
-        return;
-      }
+      
       if (!this.$refs.popover) {
         return console.error(
           "Couldn't find popover ref in your component that uses popoverMixin."
         );
       }
-      const trigger = this.$refs.trigger;
+      const trigger = this.reference;
       if (this.trigger === "hover") {
-        on(trigger, "mouseenter", this.doShow);
-        on(trigger, "mouseleave", this.doHide);
+        on(this.reference, "mouseenter", this.doShow);
+        on(this.reference, "mouseleave", this.doHide);
       } else if (this.trigger === "focus") {
-        on(trigger, "focus", this.doShow);
-        on(trigger, "blur", this.doHide);
+        on(this.reference, "focus", this.doShow);
+        on(this.reference, "blur", this.doHide);
       } else {
         on(window, "click", this.triggerClick);
       }
     })
   },
   beforeDestroy() {
-    const trigger = this.$refs.trigger;
     off(window, "scroll", this.windowScroll);
-    this.scrollTarget && off(this.scrollTarget, "scroll", this.windowScroll);
+    this.scrollTargets.forEach(d => {
+      off(d, "scroll", this.windowScroll);
+    })
     off(window, "resize", this.windowResize);
     off(window, "click", this.triggerClick);
-    off(trigger, "mouseenter", this.doShow);
-    off(trigger, "mouseleave", this.doHide);
-    off(trigger, "focus", this.doShow);
-    off(trigger, "blur", this.doHide);
+    off(this.reference, "mouseenter", this.doShow);
+    off(this.reference, "mouseleave", this.doHide);
+    off(this.reference, "focus", this.doShow);
+    off(this.reference, "blur", this.doHide);
     removeBody(this, 'popover');
   }
 };
@@ -508,7 +522,7 @@ export default {
 .light {
   color: #666;
 }
-.vue-popover-trigger__target {
+.vue-popover--reference-icon {
   display: block;
   height: auto;
   margin: 0 5px;
@@ -523,13 +537,13 @@ export default {
     color: #fff;
   }
 }
-.trigger__target-why {
+.vue-popover--reference-why {
   &::before {
     content: "?";
     background-color: #333;
   }
 }
-.trigger__target-warn {
+.vue-popover--reference-warn {
   &::before {
     content: "!";
     background-color: #e6a23c;

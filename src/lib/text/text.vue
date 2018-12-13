@@ -1,8 +1,8 @@
 <template>
-  <div class="vue-text" :style="textStyle" ref="vueText">
+  <span :style="style">
     <slot></slot>
-    <vue-content class="vue-text-content" :class="'vue-text__'+placement" v-show="!disabled" ref="vueTextContent" :style="style" :data="data"></vue-content>
-  </div>
+    <vue-content class="vue-text-content" :class="'vue-text__'+placement" v-show="!disabled" ref="vueTextContent" :style="contentStyle" :data="data"></vue-content>
+  </span>
 </template>
 
 <script>
@@ -20,7 +20,8 @@ export default {
     placement: {
       type: String,
       default: "bottom"
-    }
+    },
+    target: [String, Function]
   },
   data() {
     return {
@@ -28,12 +29,13 @@ export default {
     };
   },
   computed: {
-    textStyle() {
+    style() {
       const ret = {};
       ret["--borderColor"] = this.borderColor;
+      this.target === 'default' && (ret.width = '100%');
       return ret;
     },
-    style() {
+    contentStyle() {
       const ret = {};
       ret["--color"] = this.effect;
       return ret;
@@ -81,6 +83,8 @@ export default {
   },
   mounted() {
     this.$nextTick(() => {
+      this.text = this.$slots.default && this.$slots.default[0].elm;
+      this.text.classList.add('vue-text')
       this.calculateCoordinate();
     });
   },

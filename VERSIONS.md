@@ -1,9 +1,15 @@
+## 1.1.2
+2018-12-13
+> 删除listenScroll、listenScrollID属性，popover自动监听页面滚动。
+
+> popover触发元素由popover组件改为用户传进来的元素。
+
 ## 1.2.1
 2018-12-12
 
 > form组件增加item-gutter属性，用于设置item之间的间隔。
 
-> form组件增加labelPosition属性，用于设置label的位置。
+> form组件增加label-position属性，用于设置label的位置。
 
 > form组件增加response属性，使组件支持响应式。
 

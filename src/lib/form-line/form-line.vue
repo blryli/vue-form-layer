@@ -59,8 +59,6 @@ export default {
     let offSet = slotNodes.length - this.cols.length;
     const rowledge = this.form.$props.rowledge + "px";
     const itemGutter = (this.form.$props.itemGutter && `0 ${this.form.$props.itemGutter/2}px`) || '';
-    const listenScroll = this.form.$props.listenScroll;
-    const listenScrollID = this.form.$props.listenScrollID;
     const isResponse = this.form.$data.isResponse;
     let formItemSlotNode;
     let formItemSlotNodes = [];
@@ -162,22 +160,15 @@ export default {
                     d => d.VNode
                   );
                   if (type === "popover") {
-                    let triggerShow = da.show;
                     if (typeof target === "function") {
-                      layerTypeSlot = h("div", { slot: "reference" }, [
-                        target()
-                      ]);
+                      layerTypeSlot = target();
                     } else if (target === 'why' || target === 'warn') {
                       layerTypeSlot = '';
                     } else {
                       if (targetUseDefaultNum <= 1) {
-                        layerTypeSlot = h("div", { slot: "reference" }, [
-                          slotNode
-                        ]);
+                        layerTypeSlot = slotNode;
                       } else {
-                        layerTypeSlot = h("div", { slot: "reference" }, [
-                          targetUseDefaultDetails[lastIndex].VNode
-                        ]);
+                        layerTypeSlot = targetUseDefaultDetails[lastIndex].VNode;
                       }
                     }
 
@@ -193,7 +184,7 @@ export default {
                           visibleArrow: visibleArrow,
                           target: target,
                           order: order,
-                          triggerShow: triggerShow,
+                          layerShow: da.show,
                           disabled: disabled,
                           borderColor: borderColor,
                           showAlways: showAlways,
@@ -201,10 +192,7 @@ export default {
                           popoverClass: popoverClass,
                           hideDelay: hideDelay,
                           positions: this.positions,
-                          prop: prop,
-                          listenScroll: listenScroll,
-                          listenScrollID: listenScrollID,
-                          layerShow: da.show
+                          prop: prop
                         },
                         class: {
                           'is-recalculate': isRecalculate
@@ -251,10 +239,10 @@ export default {
                         attrs: {
                           data: data,
                           placement: placement,
+                          target: target,
                           disabled: disabled,
                           effect: effect,
-                          borderColor: borderColor,
-                          listenScroll: listenScroll
+                          borderColor: borderColor
                         },
                         class: {
                           'is-recalculate': isRecalculate
