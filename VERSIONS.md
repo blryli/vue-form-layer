@@ -1,4 +1,4 @@
-## 1.1.2
+## 1.2.2
 2018-12-13
 > 删除listenScroll、listenScrollID属性，popover自动监听页面滚动。
 
