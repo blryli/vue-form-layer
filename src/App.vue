@@ -121,8 +121,8 @@ export default {
         this.$createElement("div", {}, [data])
       ]);
     };
-    var dataFn = data => {
-      return this.$createElement("test", { attrs: { data: data } });
+    var dataFn = (data, prop) => {
+      return this.$createElement("test", { attrs: { data: data, prop: prop } });
     };
 
     var recalculateTableView = () => {
@@ -158,7 +158,7 @@ export default {
       form2: {},
       layer1: [
         {
-          id: 'formLayer',
+          id: "formLayer",
           show: true,
           view: {
             disabled: true,
@@ -167,13 +167,13 @@ export default {
           },
           data: [
             {
-              type: 'text',
+              type: "text",
               prop: "/form/name",
               recalculate: recalculateName,
-              data: "",
+              data: ""
             },
             {
-              type: 'text',
+              type: "text",
               prop: "/form/age",
               recalculate: recalculateAge,
               data: ""
@@ -183,12 +183,12 @@ export default {
       ],
       layer2: [
         {
-          id: 'layerTooltip',
+          id: "layerTooltip",
           data: [
             {
               prop: "/form/name",
               data: "我的名字是什么",
-              target: 'why'
+              target: "why"
             },
             {
               prop: "/form/age",
@@ -197,7 +197,7 @@ export default {
                 img: "../static/img/fafa.jpg"
               },
               template: dataFn,
-              target: 'why'
+              target: "why"
             }
           ]
         }
@@ -300,7 +300,7 @@ input {
 .el-select {
   display: block;
 }
-@media (min-width: 768px) { 
+@media (min-width: 768px) {
   #app {
     padding: 40px;
   }

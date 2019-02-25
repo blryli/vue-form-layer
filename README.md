@@ -6,14 +6,6 @@
 
 [github pages](https://blryli.github.io/vue-form-layer/)
 
-[jsFiddle apply to form](https://jsfiddle.net/blryli/wk0dzvjo/)
-
-[jsFiddle apply to table](https://jsfiddle.net/blryli/acxfpyv8/)
-
-[codepen apply to form](https://codepen.io/blryli/pen/gBdKwV)
-
-[codepen apply to table](https://codepen.io/blryli/pen/VEVEJq)
-
 #### npm 安装
 
 ```js
@@ -285,7 +277,7 @@ export default {
 | ---------  | ---------| -------- | ------ | ----- |
 | prop       | 使用该配置的prop字段，如不传则该配置不会作用于任何字段  | - | -  | -    |
 | data       | 展示数据，传入模板template则通过模板展示数据，object/array类型需要传模板 | string/object/array | -  | -   |
-| template   | 数据展示模板 (data) => {return 模板/组件 } | function | -  | top    |
+| template   | 数据展示模板 (data, prop) => {return 模板/组件 } | function | -  | top    |
 | recalculate| 字段重算规则 (value) => {return {message: 展示文字，effect: 主题颜色, disabled: 是否禁用, borderColor: 边框颜色} | function  |  -  | -   |
 
 ### vue-form-line Attributes

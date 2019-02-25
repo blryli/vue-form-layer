@@ -138,7 +138,7 @@ export default {
                   let data = d.data || ""; // 展示内容
                   const template =
                     d.template || (da.view && da.view.template) || ""; // 内容展示模板
-                  template && (data = template(data));
+                  template && (data = template(data, prop));
                   let disabled;
                   disabled =
                     d.disabled !== undefined

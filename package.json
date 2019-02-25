@@ -1,7 +1,7 @@
 {
   "name": "vue-form-layer",
   "description": "A vue2.0 vue-form-layer component-form",
-  "version": "1.2.2",
+  "version": "1.2.3",
   "author": "lizhili <405549416@qq.com>",
   "license": "MIT",
   "private": false,
@@ -40,6 +40,6 @@
     "vue-loader": "^13.0.5",
     "vue-template-compiler": "^2.4.4",
     "webpack": "^3.6.0",
-    "webpack-dev-server": "^2.9.1"
+    "webpack-dev-server": "^3.1.14"
   }
 }

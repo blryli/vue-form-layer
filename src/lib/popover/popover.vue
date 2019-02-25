@@ -525,7 +525,7 @@ export default {
 .vue-popover--reference-icon {
   display: block;
   height: auto;
-  margin: 0 5px;
+  margin: 8px 5px 0;
   &::before {
     display: block;
     width: 16px;

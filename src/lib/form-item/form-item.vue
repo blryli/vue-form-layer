@@ -27,7 +27,7 @@ export default {
 .vue-form-item {
   display: flex;
   flex-direction: row;
-  align-items: center;
+  align-items: flex-start;
   flex-wrap: nowrap;
   &:before {
     display: table;
@@ -50,11 +50,11 @@ export default {
 
 .vue-form-item__label {
   text-align: right;
-  vertical-align: middle;
-  float: left;
   font-size: 14px;
   color: #606266;
   padding-right: 12px;
+  height: 32px;
+  line-height: 32px;
   box-sizing: border-box;
 }
 .vue-form-item__content {
@@ -65,7 +65,7 @@ export default {
   flex-shrink: 0;
   width: 100%;
   flex-direction: row;
-  align-items: center;
+  align-items: flex-start;
   flex-wrap: nowrap;
 }
 
