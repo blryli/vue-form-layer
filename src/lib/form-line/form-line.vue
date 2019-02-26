@@ -17,7 +17,8 @@ export default {
   },
   data() {
     return {
-      positions: []
+      positions: [],
+      activeProp: null
     };
   },
   computed: {
@@ -129,7 +130,7 @@ export default {
                   let target =
                     d.target || (da.view && da.view.target) || "default"; // 指定触发元素
                   const order = nodeOrder = d.order || (da.view && da.view.order) || 0; // 排序 数字越小越靠前
-                  const showAlways = d.showAlways || (da.view && da.view.showAlways) || false; // 总是显示
+                  const showAlways = d.showAlways || (da.view && da.view.showAlways ) || false; // 总是显示
                   const enterable = d.enterable || (da.view && da.view.enterable) || false; // 鼠标可移入
                   const popoverClass = d.popoverClass || (da.view && da.view.popoverClass) || ''; // 鼠标可移入
                   let hideDelay;
@@ -138,7 +139,7 @@ export default {
                   let data = d.data || ""; // 展示内容
                   const template =
                     d.template || (da.view && da.view.template) || ""; // 内容展示模板
-                  template && (data = template(data, prop));
+                  template && (data = template(data, prop, this.activeProp === prop));
                   let disabled;
                   disabled =
                     d.disabled !== undefined
@@ -198,7 +199,9 @@ export default {
                           'is-recalculate': isRecalculate
                         },
                         on: {
-                          position: this.setPositions
+                          position: this.setPositions,
+                          show: this.show,
+                          hide: this.hide
                         }
                       },
                       [layerTypeSlot]
@@ -331,6 +334,14 @@ export default {
         index !== -1 && this.positions.splice(index, 1);
       }
       // console.log(JSON.stringify(this.positions))
+    },
+    show(prop) {
+      this.activeProp = prop;
+      this.$emit('show', prop)
+    },
+    hide(prop) {
+      this.activeProp = null;
+      this.$emit('hide', prop)
     }
   }
 };

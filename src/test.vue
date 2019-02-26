@@ -11,7 +11,8 @@ export default {
   name: 'Test',
   props: {
     data: [String, Object],
-    prop: String
+    prop: String,
+    show: Boolean
   }
 };
 </script>

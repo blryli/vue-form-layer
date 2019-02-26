@@ -5,7 +5,7 @@ export default {
     data: [String, Object]
   },
   render(h) {
-    return h("div", {}, [this.data]);
+    return h("div", {class: {'vue-popover__content': true}}, [this.data]);
   }
 };
 </script>

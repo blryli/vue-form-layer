@@ -242,6 +242,13 @@ export default {
 |initLayer |在异步获取layer数据,并有重算的场景使用，用于重置初始值，不使用则无法重置|-|
 |initModel |在异步获取model数据,并有重算的场景使用，用于重置初始值，不使用则无法重置|-|
 
+### vue-form Events
+
+|  事件名称 |    说明                    |   	回调参数      |
+|--------  |------                      |------       |
+|show      |    显示时触发	            |  prop       |
+|hide      |  隐藏时触发		            |  prop       |
+
 ### vue-form layer 图层
 
 |    参数    |    说明   |   类型   |  可选值  |默认值|
@@ -277,7 +284,7 @@ export default {
 | ---------  | ---------| -------- | ------ | ----- |
 | prop       | 使用该配置的prop字段，如不传则该配置不会作用于任何字段  | - | -  | -    |
 | data       | 展示数据，传入模板template则通过模板展示数据，object/array类型需要传模板 | string/object/array | -  | -   |
-| template   | 数据展示模板 (data, prop) => {return 模板/组件 } | function | -  | top    |
+| template   | 数据展示模板 (data, prop, show) => {return 模板/组件 }, 回调参数data是数据，回调参数prop是模板位置，回调读书show是模板所在图层展示状态 | function | -  | top    |
 | recalculate| 字段重算规则 (value) => {return {message: 展示文字，effect: 主题颜色, disabled: 是否禁用, borderColor: 边框颜色} | function  |  -  | -   |
 
 ### vue-form-line Attributes

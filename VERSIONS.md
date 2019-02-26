@@ -1,3 +1,11 @@
+## 1.2.4
+
+2018-2-26
+
+- form-line组件增加 events show 和 hide。
+
+- 数据展示模板 template，函数增加回调参数 show, function(data, prop, show) => {return 模板/组件 }。
+
 ## 1.2.3
 
 2018-2-25

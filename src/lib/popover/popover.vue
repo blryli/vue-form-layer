@@ -172,16 +172,15 @@ export default {
     show(val) {
       if (this.showAlways) return;
       if (val) {
-        this.$emit("show");
+        this.$emit("show", this.prop);
         this.popoverAddedBody();
         this.calculateCoordinate();
       } else {
-        this.$emit("hide");
+        this.$emit("hide", this.prop);
         this.$emit('position', {id: this.id});
       }
     },
     layerShow(val) {
-      console.log(val)
       if (val) {
         this.reference.style.display = 'block';
       } else {
@@ -189,7 +188,7 @@ export default {
       }
     },
     data(val) {
-      this.showAlways && val && this.calculateCoordinate();
+      // this.showAlways && val && this.calculateCoordinate();
     }
   },
   methods: {

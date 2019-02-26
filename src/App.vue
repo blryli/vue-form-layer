@@ -20,7 +20,7 @@
     <p>
       <el-switch v-model="value" @change="$refs['form2'].changeShow('layerTooltip')" inactive-text="layer toogle visible" />
     </p>
-    <vue-form ref="form2" :model="form2" :layer="layer2" :rowledge="24">
+    <vue-form ref="form2" :model="form2" :layer="layer2" :rowledge="24" @show="alert('show')" @hide="alert('hide')">
       <vue-form-line :cols="[{ span: 12, label: 'name', prop: '/form/name' },{ span: 12, label: 'age', prop: '/form/age' }]">
         <el-input type="text" v-model="form2.name" />
         <el-input type="text" v-model="form2.age" />
@@ -121,8 +121,8 @@ export default {
         this.$createElement("div", {}, [data])
       ]);
     };
-    var dataFn = (data, prop) => {
-      return this.$createElement("test", { attrs: { data: data, prop: prop } });
+    var dataFn = (data, prop, show) => {
+      return this.$createElement("test", { attrs: { data: data, prop: prop, show: show } });
     };
 
     var recalculateTableView = () => {
@@ -184,6 +184,10 @@ export default {
       layer2: [
         {
           id: "layerTooltip",
+          show: true,
+          view: {
+            
+          },
           data: [
             {
               prop: "/form/name",
