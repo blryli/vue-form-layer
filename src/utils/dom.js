@@ -7,28 +7,32 @@ export const on = (function () {
   if (!isServer && document.addEventListener) {
     return function (element, event, handler) {
       if (element && event && handler) {
-        element.addEventListener(event, function(e) { handler(e) }, false)
+        element.addEventListener(event, function (e) {
+          handler(e)
+        }, false)
       }
     }
   } else {
     return function (element, event, handler) {
       if (element && event && handler) {
-        element.attachEvent('on' + event, function(e) { handler(e) })
+        element.attachEvent('on' + event, function (e) {
+          handler(e)
+        })
       }
     }
   }
 })()
 
 // 解除绑定事件
-export const off = (function() {
+export const off = (function () {
   if (!isServer && document.removeEventListener) {
-    return function(element, event, handler) {
+    return function (element, event, handler) {
       if (element && event) {
         element.removeEventListener(event, handler, false);
       }
     };
   } else {
-    return function(element, event, handler) {
+    return function (element, event, handler) {
       if (element && event) {
         element.detachEvent('on' + event, handler);
       }
@@ -43,3 +47,30 @@ export const removeBody = function (self, ref) {
     document.body.removeChild(self.$refs[ref]);
   }
 }
+
+export const getParentNodes = function (parent) {
+  let parentNodes = [window];
+  while (parent !== document.body) {
+    parentNodes.push(parent);
+    parent = parent.parentNode;
+  }
+  return parentNodes;
+}
+
+export const enableEventListener = function (parentNodes, handler) {
+  parentNodes.forEach(p => {
+    p.addEventListener('resize', handler, {
+      passive: true
+    });
+    p.addEventListener('scroll', handler, {
+      passive: true
+    });
+  })
+};
+
+export const removeEventListener = function (parentNodes, handler) {
+  parentNodes.forEach(p => {
+    p.removeEventListener('resize', handler);
+    p.removeEventListener('scroll', handler);
+  })
+};

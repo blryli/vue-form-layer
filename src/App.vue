@@ -192,7 +192,8 @@ export default {
             {
               prop: "/form/name",
               data: "我的名字是什么",
-              target: "why"
+              target: "why",
+              trigger: "click"
             },
             {
               prop: "/form/age",

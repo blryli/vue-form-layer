@@ -23,7 +23,7 @@
 
 <script>
 import { offset, scroll, generateId } from "../../utils/util";
-import { on, off, removeBody } from "../../utils/dom";
+import { on, off, removeBody, getParentNodes, enableEventListener, removeEventListener } from "../../utils/dom";
 
 export default {
   name: "VuePopover",
@@ -89,7 +89,7 @@ export default {
       timeoutPending: null,
       momentPlacement: this.placement,
       fristShowAlways: false,
-      scrollTargets: [],
+      parentNodes: [],
       scrollTop: scroll().top,
       scrollLeft: scroll().left,
       reference: {}
@@ -357,35 +357,27 @@ export default {
       position.placement = this.momentPlacement;
       this.$emit('position', position);
     },
-    windowScroll() {
+    windowChange() {
       this.scrollTop = scroll().top;
       this.scrollLeft = scroll().left;
-      this.scrollTargets.forEach(d => {
-        this.scrollTop += d.scrollTop;
-        this.scrollLeft += d.scrollLeft;
-      })
-      this.showAlways && this.calculateCoordinate();
-    },
-    windowResize() {
-      this.showAlways && this.calculateCoordinate();
+      for (let index = 0; index < this.parentNodes.length; index++) {
+        const d = this.parentNodes[index];
+        d.scrollTop && (this.scrollTop += d.scrollTop);
+        d.scrollLeft && (this.scrollLeft += d.scrollLeft);
+      }
+
+      (this.showAlways || this.show) && this.calculateCoordinate();
     }
   },
   mounted() {
     this.$nextTick(() => {
       this.reference = (this.$slots.default && this.$slots.default[0].elm) || this.$refs.reference;
-      this.reference.classList.add('vue-popover__reference')
-      let parent = this.$el.parentNode;
-      while (parent !== document.body) {
-        if (parent.scrollHeight !== parent.offsetHeight) {
-          this.scrollTargets.push(parent);
-          on(parent, "scroll", this.windowScroll);
-        }
-        parent = parent.parentNode;
-      }
+      this.reference.classList.add('vue-popover__reference');
+
+      this.parentNodes = getParentNodes(this.$el);
+      this.parentNodes.length && enableEventListener(this.parentNodes, this.windowChange);
 
       this.showAlways && this.calculateCoordinate();
-      on(window, "scroll", this.windowScroll);
-      on(window, "resize", this.windowResize);
       
       if (!this.$refs.popover) {
         return console.error(
@@ -405,16 +397,17 @@ export default {
     })
   },
   beforeDestroy() {
-    off(window, "scroll", this.windowScroll);
-    this.scrollTargets.forEach(d => {
-      off(d, "scroll", this.windowScroll);
-    })
-    off(window, "resize", this.windowResize);
-    off(window, "click", this.triggerClick);
-    off(this.reference, "mouseenter", this.doShow);
-    off(this.reference, "mouseleave", this.doHide);
-    off(this.reference, "focus", this.doShow);
-    off(this.reference, "blur", this.doHide);
+    this.parentNodes.length && removeEventListener(this.parentNodes, this.windowChange);
+
+    if (this.trigger === "hover") {
+      off(this.reference, "mouseenter", this.doShow);
+      off(this.reference, "mouseleave", this.doHide);
+    } else if (this.trigger === "focus") {
+      off(this.reference, "focus", this.doShow);
+      off(this.reference, "blur", this.doHide);
+    } else {
+      off(window, "click", this.triggerClick);
+    }
     removeBody(this, 'popover');
   }
 };
