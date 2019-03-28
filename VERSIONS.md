@@ -1,3 +1,17 @@
+## 1.2.7
+
+2018-3-28
+
+- 增加图层处理组件 vue-layer。
+
+- 解决多图层，scroll 事件改变popover placement 时定位不准确的问题。
+
+- 增加 form-line 内的 slot 渲染组件 render-slot。
+
+- 节点位置改用 getBoundingClientRect 函数获取。
+
+- 增加 referenceBorderColor，用于改变reference 边框颜色属性，不传referenceBorderColor则不会改变 reference 的样式。
+
 ## 1.2.6
 
 2018-3-15

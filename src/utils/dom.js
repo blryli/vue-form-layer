@@ -41,10 +41,11 @@ export const off = (function () {
 })();
 
 export const removeBody = function (self, ref) {
-  if (self.$refs[ref] && self.$refs[ref].$el && self.$refs[ref].$el.parentNode === document.body) {
-    document.body.removeChild(self.$refs[ref].$el);
-  } else if (self.$refs[ref] && self.$refs[ref].parentNode === document.body) {
-    document.body.removeChild(self.$refs[ref]);
+  const pos = self.$refs[ref];
+  if (pos && pos.$el && pos.$el.parentNode === document.body) {
+    document.body.removeChild(pos.$el);
+  } else if (pos && pos.parentNode === document.body) {
+    document.body.removeChild(pos);
   }
 }
 
@@ -52,6 +53,7 @@ export const getParentNodes = function (parent) {
   let parentNodes = [window];
   while (parent !== document.body) {
     parentNodes.push(parent);
+    if (!parent.parentNode || parent.parentNode.name) return parentNodes;
     parent = parent.parentNode;
   }
   return parentNodes;
@@ -73,4 +75,24 @@ export const removeEventListener = function (parentNodes, handler) {
     p.removeEventListener('resize', handler);
     p.removeEventListener('scroll', handler);
   })
+};
+
+export const getDomClientRect = function (target) {
+  const targetRect = target.getBoundingClientRect();
+  const top = targetRect.top;
+  const bottom = targetRect.bottom;
+  const left = targetRect.left;
+  const right = targetRect.right;
+  const width = targetRect.width || right - left;
+  const height = targetRect.height || bottom - top;
+    return {
+      x: left + document.documentElement.scrollLeft,
+      y: right + document.documentElement.scrollTop,
+      width: width,
+      height: height,
+      top: top,
+      right: right,
+      bottom: bottom,
+      left: left
+    }
 };

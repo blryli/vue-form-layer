@@ -2,9 +2,8 @@
   <div id="app">
     <h2>apply to form layou</h2>
     <vue-form ref="formLayou" :model="formLayou" :rowledge="24" labelPosition="top" :itemGutter="10">
-      <vue-form-line :cols="[{ label: 'product' },{ label: 'type' },{ label: 'type' }]">
+      <vue-form-line :cols="[{ label: 'product' },{ label: 'type' }]">
         <el-input type="text" v-model="formLayou.product" />
-        <el-input type="text" v-model="formLayou.type" />
         <el-input type="text" v-model="formLayou.type" />
       </vue-form-line>
       <vue-form-line label="size" :span="12">
@@ -36,8 +35,8 @@
     </vue-form>
     <p>
       <el-button type="primary" @click="submitForm('form1')">submit form</el-button>
-      <el-button @click="$refs['form1'].clearCalculate()">clearCalculate</el-button>
-      <el-button @click="$refs['form1'].resetFields()">resetFields</el-button>
+      <el-button @click="$refs['form1'].clearCalculate('formLayer')">clearCalculate</el-button>
+      <el-button @click="$refs['form1'].resetFields('formLayer')">resetFields</el-button>
     </p>
     <br />
     <h2>apply to table validate</h2>
@@ -68,8 +67,8 @@
     </vue-form>
     <p>
       <el-button type="primary" @click="submitTable('table')">submit table</el-button>
-      <el-button @click="$refs['table'].clearCalculate()">clearCalculate</el-button>
-      <el-button @click="$refs['table'].resetFields()">resetFields</el-button>
+      <el-button @click="$refs['table'].clearCalculate('tableLayer')">clearCalculate</el-button>
+      <el-button @click="$refs['table'].resetFields('tableLayer')">resetFields</el-button>
     </p>
   </div>
 </template>
@@ -84,10 +83,16 @@ export default {
       message: "",
       effect: "#67c23a",
       disabled: true,
-      borderColor: "#67c23a"
+      borderColor: "#67c23a",
+      referenceBorderColor: "#67c23a"
     };
     var recalculateView = () => {
-      return { effect: "red", disabled: false, borderColor: "red" };
+      return {
+        effect: "red",
+        disabled: false,
+        borderColor: "red",
+        referenceBorderColor: "red"
+      };
     };
     var recalculateName = value => {
       if (value === "") {
@@ -112,8 +117,8 @@ export default {
         return style;
       }
     };
-    var targetFn = () => {
-      return this.$createElement("span", {}, ["(?)"]);
+    var referenceFn = () => {
+      return <i class="el-icon-question" />;
     };
     var recalculateAge2TP = data => {
       return this.$createElement("div", {}, [
@@ -121,12 +126,19 @@ export default {
         this.$createElement("div", {}, [data])
       ]);
     };
-    var dataFn = (data, prop, show) => {
-      return this.$createElement("test", { attrs: { data: data, prop: prop, show: show } });
+    var dataFn = (data, prop) => {
+      return this.$createElement("test", {
+        attrs: { data: data, prop: prop }
+      });
     };
 
     var recalculateTableView = () => {
-      return { effect: "red", disabled: false, borderColor: "red" };
+      return {
+        effect: "red",
+        disabled: false,
+        borderColor: "red",
+        referenceBorderColor: "red"
+      };
     };
     var recalculateTableId = value => {
       if (value === "") {
@@ -152,6 +164,7 @@ export default {
       }
     };
     return {
+      radio: "1",
       value: true,
       formLayou: {},
       form1: { name: "laowang" },
@@ -164,16 +177,15 @@ export default {
             disabled: true,
             type: "popover",
             recalculate: recalculateView
+            // type: "text"
           },
           data: [
             {
-              type: "text",
               prop: "/form/name",
               recalculate: recalculateName,
               data: ""
             },
             {
-              type: "text",
               prop: "/form/age",
               recalculate: recalculateAge,
               data: ""
@@ -186,23 +198,23 @@ export default {
           id: "layerTooltip",
           show: true,
           view: {
-            
+            reference: referenceFn,
+            template: dataFn
           },
           data: [
             {
               prop: "/form/name",
-              data: "我的名字是什么",
-              target: "why",
-              trigger: "click"
+              data: {
+                content: "name",
+                img: "../static/img/fafa.jpg"
+              }
             },
             {
               prop: "/form/age",
               data: {
-                content: "fafa",
+                content: "age",
                 img: "../static/img/fafa.jpg"
-              },
-              template: dataFn,
-              target: "why"
+              }
             }
           ]
         }
@@ -265,7 +277,7 @@ export default {
   },
   methods: {
     recalculateField(prop) {
-      this.$refs["form1"].recalculateField(prop);
+      this.$refs["form1"].recalculateField("formLayer", prop);
     },
     submitForm(formName) {
       this.$refs[formName].recalculate("formLayer", valid => {
@@ -277,7 +289,7 @@ export default {
       });
     },
     tableRecalculateField(prop) {
-      this.$refs["table"].recalculateField(prop);
+      this.$refs["table"].recalculateField("tableLayer", prop);
     },
     submitTable(formName) {
       this.$refs[formName].recalculate("tableLayer", valid => {
@@ -292,16 +304,16 @@ export default {
 };
 </script>
 
-<style>
+<style lang="scss">
 * {
   box-sizing: border-box;
 }
 #app {
   padding: 10px;
+  /* max-height: 500px; */
+  overflow: auto;
 }
-input {
-  width: 100%;
-}
+
 .el-select {
   display: block;
 }

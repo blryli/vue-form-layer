@@ -7,6 +7,8 @@ import Row from './row';
 import Col from './col';
 import Content from './content';
 import VueText from './text';
+import Layer from './layer';
+import RenderSlot from './render-slot';
 
 const components = [
   Form,
@@ -16,7 +18,9 @@ const components = [
   Row,
   Col,
   Content,
-  VueText
+  VueText,
+  Layer,
+  RenderSlot
 ];
 
 const VueForm = function (Vue, opts = {}) {

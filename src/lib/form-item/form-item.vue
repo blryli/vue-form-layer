@@ -3,7 +3,7 @@
     <label class="vue-form-item__label" :style="{width: labelWidth}" v-if="label">
       <slot name="label">{{label}}</slot>
     </label>
-    <div ref="formItemContent" class="vue-form-item__content" :style="{'--borderColor': '#ccc'}">
+    <div ref="formItemContent" class="vue-form-item__content">
       <slot></slot>
     </div>
   </div>
@@ -18,7 +18,7 @@ export default {
     required: Boolean
   },
   data() {
-    return {}
+    return {};
   }
 };
 </script>
@@ -58,54 +58,25 @@ export default {
   box-sizing: border-box;
 }
 .vue-form-item__content {
-  flex: 1;
-  position: relative;
-  font-size: 14px;
-  display: flex;
-  flex-shrink: 0;
   width: 100%;
-  flex-direction: row;
-  align-items: flex-start;
-  flex-wrap: nowrap;
+  font-size: 14px;
 }
 
-.vue-form-item .vue-form-item__content {
-  input {
-    -webkit-appearance: none;
-    border: 1px solid;
-    border-color: var(--borderColor);
-    box-sizing: border-box;
-    font-size: inherit;
-    outline: none;
-    width: 100%;
-    &:hover {
-      border-color: #bbb;
-    }
-    &:focus {
-      border-color: #409eff;
-    }
-  }
-  .is-recalculate {
-    input {
-      &:focus,
-      &:hover {
-        border-color: var(--borderColor);
-      }
-    }
-  }
+input, select, textarea {
+  width: 100%;
 }
 
-.vue-form--label-left .vue-form-item__label{
+.vue-form--label-left .vue-form-item__label {
   text-align: left;
 }
-.vue-form--label-right .vue-form-item__label{
+.vue-form--label-right .vue-form-item__label {
   text-align: right;
 }
-.vue-form--label-top{
+.vue-form--label-top {
   .vue-form-item {
     display: block;
   }
-  .vue-form-item__label{
+  .vue-form-item__label {
     text-align: left;
     padding-right: 0;
     padding-bottom: 10px;

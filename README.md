@@ -236,11 +236,9 @@ export default {
 |-------- |------                      |------       |
 |changeShow  |改变图层展示状态            |图层ID       |
 |recalculate |对整个表单进行重算的方法，参数id是进行重算的图层ID，第二个参数是回调函数|Function(id, callback: Function(boolean))|
-|recalculateField |对部分表单字段进行重算的方法，参数为字段prop，不传参数则进行全局重算|prop: string|
-|clearCalculate |移除表单项的重算结果。传入待移除的表单项的 prop 属性组成的数组，如不传则移除整个表单的重算结果|props: array|
-|resetFields |对表单进行重置，将所有字段值重置为初始值并移除重算结果。传入待移除的表单项的 prop 属性组成的数组，如不传则移除整个表单进行重置|props: array|
-|initLayer |在异步获取layer数据,并有重算的场景使用，用于重置初始值，不使用则无法重置|-|
-|initModel |在异步获取model数据,并有重算的场景使用，用于重置初始值，不使用则无法重置|-|
+|recalculateField |对部分表单字段进行重算的方法，参数 (id: 图层id, prop: item prop)，不传参数则进行全局重算|id: string, prop: string|
+|clearCalculate |移除表单项的重算结果。参数 (id: 图层id, prop: 传入待移除的表单项的 prop 属性组成的数组，如不传则移除整个表单的重算结果)|id: string,props: array|
+|resetFields |对表单进行重置，将所有字段值重置为初始值并移除重算结果。参数 (id: 图层id, prop: 传入待移除的表单项的 prop 属性组成的数组，如不传则移除整个表单进行重置)|props: array|
 
 ### vue-form Events
 
@@ -249,7 +247,7 @@ export default {
 |show      |    显示时触发	            |  prop       |
 |hide      |  隐藏时触发		            |  prop       |
 
-### vue-form layer 图层
+### vue-form layer 图层 array
 
 |    参数    |    说明   |   类型   |  可选值  |默认值|
 | --------- | ---------| -------- | ------ | ----- |
@@ -258,33 +256,33 @@ export default {
 | view      | 图层默认配置| object | -     |  -   |
 | data      | 图层item配置| object | -     |  -   |
 
-### layer view 图层默认配置
+### layer view 图层默认配置 object
 
 |    参数    |    说明   |   类型   |  可选值  |默认值|
 | ---------  | ---------| -------- | ------ | ----- |
-| type       | 图层展示类型   | string   | popover/text  | popover    |
-| effect     | 主题或颜色，如果传入色值则主题颜色为该色值 | string  |  light/dark/info/error  | light   |
-| borderColor| 默认item的border颜色 | string  |  -  | "#ccc"   |
-| recalculate| 默认重算规则 (value) => {return {effect: 主题颜色, disabled: 是否禁用, borderColor: 边框颜色}，当字段重算没有传入这些参数的时候生效 | function  |  -  | -   |
-| placement  | 展示位置   | string   | top/right/bottom/left  | top    |
-| target    | 默认为default(传入form-line的dom)，target存在时会修改触发目标，(data) => {return 模板/组件 },多个图层同时指向default时，默认错位显示   | string/function   | why/warn  | default |
-| disabled    | 是否禁用  | boolean   | -  | false |
-| order      | 图层横向排序，数字越小越靠前   | number   | -  | 0 |
-| trigger    | popover触发方式   | string   | hover/focus/click  | hover    |
-| hideDelay    | popover隐藏延时   | number   | -  | 200    |
-| showAlways    | popover是否总是显示  | boolean   | -  | false |
-| enterable    | 鼠标是否可移入popover  | boolean   | -  | false |
-| visible-arrow | 是否显示popover箭头  | boolean   | -  | true |
+| type       | layer 展示类型   | string   | popover/text  | popover    |
+| effect     | layer 主题或颜色，如果传入色值则主题颜色为该色值 | string  |  light/dark/info/error  | light   |
+| borderColor| layer 的border颜色 | string  |  -  | "#ccc"   |
+| referenceBorderColor| reference 的border颜色 | string  |  -  | -   |
+| recalculate| layer 默认重算规则 (value) => {return {effect: 主题颜色, disabled: 是否禁用, referenceBorderColor: reference边框颜色} | function  |  -  | -   |
+| placement  | layer 展示位置   | string   | top/right/bottom/left  | top    |
+| target    | layer 默认为default(传入form-line的dom)，target存在时会修改触发目标，(data) => {return 模板/组件 },多个图层同时指向default时，排列显示   | string/function   | why/warn  | default |
+| disabled    | layer 是否禁用  | boolean   | -  | false |
+| order      | layer 图层横向排序，数字越小越靠前   | number   | -  | 0 |
+| trigger    | layer 触发方式   | string   | hover/focus/click  | hover    |
+| hideDelay    | layer 隐藏延时   | number   | -  | 200    |
+| showAlways    | layer 是否总是显示  | boolean   | -  | false |
+| enterable    | layer为popover时，鼠标是否可移入  | boolean   | -  | false |
+| visible-arrow | layer为popover时，是否显示箭头  | boolean   | -  | true |
+| template   | 数据展示模板 (data, prop, show) => {return 模板/组件 }, 回调参数data是数据，回调参数prop是模板位置，回调读书show是模板所在图层展示状态 | function | -  | top    |
+| recalculate| 字段重算规则 (value) => {return {message: 展示文字，effect: 主题颜色, disabled: 是否禁用, borderColor: 边框颜色} | function  |  -  | -   |
 
-### layer data 图层item配置
-
-> 图层item具有view的所配置，作用于prop字段，优先级大于view
+### layer data 图层item配置 array
 
 |    参数    |    说明   |   类型   |  可选值  |默认值|
 | ---------  | ---------| -------- | ------ | ----- |
 | prop       | 使用该配置的prop字段，如不传则该配置不会作用于任何字段  | - | -  | -    |
 | data       | 展示数据，传入模板template则通过模板展示数据，object/array类型需要传模板 | string/object/array | -  | -   |
-| template   | 数据展示模板 (data, prop, show) => {return 模板/组件 }, 回调参数data是数据，回调参数prop是模板位置，回调读书show是模板所在图层展示状态 | function | -  | top    |
 | recalculate| 字段重算规则 (value) => {return {message: 展示文字，effect: 主题颜色, disabled: 是否禁用, borderColor: 边框颜色} | function  |  -  | -   |
 
 ### vue-form-line Attributes
