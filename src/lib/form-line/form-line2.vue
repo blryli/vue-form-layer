@@ -92,8 +92,6 @@ export default {
       let referenceBorderColor;
       (this.formationLayer || []).forEach((d, i) => {
         d.prop === prop && d.layer.forEach(l => {
-          console.log(d)
-          console.log(l)
           l.referenceBorderColor && (referenceBorderColor = l.referenceBorderColor);
         })
       });

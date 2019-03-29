@@ -124,7 +124,7 @@ export default {
     // 获取参考点ID
     getReferenceId() {
       if (this.placementId) {
-        const samePlacementArr = this.placementArr[this.placement].sort(
+        const samePlacementArr = this.placementObj[this.placement].sort(
           this.compare("disabled")
         );
         const index = samePlacementArr.findIndex(
@@ -149,8 +149,8 @@ export default {
     },
     // 获取变化后的参考点
     getChangeReference(placement) {
-      const last = this.placementArr[placement].find(
-        (d, i) => i === this.placementArr[placement].length - 1
+      const last = this.placementObj[placement].find(
+        (d, i) => i === this.placementObj[placement].length - 1
       ); // 取反方向的最后一个
       return last ? document.getElementById(last.id) : this.reference;
     },
@@ -158,7 +158,7 @@ export default {
       !this.addedBody && this.popoverAddedBody();
       const popover = this.$el;
       const popoverRect = getDomClientRect(popover);
-      const samePlacementArr = this.placementArr[this.placement];
+      const samePlacementArr = this.placementObj[this.placement];
       let reference =
         document.getElementById(this.getReferenceId()) || this.reference;
       let referenceRect = getDomClientRect(reference);

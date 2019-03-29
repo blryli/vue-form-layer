@@ -1,11 +1,9 @@
 <script>
 export default {
   name: "VueContent",
-  props: {
-    data: [String, Object]
-  },
+  props: ['data'],
   render(h) {
-    return h("div", {class: {'vue-popover__content': true}}, [this.data]);
+    return h("div", {class: {'vue-layer__content': true}}, [this.data]);
   }
 };
 </script>

@@ -1,6 +1,6 @@
 <template>
-  <div class="vue-form-item" :class="{'is-required': required}">
-    <label class="vue-form-item__label" :style="{width: labelWidth}" v-if="label">
+  <div class="vue-form-item" :class="{'is-required': required}" :style="{marginBottom: rowledge}">
+    <label class="vue-form-item__label" :style="{flex: `0 0 ${labelWidth}`}" v-if="label">
       <slot name="label">{{label}}</slot>
     </label>
     <div ref="formItemContent" class="vue-form-item__content">
@@ -19,6 +19,21 @@ export default {
   },
   data() {
     return {};
+  },
+  computed: {
+    form() {
+      let parent = this.$parent;
+      let parentName = parent.$options.name;
+      while (parentName !== "VueForm") {
+        parent = parent.$parent;
+        parentName = parent.$options.name;
+      }
+      return parent;
+    },
+    // 行距
+    rowledge() {
+      return `${this.form.$props.rowledge}px`;
+    }
   }
 };
 </script>

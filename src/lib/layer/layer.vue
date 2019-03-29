@@ -1,7 +1,7 @@
 <script>
 import { generateId } from "../../utils/util";
 export default {
-  name: "vue-layer",
+  name: "VueLayer",
   props: {
     prop: String,
     layer: {
@@ -25,19 +25,8 @@ export default {
     }
   },
   render(h) {
-    let referenceBorderColor;
-    this.layer.forEach((d, i) => {
-      d.referenceBorderColor && (referenceBorderColor = d.referenceBorderColor);
-    })
-    let referenceNode = (
-      <div
-        id={this.defaultReferenceId}
-        class="vue-popover__reference vue-popover__reference-popover"
-      >
-        {this.$slots.default[0]}
-      </div>
-    );
-    let placementArr = {
+    let referenceNode = this.$slots.default[0];
+    let placementObj = {
       left: [],
       right: [],
       top: [],
@@ -45,39 +34,36 @@ export default {
     };
     let layers = [];
     this.layer.forEach((d, i) => {
-      let referenceId = `${generateId()}${this.prop}/${i}`;
-      const referenceBorderColor = d.referenceBorderColor || ""; // 参考点边框颜色
-      const borderColor = d.borderColor || "#ccc"; // border 颜色
-      const type = d.type || "popover"; // 展示类型
-      let effect = d.effect || "light"; // 主题 or 颜色
-      const placement = d.placement || "top"; // 展示位置
-      const trigger = d.trigger || "hover"; // 触发事件
-      let reference = d.reference || null; // 指定触发元素
-      const order = d.order || 0; // 排序 数字越小越靠前
-      const showAlways = d.showAlways || false; // 总是显示
-      const enterable = d.enterable || false; // 鼠标可移入
-      const popoverClass = d.popoverClass || ""; // popover 扩展类
-      let hideDelay = d.hideDelay;
-      let data = d.data || ""; // 展示内容
-      const template = d.template || ""; // 内容展示模板
-      typeof template === "function" && (data = template(data, this.prop));
-      let disabled = d.disabled === true ? 1 : 0; // 是否禁用
-      let visibleArrow = d.visibleArrowe; // 是否使用小箭头
-      d.show === false && (disabled = 1);
-      let placementId = `${this.defaultReferenceId}/${placement}/${placementArr[
-        placement
-      ].length + 1}`;
-      if (type === "popover") {
-        if (typeof reference === "function") {
+      let referenceId = `${generateId()}${this.prop}/${i}`; // 参考点id
+      const data =
+        typeof d.template === "function"
+          ? d.template(d.data, this.prop)
+          : d.data; // 展示内容
+
+      if (!d.type || d.type === "popover") {
+        referenceNode = (
+          <div id={this.defaultReferenceId} class="vue-layer__reference">
+            {referenceNode}
+          </div>
+        );
+        const placement = d.placement || "top"; // 默认展示位置
+        const disabled = d.disabled === true || d.show === false ? 1 : 0; // 是否禁用
+        let placementId = `${
+          this.defaultReferenceId
+        }/${placement}/${placementObj[placement].length + 1}`;
+        if (typeof d.reference === "function") {
           layers.push(
             <div id={referenceId} class="vue-popover__reference-function">
-              {reference()}
+              {d.reference()}
             </div>
           );
           placementId = "";
         } else {
           referenceId = this.defaultReferenceId;
-          placementArr[placement] && placementArr[placement].push({id: placementId, disabled: disabled});
+          placementObj[placement].push({
+            id: placementId,
+            disabled: disabled
+          });
         }
         layers.push(
           <vue-popover
@@ -85,32 +71,46 @@ export default {
             placementId={placementId}
             data={data}
             placement={placement}
-            trigger={trigger}
-            effect={effect}
-            visibleArrow={visibleArrow}
-            order={order}
+            trigger={d.trigger}
+            effect={d.effect}
+            visibleArrow={d.visibleArrow}
+            order={d.order}
             layerShow={d.show}
             disabled={disabled}
-            borderColor={borderColor}
-            showAlways={showAlways}
-            enterable={enterable}
-            popoverClass={popoverClass}
-            hideDelay={hideDelay}
+            borderColor={d.borderColor}
+            showAlways={d.showAlways}
+            enterable={d.enterable}
+            popoverClass={d.popoverClass}
+            hideDelay={d.hideDelay}
             prop={this.prop}
             betraye={this.betraye}
-            placementArr={placementArr}
+            placementObj={placementObj}
             onAddBetrayer={this.addBetrayer}
             onRemoveBetrayer={this.removeBetrayer}
           />
         );
-      } else if (type === "text") {
-        1;
+      } else if (d.type === "text") {
+        referenceNode = (
+          <div id={referenceId} class="vue-text">
+            {referenceNode}
+          </div>
+        );
+        layers.push(
+          <vue-text
+            referenceId={referenceId}
+            placement={d.placement}
+            data={data}
+            effect={d.effect}
+            disabled={d.disabled}
+          />
+        );
       } else {
       }
     });
     return h("div", { class: "vue-layer" }, [referenceNode, layers]);
   },
   methods: {
+    // 计算叛逆列表
     addBetrayer(betrayer) {
       betrayer.id &&
         !this.betraye[betrayer.placement].find(d => d === betrayer.id) &&
@@ -122,8 +122,7 @@ export default {
       );
       index !== -1 && this.betraye[betrayer.placement].splice(index, 1);
     }
-  },
-  mounted() {}
+  }
 };
 </script>
 
@@ -138,7 +137,11 @@ export default {
   align-items: flex-start;
   flex-wrap: nowrap;
 }
-.vue-popover__reference-popover {
+.vue-layer__reference {
+  width: 100%;
+}
+.vue-text {
+  position: relative;
   width: 100%;
 }
 .vue-popover__reference-function {

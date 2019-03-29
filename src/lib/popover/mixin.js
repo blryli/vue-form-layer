@@ -19,7 +19,7 @@ export default {
     },
     placementId: String,
     betraye: Object, // 叛逆者对象
-    placementArr: Object, // popover 各个方向成员
+    placementObj: Object, // popover 各个方向成员
     visibleArrow: {
       type: Boolean,
       default: true
