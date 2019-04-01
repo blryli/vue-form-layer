@@ -1,19 +1,26 @@
 <template>
   <div id="app">
     <div class="group">
+      <center>
+        <h1>vue-form-layer</h1>
+        <p>解决：复杂布局、多重标记（前后端校验、标记信息等）方案。</p>
+        <p>特点：高度灵活性、可控性、扩展性。</p>
+        <a class="link" href="https://github.com/blryli/vue-form-layer">文档</a>
+      </center>
       <h2>apply to form layou</h2>
-      <vue-form ref="formLayou" :model="formLayou" :rowledge="24" labelPosition="top" :itemGutter="10">
-        <vue-form-line :cols="[{ label: 'product' },{ label: 'type' }]">
-          <el-input type="text" v-model="formLayou.product" />
-          <el-input type="text" v-model="formLayou.type" />
+      <vue-form ref="formLayou" :model="formLayou">
+        <vue-form-line :cols="[{ label: '产品' },{ label: '类型' }]">
+          <el-input type="text" v-model="formLayou.product" placeholder="product" />
+          <el-input type="text" v-model="formLayou.type" placeholder="type" />
         </vue-form-line>
-        <vue-form-line label="size" :span="12">
+        <vue-form-line label="尺寸" :span="12">
           <el-input type="text" placeholder="long" v-model="formLayou.long" />
           <el-input type="text" placeholder="width" v-model="formLayou.width" />
           <el-input type="text" placeholder="height" v-model="formLayou.height" />
         </vue-form-line>
-        <vue-form-line :cols="[{ label: 'price' }]" :span="12">
-          <el-input type="text" v-model="formLayou.price" />
+        <vue-form-line label='联系人' :cols="[{ span: 9 },{ span: 15 }]" :span="12">
+          <el-input type="text" v-model="formLayou.name" placeholder="name" />
+          <el-input type="text" v-model="formLayou.phone" placeholder="phone" />
         </vue-form-line>
       </vue-form>
       <h2>apply to form layer show</h2>
@@ -87,41 +94,45 @@
 export default {
   name: "app",
   data() {
-    let style = {
-      message: "",
-      effect: "#67c23a",
+    const successValidate = {
       disabled: true,
-      borderColor: "#67c23a",
       referenceBorderColor: "#67c23a"
     };
-    var recalculateView = () => {
+    const errorValidate = message => {
       return {
-        effect: "#F56C6C",
+        message: message,
         disabled: false,
-        borderColor: "#F56C6C",
         referenceBorderColor: "#F56C6C"
       };
     };
-    var recalculateName = value => {
+    const recalculateName = value => {
       if (value === "") {
-        return "name is required";
+        return errorValidate("name is required");
       } else {
-        return style;
+        return successValidate;
       }
     };
-    var recalculateAge = value => {
+    const recalculateAge = value => {
       if (value === "") {
-        return "age is required";
+        return errorValidate("age is required");
       } else if (value < 18) {
-        return "age not less then 18";
+        return errorValidate("age not less then 18");
       } else {
-        return style;
+        return successValidate;
       }
     };
-    var referenceFn = () => {
+    const referenceFn = () => {
       return <i class="el-icon-question" />;
     };
-    var templateFn = (data, prop) => {
+    const boundaryTemplateFn = (data, prop) => {
+      return (
+        <div>
+          <p>placement: {data.placement}</p>
+          <p>content: {data.content}</p>
+        </div>
+      );
+    };
+    const templateFn = (data, prop) => {
       return (
         <div>
           <p>{data.title}</p>
@@ -131,35 +142,27 @@ export default {
       );
     };
 
-    var recalculateTableView = () => {
-      return {
-        effect: "red",
-        disabled: false,
-        borderColor: "red",
-        referenceBorderColor: "red"
-      };
-    };
-    var recalculateTableId = value => {
+    const recalculateTableId = value => {
       if (value === "") {
-        return "id is required";
+        return errorValidate("id is required");
       } else {
-        return style;
+        return successValidate;
       }
     };
-    var recalculateTableName = value => {
+    const recalculateTableName = value => {
       if (value === "") {
-        return "name is required";
+        return errorValidate("name is required");
       } else {
-        return style;
+        return successValidate;
       }
     };
-    var recalculateTableAddress = value => {
+    const recalculateTableAddress = value => {
       if (value === "") {
-        return "address is required";
+        return errorValidate("address is required");
       } else if (value.length < 18) {
-        return "not less than 18 characters";
+        return errorValidate("not less than 18 characters");
       } else {
-        return style;
+        return successValidate;
       }
     };
     return {
@@ -185,7 +188,7 @@ export default {
               prop: "/form/templateFn",
               data: {
                 title: "内容展示模板自定义",
-                template: `template: var templateFn = (data, prop) => {
+                template: `template: templateFn = (data, prop) => {
                   return <div>
                     <p>{data.title}</p>
                     <p>{data.template}</p>
@@ -201,7 +204,9 @@ export default {
             {
               reference: referenceFn,
               prop: "/form/referenceFn",
-              data: "referenceFn"
+              data: `data: referenceFn = () => {
+                return <i class="el-icon-question" />;
+              }`
             },
             {
               effect: "orange",
@@ -219,7 +224,7 @@ export default {
               data: "标记错误"
             },
             {
-              type: 'text',
+              type: "text",
               prop: "/form/text",
               data: "layer text"
             },
@@ -275,122 +280,142 @@ export default {
               effect: "#139bd2",
               placement: "top",
               prop: "/form/boundary",
-              data: "boundary top"
+              template: boundaryTemplateFn,
+              data: {
+                placement: "top",
+                content: "boundary"
+              }
             },
             {
               effect: "#139bd2",
               placement: "top",
               prop: "/form/boundary",
-              data: "boundary top"
+              template: boundaryTemplateFn,
+              data: {
+                placement: "top",
+                content: "boundary"
+              }
             },
             {
               effect: "#139bd2",
               placement: "top",
               prop: "/form/boundary",
-              data: "boundary top"
+              template: boundaryTemplateFn,
+              data: {
+                placement: "top",
+                content: "boundary"
+              }
             },
             {
               effect: "#139bd2",
               placement: "top",
               prop: "/form/boundary",
-              data: "boundary top"
+              template: boundaryTemplateFn,
+              data: {
+                placement: "top",
+                content: "boundary"
+              }
             },
             {
               effect: "#139bd2",
               placement: "top",
               prop: "/form/boundary",
-              data: "boundary top"
-            },
-            {
-              effect: "#139bd2",
-              placement: "top",
-              prop: "/form/boundary",
-              data: "boundary top"
-            },
-            {
-              effect: "#139bd2",
-              placement: "top",
-              prop: "/form/boundary",
-              data: "boundary top"
+              template: boundaryTemplateFn,
+              data: {
+                placement: "top",
+                content: "boundary"
+              }
             },
             {
               effect: "#F56C6C",
               placement: "right",
               prop: "/form/boundary",
-              data: "boundary right"
+              template: boundaryTemplateFn,
+              data: {
+                placement: "right",
+                content: "boundary"
+              }
             },
             {
               effect: "#F56C6C",
               placement: "right",
               prop: "/form/boundary",
-              data: "boundary right"
+              template: boundaryTemplateFn,
+              data: {
+                placement: "right",
+                content: "boundary"
+              }
             },
             {
               effect: "#F56C6C",
               placement: "right",
               prop: "/form/boundary",
-              data: "boundary right"
+              template: boundaryTemplateFn,
+              data: {
+                placement: "right",
+                content: "boundary"
+              }
             },
             {
               effect: "#F56C6C",
               placement: "right",
               prop: "/form/boundary",
-              data: "boundary right"
+              template: boundaryTemplateFn,
+              data: {
+                placement: "right",
+                content: "boundary"
+              }
             },
             {
               effect: "#E6A23C",
               placement: "bottom",
               prop: "/form/boundary",
-              data: "boundary bottom"
+              template: boundaryTemplateFn,
+              data: {
+                placement: "bottom",
+                content: "boundary"
+              }
             },
             {
               effect: "#E6A23C",
               placement: "bottom",
               prop: "/form/boundary",
-              data: "boundary bottom"
+              template: boundaryTemplateFn,
+              data: {
+                placement: "bottom",
+                content: "boundary"
+              }
             },
             {
               effect: "#E6A23C",
               placement: "bottom",
               prop: "/form/boundary",
-              data: "boundary bottom"
-            },
-            {
-              effect: "#E6A23C",
-              placement: "bottom",
-              prop: "/form/boundary",
-              data: "boundary bottom"
-            },
-            {
-              effect: "#E6A23C",
-              placement: "bottom",
-              prop: "/form/boundary",
-              data: "boundary bottom"
-            },
-            {
-              effect: "#E6A23C",
-              placement: "bottom",
-              prop: "/form/boundary",
-              data: "boundary bottom"
-            },
-            {
-              effect: "#E6A23C",
-              placement: "bottom",
-              prop: "/form/boundary",
-              data: "boundary bottom"
+              template: boundaryTemplateFn,
+              data: {
+                placement: "bottom",
+                content: "boundary"
+              }
             },
             {
               effect: "#67C23A",
               placement: "left",
               prop: "/form/boundary",
-              data: "boundary left"
+              template: boundaryTemplateFn,
+              data: {
+                placement: "left",
+                content: "boundary"
+              }
             },
             {
               effect: "#67C23A",
               placement: "left",
               prop: "/form/boundary",
-              data: "boundary left"
-            },
+              template: boundaryTemplateFn,
+              data: {
+                placement: "left",
+                content: "boundary"
+              }
+            }
           ]
         }
       ],
@@ -400,8 +425,7 @@ export default {
           show: true,
           view: {
             disabled: true,
-            type: "popover",
-            recalculate: recalculateView,
+            effect: "#F56C6C",
             type: "text"
           },
           data: [
@@ -424,7 +448,7 @@ export default {
           show: true,
           view: {
             disabled: true,
-            recalculate: recalculateTableView
+            effect: "#F56C6C"
           },
           data: [
             {
@@ -507,7 +531,7 @@ export default {
 * {
   box-sizing: border-box;
 }
-body{
+body {
   margin: 0;
 }
 #app {
@@ -515,12 +539,16 @@ body{
   overflow: auto;
 }
 
-.group{
+.group {
   max-width: 1000px;
   margin: 0 auto;
   padding: 20px;
   background-color: #fff;
-  box-shadow: 0 1px 15px rgba($color: #000000, $alpha: .1);
+  box-shadow: 0 1px 15px rgba($color: #000000, $alpha: 0.1);
+}
+
+.link {
+  color: #409eff;
 }
 
 .el-select {

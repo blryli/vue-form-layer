@@ -1,7 +1,7 @@
 <template>
-  <vue-col :span="span">
+  <vue-col :span="abreastAttr.span">
     <div class="vue-form-line" v-if="!label">
-      <vue-col v-for="(d, i) in slotNodes" :key="i" :span="getSlotAttr(i).span" :style="{ padding: itemGutter, paddingBottom: getPaddingBottom(i) }">
+      <vue-col v-for="(d, i) in slotNodes" :key="i" :span="getSlotAttr(i).span" :style="{ padding: itemGutter }">
         <vue-form-item :label="getSlotAttr(i).label" :labelWidth="getSlotAttr(i).labelWidth" :required="getSlotAttr(i).required">
           <vue-layer v-if="hasLayer(i)" :layer="hasLayer(i).layer" :prop="hasLayer(i).prop">
             <render-slot :isClearValue="isClearValue" :value="d" :referenceBorderColor="getReferenceBorderColor(hasLayer(i))"></render-slot>
@@ -11,16 +11,14 @@
       </vue-col>
     </div>
     <div class="vue-form-line" v-else>
-      <div class="vue-col">
-        <vue-form-item :label="label" :labelWidth="labelWidth" :required="required" :style="{ padding: itemGutter }">
-          <vue-col v-for="(d, i) in slotNodes" :key="i" :span="getSlotAttr(i).span" class="form-line--abreast" >
-            <vue-layer v-if="hasLayer(i)" :layer="hasLayer(i).layer" :prop="hasLayer(i).prop">
-              <render-slot :isClearValue="isClearValue" :value="d" :referenceBorderColor="getReferenceBorderColor(hasLayer(i))"></render-slot>
-            </vue-layer>
-            <render-slot v-else :value="d" :referenceBorderColor="getReferenceBorderColor(hasLayer(i))"></render-slot>
-          </vue-col>
-        </vue-form-item>
-      </div>
+      <vue-form-item :label="label" :labelWidth="abreastAttr.labelWidth" :required="required" :style="{ padding: itemGutter }">
+        <vue-col v-for="(d, i) in slotNodes" :key="i" :span="getSlotAttr(i).span" class="form-line--abreast">
+          <vue-layer v-if="hasLayer(i)" :layer="hasLayer(i).layer" :prop="hasLayer(i).prop">
+            <render-slot :isClearValue="isClearValue" :value="d" :referenceBorderColor="getReferenceBorderColor(hasLayer(i))"></render-slot>
+          </vue-layer>
+          <render-slot v-else :value="d" :referenceBorderColor="getReferenceBorderColor(hasLayer(i))"></render-slot>
+        </vue-col>
+      </vue-form-item>
     </div>
   </vue-col>
 </template>
@@ -88,7 +86,7 @@ export default {
       const layer = this.layer;
       (layer || []).forEach(la => {
         la.data.forEach(da => {
-          const layer = {...la.view, ...da};
+          const layer = { ...la.view, ...da };
           let findIndex = layerArr.findIndex(l => l.prop === da.prop);
           if (findIndex === -1) {
             layerArr.push({ prop: da.prop, show: la.show, layer: [layer] });
@@ -98,6 +96,13 @@ export default {
         });
       });
       return layerArr;
+    },
+    // 并列布局
+    abreastAttr() {
+      return {
+        labelWidth: this.labelWidth || this.form.$props.labelWidth || "80px",
+        span: this.isResponse ? 24 : this.span
+      };
     }
   },
   methods: {
@@ -133,19 +138,21 @@ export default {
         required: required
       };
     },
-    getPaddingBottom(index) {
-      return (
-        this.isResponse && index !== this.slotNodes.length - 1 && this.rowledge
-      );
-    },
     hasLayer(index) {
-      return this.cols.length && this.cols[index] && this.formationLayer.find(d => d.show && d.prop === this.cols[index].prop);
+      return (
+        this.cols.length &&
+        this.cols[index] &&
+        this.formationLayer.find(
+          d => d.show && d.prop === this.cols[index].prop
+        )
+      );
     },
     getReferenceBorderColor(data) {
       if (!data || !data.layer) return;
       let referenceBorderColor;
       (data.layer || []).forEach((d, i) => {
-        d.referenceBorderColor && (referenceBorderColor = d.referenceBorderColor);
+        d.referenceBorderColor &&
+          (referenceBorderColor = d.referenceBorderColor);
       });
       return referenceBorderColor;
     }

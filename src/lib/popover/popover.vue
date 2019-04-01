@@ -28,6 +28,10 @@ import {
 } from "../../utils/dom";
 import Mixin from "./mixin";
 
+function $(params) {
+  return document.getElementById(params);
+}
+
 export default {
   name: "VuePopover",
   mixins: [Mixin],
@@ -152,21 +156,43 @@ export default {
       const last = this.placementObj[placement].find(
         (d, i) => i === this.placementObj[placement].length - 1
       ); // 取反方向的最后一个
-      return last ? document.getElementById(last.id) : this.reference;
+      return last ? $(last.id) : this.reference;
+    },
+    getPlacementAllRect(placement = this.placement) {
+      let width = 0;
+      let height = 0;
+      (this.placementObj[placement] || []).forEach(d => {
+        height += getDomClientRect($(d.id)).height + 12;
+        width += getDomClientRect($(d.id)).width + 12;
+      });
+      return {
+        width: width,
+        height: height
+      };
     },
     calculateCoordinate() {
       !this.addedBody && this.popoverAddedBody();
       const popover = this.$el;
       const popoverRect = getDomClientRect(popover);
       const samePlacementArr = this.placementObj[this.placement];
-      let reference =
-        document.getElementById(this.getReferenceId()) || this.reference;
+      let reference = $(this.getReferenceId()) || this.reference;
       let referenceRect = getDomClientRect(reference);
       let referenceRectCount = referenceRect;
 
       // 判断是否改变方向与确定最终参考点
       switch (this.placement) {
         case "top":
+          if (
+            getDomClientRect(this.reference).top -
+              this.getPlacementAllRect().height <
+              0 &&
+            getDomClientRect(this.reference).bottom +
+              this.getPlacementAllRect("bottom").height >
+              window.innerHeight
+          ) {
+            this.momentPlacement = "top";
+            break;
+          }
           if (this.referenceInBetrayet()) {
             this.momentPlacement = "bottom";
           } else {
@@ -180,6 +206,17 @@ export default {
           }
           break;
         case "left":
+          if (
+            getDomClientRect(this.reference).left -
+              this.getPlacementAllRect().width <
+              0 &&
+            getDomClientRect(this.reference).right +
+              this.getPlacementAllRect("right").width >
+              window.innerWidth
+          ) {
+            this.momentPlacement = "left";
+            break;
+          }
           if (this.referenceInBetrayet()) {
             this.momentPlacement = "right";
           } else {
@@ -193,6 +230,17 @@ export default {
           }
           break;
         case "right":
+          if (
+            getDomClientRect(this.reference).left -
+              this.getPlacementAllRect("left").width <
+              0 &&
+            getDomClientRect(this.reference).right +
+              this.getPlacementAllRect().width >
+              window.innerWidth
+          ) {
+            this.momentPlacement = "right";
+            break;
+          }
           if (this.referenceInBetrayet()) {
             this.momentPlacement = "left";
           } else {
@@ -209,6 +257,17 @@ export default {
           }
           break;
         case "bottom":
+          if (
+            getDomClientRect(this.reference).top -
+              this.getPlacementAllRect("top").height <
+              0 &&
+            getDomClientRect(this.reference).bottom +
+              this.getPlacementAllRect().height >
+              window.innerHeight
+          ) {
+            this.momentPlacement = "bottom";
+            break;
+          }
           if (this.referenceInBetrayet()) {
             this.momentPlacement = "top";
           } else {
@@ -271,7 +330,7 @@ export default {
   },
   mounted() {
     this.$nextTick(() => {
-      this.reference = document.getElementById(this.referenceId);
+      this.reference = $(this.referenceId);
       if (
         !this.reference ||
         !this.reference.nodeName ||

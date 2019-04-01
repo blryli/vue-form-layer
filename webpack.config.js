@@ -12,19 +12,17 @@ module.exports = {
     umdNamedDefine: true
   },
   module: {
-    rules: [
-      {
+    rules: [{
         test: /\.css$/,
         use: [
           'vue-style-loader',
           'css-loader'
         ],
-      },      {
+      }, {
         test: /\.vue$/,
         loader: 'vue-loader',
         options: {
-          loaders: {
-          }
+          loaders: {}
           // other vue-loader options go here
         }
       },
@@ -33,8 +31,8 @@ module.exports = {
         loader: 'babel-loader',
         exclude: /node_modules/
       },
-      { 
-        test: /\.(woff|woff2|eot|ttf|svg|jpg|png|gif)\??.*$/, 
+      {
+        test: /\.(woff|woff2|eot|ttf|svg|jpg|png|gif)\??.*$/,
         loader: 'url-loader',
         options: {
           limit: 10000,

@@ -1,6 +1,7 @@
 ### form-line 表单
 
-> 快速组建，灵活调整结构，支持表单/表格校验，支持自定义模板，支持不同图层展示
+> 解决：复杂布局、多重标记（前后端校验、标记信息等）方案。
+>  特点：高度灵活性、可控性、扩展性。
 
 ### 演示
 
@@ -28,8 +29,8 @@ Vue.use(VueFormLayer)
 ```html
 <vue-form :model="form">
     <vue-form-line 
-    :cols="[{ span: 10, label: '名字' },
-    { span: 10, label: '年龄' }]">
+    :cols="[{ label: '名字' },
+    { label: '年龄' }]">
         <input type="text" v-model="form.name">
         <input type="text" v-model="form.age">
     </vue-form-line>
@@ -39,10 +40,10 @@ Vue.use(VueFormLayer)
 #### 增加图层
 
 ```html
-<vue-form :model="form" ref="form" :layer="layer">
+<vue-form :model="form" :layer="layer">
     <vue-form-line 
-    :cols="[{ span: 10, label: '名字', prop: '/form/name' },
-            { span: 10, label: '年龄', prop: '/form/age'}]">
+    :cols="[{ label: '名字', prop: '/form/name' },
+            { label: '年龄', prop: '/form/age'}]">
         <input type="text" v-model="form.name">
         <input type="text" v-model="form.age">
     </vue-form-line>
@@ -82,8 +83,8 @@ export default {
 ```html
 <vue-form :model="form" ref="form" :layer="layer">
     <vue-form-line 
-    :cols="[{ span: 10, label: '名字', prop: '/form/name' },
-            { span: 10, label: '年龄', prop: '/form/age'}]">
+    :cols="[{ label: '名字', prop: '/form/name' },
+            { label: '年龄', prop: '/form/age'}]">
         <input type="text" v-model="form.name">
         <input type="text" v-model="form.age">
     </vue-form-line>
@@ -94,7 +95,7 @@ export default {
 <script>
 export default {
   data () {
-    var dataFn = data => {
+    var templateFn = data => {
       return 
         // your component
         // vue1.0支持 this.$createElement("component", { attrs: { data: data } });
@@ -126,7 +127,7 @@ export default {
           data: [
             {
               prop: "/form/name",
-              template: dataFn,
+              template: templateFn,
               data: // your show data
             },
             {
@@ -146,8 +147,8 @@ export default {
 ```html
 <vue-form :model="form" ref="form" :layer="layer">
     <vue-form-line 
-    :cols="[{ span: 10, label: '名字', prop: '/form/name' },
-            { span: 10, label: '年龄', prop: '/form/age'}]">
+    :cols="[{ label: '名字', prop: '/form/name' },
+            { label: '年龄', prop: '/form/age'}]">
         <input type="text" v-model="form.name" @blur="recalculateField('/form/name')">
         <input type="text" v-model="form.age" @blur="recalculateField('/form/age')">
     </vue-form-line>
@@ -158,29 +159,31 @@ export default {
 <script>
 export default {
   data () {
-    let style = {
-      message: "",
-      effect: "#67c23a",
+    const successValidate = {
       disabled: true,
-      borderColor: "#67c23a"
+      referenceBorderColor: "#67c23a"
     };
-    var recalculateView = () => {
-      return { effect: "#f56c6c", disabled: false, borderColor: "#f56c6c" };
+    const errorValidate = message => {
+      return {
+        message: message,
+        disabled: false,
+        referenceBorderColor: "#F56C6C"
+      };
     };
-    var recalculateName = value => {
+    const recalculateName = value => {
       if (value === "") {
-        return "name is required";
+        return errorValidate("name is required");
       } else {
-        return style;
+        return successValidate;
       }
     };
-    var recalculateAge = value => {
+    const recalculateAge = value => {
       if (value === "") {
-        return "age is required";
+        return errorValidate("age is required");
       } else if (value < 18) {
-        return {message: "age not less then 18", effect: 'blue'};
+        return errorValidate("age not less then 18");
       } else {
-        return style;
+        return successValidate;
       }
     };
     return {
@@ -190,8 +193,7 @@ export default {
           id: "layer-1",
           show: true,
           view: {
-            disabled: true,
-            recalculate: recalculateView
+            disabled: true
           },
           data: [
             {
@@ -211,7 +213,7 @@ export default {
   },
   methods: {
     recalculateField(prop) {
-      this.$refs['form'].recalculateField(prop);
+      this.$refs['form'].recalculateField('layer-1', prop);
     }
   }
 }
@@ -303,4 +305,30 @@ export default {
 | label     | item label名  | number | - |
 | prop | 校验的字段，在需要校验时是必须的 | string | -     |
 | label-width | 表单域标签的宽度 | string | "80px"     |
-| required | 是否必填 | boolean | false     |
+| required | 是否必填(只提供样式，校验规则要在图层定义) | boolean | false     |
+
+### 版本
+
+## 1.2.8
+
+2018-3-28
+
+- 增加图层处理组件 vue-layer。
+
+- 解决多图层，scroll 事件改变popover placement 时定位不准确的问题。
+
+- 增加 form-line 内的 slot 渲染组件 render-slot。
+
+- 节点位置改用 getBoundingClientRect 函数获取。
+
+- 增加 referenceBorderColor，用于改变reference 边框颜色属性，不传referenceBorderColor则不会改变 reference 的样式。
+
+## 1.2.6
+
+2018-3-15
+
+- scroll事件时，展示状态的popover实时计算位置。
+
+- 修复popover对scroll响应不准确的BUG。
+
+[历史版本](https://github.com/blryli/vue-form-layer/blob/master/VERSIONS.md)

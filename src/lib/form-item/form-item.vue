@@ -75,9 +75,19 @@ export default {
 .vue-form-item__content {
   width: 100%;
   font-size: 14px;
+  &::before,
+  &::after {
+    display: table;
+    content: "";
+  }
+  &:after {
+    clear: both;
+  }
 }
 
-input, select, textarea {
+input,
+select,
+textarea {
   width: 100%;
 }
 

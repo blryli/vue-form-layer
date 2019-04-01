@@ -24,7 +24,7 @@ export default {
     },
     rowledge: {
       type: Number,
-      default: 20
+      default: 24
     }
   },
   data() {
@@ -114,85 +114,49 @@ export default {
       });
       callback(valid);
     },
-    setData(prop, d, da) {
-      const p = prop || d.prop;
-      const key = p.substring(p.lastIndexOf("/") + 1);
-      let val = "";
-      if (
-        this.model &&
-        typeof this.model === "object" &&
-        !Array.isArray(this.model)
-      ) {
-        val = this.model[key] || this.$set(this.model, key, "");
-      } else {
-        const arr = p.split("/");
-        const index = parseInt(arr[arr.length - 2]);
-        val = this.model[index][key];
-      }
-      const fieldCallback = (d.recalculate && d.recalculate(val)) || null;
-      const viewCallback =
-        (da.view && da.view.recalculate && da.view.recalculate(val)) || null;
-      let data;
-      let effect;
-      let disabled = false;
-      let borderColor;
-      let referenceBorderColor;
-      if (typeof fieldCallback === "string") {
-        data = fieldCallback || "";
-        effect = (viewCallback && viewCallback.effect) || "";
-        disabled =
-          viewCallback &&
-          viewCallback.disabled !== undefined &&
-          typeof viewCallback.disabled === "boolean" &&
-          viewCallback.disabled;
-        borderColor = (viewCallback && viewCallback.borderColor) || "";
-        referenceBorderColor =
-          (viewCallback && viewCallback.referenceBorderColor) || "";
-      } else if (typeof fieldCallback === "object") {
-        Array.isArray(fieldCallback) &&
-          console.error("recalculate 返回值必须是 字符串 或 对象");
-        data =
-          (fieldCallback.message !== undefined && fieldCallback.message) || "";
-        effect =
-          fieldCallback.effect || (viewCallback && viewCallback.effect) || "";
-        fieldCallback.disabled !== undefined &&
-          typeof fieldCallback.disabled === "boolean" &&
-          (disabled = fieldCallback.disabled);
-        fieldCallback.disabled === undefined &&
-          viewCallback &&
-          viewCallback.disabled !== undefined &&
-          typeof viewCallback.disabled === "boolean" &&
-          (disabled = viewCallback.disabled);
-        borderColor =
-          fieldCallback.borderColor ||
-          (viewCallback && viewCallback.borderColor) ||
-          "";
-        referenceBorderColor =
-          fieldCallback.referenceBorderColor ||
-          (viewCallback && viewCallback.referenceBorderColor) ||
-          "";
-      } else {
-        console.error("recalculate 返回值必须是 string 或 object");
-      }
-      if ((prop && d.prop === prop) || !prop) {
-        this.$set(d, "data", data);
-        effect && this.$set(d, "effect", effect);
-        disabled !== undefined && this.$set(d, "disabled", disabled);
-        borderColor && this.$set(d, "borderColor", borderColor);
-        referenceBorderColor &&
-          this.$set(d, "referenceBorderColor", referenceBorderColor);
-      }
-    },
     recalculateField(id, prop) {
       (this.layerData || []).forEach(da => {
         if (da.show && da.id === id) {
           this.isClearValue = false;
           (da.data || []).forEach(d => {
+            const obj = { ...(da.view || {}), ...d };
+            if (typeof obj.recalculate !== "function")
+              console.error("recalculate 必须是 function");
+
+            const p = prop || d.prop;
+            const key = p.substring(p.lastIndexOf("/") + 1);
+            let val = "";
             if (
-              d.recalculate !== undefined &&
-              typeof d.recalculate === "function"
+              this.model &&
+              typeof this.model === "object" &&
+              !Array.isArray(this.model)
             ) {
-              this.setData(prop, d, da);
+              val = this.model[key] || this.$set(this.model, key, "");
+            } else {
+              const arr = p.split("/");
+              const index = parseInt(arr[arr.length - 2]);
+              val = this.model[index][key];
+            }
+            const recalculate = obj.recalculate(val) || null;
+            if (typeof recalculate === "object") {
+              Array.isArray(recalculate) &&
+                console.error("recalculate 返回值必须是 object");
+            } else {
+              console.error("recalculate 返回值必须是 object");
+            }
+
+            const data = recalculate.message || "";
+            const disabled = recalculate.disabled === true;
+            const effect = recalculate.effect;
+            const borderColor = recalculate.borderColor;
+            const referenceBorderColor = recalculate.referenceBorderColor;
+            if ((prop && d.prop === prop) || !prop) {
+              this.$set(d, "data", data);
+              effect && this.$set(d, "effect", effect);
+              this.$set(d, "disabled", disabled);
+              borderColor && this.$set(d, "borderColor", borderColor);
+              referenceBorderColor &&
+                this.$set(d, "referenceBorderColor", referenceBorderColor);
             }
           });
         }
@@ -213,17 +177,14 @@ export default {
             const copyDa = this.layerCopy[idx];
             const data = copyD.data || "";
             const effect = (copyDa.view && copyDa.view.effect) || "";
-            const disabled = 
+            const disabled =
               (copyDa.view &&
                 copyDa.view.disabled !== undefined &&
                 copyDa.view.disabled) ||
               false;
-            const borderColor =
-              (copyDa.view && copyDa.view.borderColor) ||
-              "";
+            const borderColor = (copyDa.view && copyDa.view.borderColor) || "";
             const referenceBorderColor =
-              (copyDa.view && copyDa.view.referenceBorderColor) ||
-              "";
+              (copyDa.view && copyDa.view.referenceBorderColor) || "";
             if (props.length) {
               if (props.find(prop => prop === d.prop)) {
                 resetModel && this.resetData(prop);
