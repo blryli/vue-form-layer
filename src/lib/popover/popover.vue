@@ -23,18 +23,60 @@ import {
   removeBody,
   getParentNodes,
   enableEventListener,
-  removeEventListener,
-  getDomClientRect
+  removeEventListener
 } from "../../utils/dom";
 import Mixin from "./mixin";
-
-function $(params) {
-  return document.getElementById(params);
-}
 
 export default {
   name: "VuePopover",
   mixins: [Mixin],
+  props: {
+    referenceId: String,
+    // 需要监听的事件
+    trigger: {
+      type: String,
+      default: "hover"
+    },
+    effect: {
+      type: String,
+      default: "dark"
+    },
+    borderColor: String,
+    // popover消息提示
+    data: [String, Object, Array],
+    disabled: [Boolean, Number],
+    placement: {
+      type: String,
+      default: "top"
+    },
+    placementId: String,
+    betraye: Object, // 叛逆者对象
+    placementObj: Object, // popover 各个方向成员
+    visibleArrow: {
+      type: Boolean,
+      default: true
+    },
+    order: {
+      type: Number,
+      default: 0
+    },
+    layerShow: {
+      type: Boolean,
+      default: true
+    },
+    showAlways: Boolean,
+    positions: {
+      type: Array,
+      default: () => []
+    },
+    enterable: Boolean,
+    popoverClass: String,
+    hideDelay: {
+      type: Number,
+      default: 200
+    },
+    prop: String
+  },
   data() {
     return {
       reference: null,
@@ -67,6 +109,7 @@ export default {
         this.reference.style.display = "none";
       }
     },
+    // 叛逆者管理
     momentPlacement(val) {
       val === this.placement
         ? this.$emit("removeBetrayer", {
@@ -77,6 +120,48 @@ export default {
             id: this.placementId,
             placement: this.placement
           });
+    }
+  },
+  computed: {
+    effectClass() {
+      let effect = this.effect ? `is-${this.effect}` : "is-light";
+      effect += ` ${this.popoverClass}`;
+      return effect;
+    },
+    popoverStyle() {
+      let style = {
+        "--borderColor": "#ccc",
+        "--bgColor": "#fff"
+      };
+      if (typeof this.effect === "string") {
+        switch (this.effect) {
+          case "light":
+            style["--borderColor"] = "#ccc";
+            style["--bgColor"] = "#fff";
+            break;
+          case "dark":
+            style["--borderColor"] = "#303133";
+            style["--bgColor"] = "#303133";
+            style["--color"] = "#fff";
+            break;
+          case "info":
+            style["--borderColor"] = "#e6a23c";
+            style["--bgColor"] = "#e6a23c";
+            style["--color"] = "#fff";
+            break;
+          case "error":
+            style["--borderColor"] = "#f56c6c";
+            style["--bgColor"] = "#f56c6c";
+            style["--color"] = "#fff";
+            break;
+          default:
+            style["--borderColor"] = this.borderColor || this.effect;
+            style["--bgColor"] = this.effect;
+            style["--color"] = "#fff";
+            break;
+        }
+      }
+      return style;
     }
   },
   methods: {
@@ -125,226 +210,20 @@ export default {
         }, 200);
       }
     },
-    // 获取参考点ID
-    getReferenceId() {
-      if (this.placementId) {
-        const samePlacementArr = this.placementObj[this.placement].sort(
-          this.compare("disabled")
-        );
-        const index = samePlacementArr.findIndex(
-          d => d.id === this.placementId
-        );
-        if (index !== -1 && samePlacementArr[index - 1])
-          return samePlacementArr[index - 1].id; // 取同向的前一个
-      }
-    },
-    compare(property) {
-      return function(a, b) {
-        var value1 = a[property];
-        var value2 = b[property];
-        return value1 - value2;
-      };
-    },
-    // 参考点是否在叛逆列表
-    referenceInBetrayet() {
-      return this.betraye[this.placement].find(
-        d => d === this.getReferenceId()
-      );
-    },
-    // 获取变化后的参考点
-    getChangeReference(placement) {
-      const last = this.placementObj[placement].find(
-        (d, i) => i === this.placementObj[placement].length - 1
-      ); // 取反方向的最后一个
-      return last ? $(last.id) : this.reference;
-    },
-    getPlacementAllRect(placement = this.placement) {
-      let width = 0;
-      let height = 0;
-      (this.placementObj[placement] || []).forEach(d => {
-        height += getDomClientRect($(d.id)).height + 12;
-        width += getDomClientRect($(d.id)).width + 12;
-      });
-      return {
-        width: width,
-        height: height
-      };
-    },
-    calculateCoordinate() {
-      !this.addedBody && this.popoverAddedBody();
-      const popover = this.$el;
-      const popoverRect = getDomClientRect(popover);
-      const samePlacementArr = this.placementObj[this.placement];
-      let reference = $(this.getReferenceId()) || this.reference;
-      let referenceRect = getDomClientRect(reference);
-      let referenceRectCount = referenceRect;
-
-      // 判断是否改变方向与确定最终参考点
-      switch (this.placement) {
-        case "top":
-          if (
-            getDomClientRect(this.reference).top -
-              this.getPlacementAllRect().height <
-              0 &&
-            getDomClientRect(this.reference).bottom +
-              this.getPlacementAllRect("bottom").height >
-              window.innerHeight
-          ) {
-            this.momentPlacement = "top";
-            break;
-          }
-          if (this.referenceInBetrayet()) {
-            this.momentPlacement = "bottom";
-          } else {
-            if (referenceRect.top - popoverRect.height - 12 < 0) {
-              this.momentPlacement = "bottom";
-              reference = this.getChangeReference(this.momentPlacement);
-              referenceRectCount = getDomClientRect(reference);
-            } else {
-              this.momentPlacement = "top";
-            }
-          }
-          break;
-        case "left":
-          if (
-            getDomClientRect(this.reference).left -
-              this.getPlacementAllRect().width <
-              0 &&
-            getDomClientRect(this.reference).right +
-              this.getPlacementAllRect("right").width >
-              window.innerWidth
-          ) {
-            this.momentPlacement = "left";
-            break;
-          }
-          if (this.referenceInBetrayet()) {
-            this.momentPlacement = "right";
-          } else {
-            if (referenceRect.left - popoverRect.width - 12 < 0) {
-              this.momentPlacement = "right";
-              reference = this.getChangeReference(this.momentPlacement);
-              referenceRectCount = getDomClientRect(reference);
-            } else {
-              this.momentPlacement = "left";
-            }
-          }
-          break;
-        case "right":
-          if (
-            getDomClientRect(this.reference).left -
-              this.getPlacementAllRect("left").width <
-              0 &&
-            getDomClientRect(this.reference).right +
-              this.getPlacementAllRect().width >
-              window.innerWidth
-          ) {
-            this.momentPlacement = "right";
-            break;
-          }
-          if (this.referenceInBetrayet()) {
-            this.momentPlacement = "left";
-          } else {
-            if (
-              referenceRect.right + popoverRect.width + 12 >
-              window.innerWidth
-            ) {
-              this.momentPlacement = "left";
-              reference = this.getChangeReference(this.momentPlacement);
-              referenceRectCount = getDomClientRect(reference);
-            } else {
-              this.momentPlacement = "right";
-            }
-          }
-          break;
-        case "bottom":
-          if (
-            getDomClientRect(this.reference).top -
-              this.getPlacementAllRect("top").height <
-              0 &&
-            getDomClientRect(this.reference).bottom +
-              this.getPlacementAllRect().height >
-              window.innerHeight
-          ) {
-            this.momentPlacement = "bottom";
-            break;
-          }
-          if (this.referenceInBetrayet()) {
-            this.momentPlacement = "top";
-          } else {
-            if (
-              referenceRect.bottom + popoverRect.height + 12 >
-              window.innerHeight
-            ) {
-              this.momentPlacement = "top";
-              reference = this.getChangeReference(this.momentPlacement);
-              referenceRectCount = getDomClientRect(reference);
-            } else {
-              this.momentPlacement = "bottom";
-            }
-          }
-          break;
-        default:
-          console.error("Wrong placement prop");
-      }
-      // 计算节点坐标
-      switch (this.momentPlacement) {
-        case "top":
-          this.position.left =
-            referenceRectCount.left -
-            popoverRect.width / 2 +
-            referenceRectCount.width / 2;
-          this.position.top = referenceRectCount.top - popoverRect.height - 12;
-          break;
-        case "left":
-          this.position.left = referenceRectCount.left - popoverRect.width - 12;
-          this.position.top =
-            referenceRectCount.top +
-            referenceRectCount.height / 2 -
-            popoverRect.height / 2;
-          break;
-        case "right":
-          this.position.left =
-            referenceRectCount.left + referenceRectCount.width + 12;
-          this.position.top =
-            referenceRectCount.top +
-            referenceRectCount.height / 2 -
-            popoverRect.height / 2;
-          break;
-        case "bottom":
-          this.position.left =
-            referenceRectCount.left -
-            popoverRect.width / 2 +
-            referenceRectCount.width / 2;
-          this.position.top =
-            referenceRectCount.top + referenceRectCount.height + 12;
-          break;
-        default:
-          console.error("Wrong placement prop");
-      }
-      popover.style.top = this.position.top + "px";
-      popover.style.left = this.position.left + "px";
-    },
     scrollChange() {
       this.calculateCoordinate();
     }
   },
   mounted() {
     this.$nextTick(() => {
-      this.reference = $(this.referenceId);
-      if (
-        !this.reference ||
-        !this.reference.nodeName ||
-        !this.$el ||
-        !this.$el.nodeName
-      )
-        return;
+      this.reference = document.getElementById(this.referenceId).children[0];
+      if (!this.reference) return;
 
-      this.parentNodes = getParentNodes(this.$el);
+      this.parentNodes = getParentNodes(this.reference);
       this.parentNodes.length &&
         enableEventListener(this.parentNodes, this.scrollChange);
       this.calculateCoordinate();
 
-      const trigger = this.reference;
       if (this.trigger === "hover") {
         on(this.reference, "mouseenter", this.doShow);
         on(this.reference, "mouseleave", this.doHide);
@@ -475,32 +354,5 @@ export default {
 
 .light {
   color: #666;
-}
-.vue-popover--reference-icon {
-  display: block;
-  height: auto;
-  margin: 8px 5px 0;
-  &::before {
-    display: block;
-    width: 16px;
-    height: 16px;
-    line-height: 16px;
-    font-size: 13px;
-    text-align: center;
-    border-radius: 50%;
-    color: #fff;
-  }
-}
-.vue-popover--reference-why {
-  &::before {
-    content: "?";
-    background-color: #333;
-  }
-}
-.vue-popover--reference-warn {
-  &::before {
-    content: "!";
-    background-color: #e6a23c;
-  }
 }
 </style>

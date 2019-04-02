@@ -40,3 +40,11 @@ export const scroll = function() {
     top:document.body.scrollTop
   }
 }
+
+export const clone = function(obj) {
+  var o = obj instanceof Array ? [] : {};
+  for (var k in obj) {
+    o[k] = obj[k];
+  }
+  return o;
+}

@@ -8,7 +8,12 @@
         <a class="link" href="https://github.com/blryli/vue-form-layer">文档</a>
       </center>
       <h2>apply to form layou</h2>
-      <vue-form ref="formLayou" :model="formLayou">
+      <el-radio-group v-model="radio" style="margin-bottom: 20px;">
+        <el-radio-button label="top"></el-radio-button>
+        <el-radio-button label="right"></el-radio-button>
+        <el-radio-button label="left"></el-radio-button>
+      </el-radio-group>
+      <vue-form ref="formLayou" :model="formLayou" :label-position="radio" :item-gutter="20">
         <vue-form-line :cols="[{ label: '产品' },{ label: '类型' }]">
           <el-input type="text" v-model="formLayou.product" placeholder="product" />
           <el-input type="text" v-model="formLayou.type" placeholder="type" />
@@ -166,6 +171,7 @@ export default {
       }
     };
     return {
+      radio: "right",
       value: true,
       formLayou: {},
       form1: { name: "laowang" },

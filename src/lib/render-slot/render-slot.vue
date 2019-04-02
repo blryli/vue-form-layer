@@ -34,6 +34,8 @@ export default {
       var getAllChildNodes = function(node, names, allCN) {
         // 获取当前元素所有的子节点nodes
         var nodes = node.childNodes;
+        console.log(node.childNodes)
+        console.log(node.children)
         // 获取nodes的子节点
         for (var i = 0; i < nodes.length; i++) {
           var child = nodes[i];

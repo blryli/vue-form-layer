@@ -52,9 +52,7 @@ export default {
     // 间距
     itemGutter() {
       return (
-        (this.form.$props.itemGutter &&
-          `0 ${this.form.$props.itemGutter / 2}px`) ||
-        ""
+        this.form.$props.itemGutter && `0 ${this.form.$props.itemGutter / 2}px`
       );
     },
     // 响应式
@@ -89,7 +87,12 @@ export default {
           const layer = { ...la.view, ...da };
           let findIndex = layerArr.findIndex(l => l.prop === da.prop);
           if (findIndex === -1) {
-            layerArr.push({ prop: da.prop, show: la.show, layer: [layer] });
+            layerArr.push({
+              id: la.id,
+              prop: da.prop,
+              show: la.show,
+              layer: [layer]
+            });
           } else {
             layerArr[findIndex].layer.push(layer);
           }
@@ -118,14 +121,14 @@ export default {
       let span, label, labelWidth, prop, required;
       if (this.cols.length && this.cols[index]) {
         span = this.cols[index].span || remainSpace / remainNodeNum;
-        label = this.cols[index].label || "";
+        label = this.cols[index].label;
         labelWidth =
           this.cols[index].labelWidth ||
           this.labelWidth ||
           this.form.$props.labelWidth ||
           "80px";
-        prop = this.cols[index].prop || "";
-        required = this.cols[index].required || false;
+        prop = this.cols[index].prop;
+        required = this.cols[index].required;
       } else {
         span = remainSpace / remainNodeNum;
       }
@@ -147,6 +150,7 @@ export default {
         )
       );
     },
+    // 获取参考点 borderColor
     getReferenceBorderColor(data) {
       if (!data || !data.layer) return;
       let referenceBorderColor;

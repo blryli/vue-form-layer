@@ -1,8 +1,6 @@
 <template>
   <div class="vue-form-item" :class="{'is-required': required}" :style="{marginBottom: rowledge}">
-    <label class="vue-form-item__label" :style="{flex: `0 0 ${labelWidth}`}" v-if="label">
-      <slot name="label">{{label}}</slot>
-    </label>
+    <label class="vue-form-item__label" :style="{flex: `0 0 ${labelWidth}`}" v-if="label">{{label}}</label>
     <div ref="formItemContent" class="vue-form-item__content">
       <slot></slot>
     </div>
