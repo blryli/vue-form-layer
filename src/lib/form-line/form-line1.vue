@@ -4,7 +4,7 @@
       <vue-col v-for="(d, i) in slotNodes" :key="i" :span="getSlotAttr(i).span" :style="{ padding: itemGutter }">
         <vue-form-item :label="getSlotAttr(i).label" :labelWidth="getSlotAttr(i).labelWidth" :required="getSlotAttr(i).required">
           <vue-layer v-if="hasLayer(i)" :layer="hasLayer(i).layer" :prop="hasLayer(i).prop">
-            <render-slot :isClearValue="isClearValue" :value="d" :referenceBorderColor="getReferenceBorderColor(hasLayer(i))"></render-slot>
+            <render-slot :value="d" :referenceBorderColor="getReferenceBorderColor(hasLayer(i))"></render-slot>
           </vue-layer>
           <render-slot v-else :value="d" :referenceBorderColor="getReferenceBorderColor(hasLayer(i))"></render-slot>
         </vue-form-item>
@@ -14,7 +14,7 @@
       <vue-form-item :label="label" :labelWidth="abreastAttr.labelWidth" :required="required" :style="{ padding: itemGutter }">
         <vue-col v-for="(d, i) in slotNodes" :key="i" :span="getSlotAttr(i).span" class="form-line--abreast">
           <vue-layer v-if="hasLayer(i)" :layer="hasLayer(i).layer" :prop="hasLayer(i).prop">
-            <render-slot :isClearValue="isClearValue" :value="d" :referenceBorderColor="getReferenceBorderColor(hasLayer(i))"></render-slot>
+            <render-slot :value="d" :referenceBorderColor="getReferenceBorderColor(hasLayer(i))"></render-slot>
           </vue-layer>
           <render-slot v-else :value="d" :referenceBorderColor="getReferenceBorderColor(hasLayer(i))"></render-slot>
         </vue-col>
@@ -58,10 +58,6 @@ export default {
     // 响应式
     isResponse() {
       return this.form.$data.isResponse;
-    },
-    // 清空值
-    isClearValue() {
-      return this.form.$data.isClearValue;
     },
     form() {
       let parent = this.$parent;

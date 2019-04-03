@@ -26,10 +26,11 @@ import {
   removeEventListener
 } from "../../utils/dom";
 import Mixin from "./mixin";
+import Emitter from "../../mixins/emitter";
 
 export default {
   name: "VuePopover",
-  mixins: [Mixin],
+  mixins: [Mixin, Emitter],
   props: {
     referenceId: String,
     // 需要监听的事件
@@ -95,11 +96,11 @@ export default {
     show(val) {
       if (this.showAlways) return;
       if (val) {
-        this.$emit("show", this.prop);
+        this.dispatch('VueForm', 'popover.show', [{prop: this.prop, show: true}])
         this.popoverAddedBody();
         this.calculateCoordinate();
       } else {
-        this.$emit("hide", this.prop);
+        this.dispatch('VueForm', 'popover.hide', [{prop: this.prop, show: false}])
       }
     },
     layerShow(val) {

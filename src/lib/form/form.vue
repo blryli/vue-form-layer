@@ -7,9 +7,12 @@
 <script>
 import { on, off } from "../../utils/dom";
 import { clone } from "../../utils/util";
+import Emitter from "../../mixins/emitter";
 
 export default {
   name: "VueForm",
+  componentName: 'VueForm',
+  mixins: [Emitter],
   props: {
     model: [Object, Array],
     layer: {
@@ -34,8 +37,7 @@ export default {
       initData: null,
       isResponse: false,
       layerData: [],
-      reload: true,
-      isClearValue: false
+      reload: true
     };
   },
   computed: {
@@ -51,6 +53,12 @@ export default {
     }
   },
   created() {
+    this.$on("popover.show", obj => {
+      this.$emit('show', obj)
+    });
+    this.$on("popover.hide", obj => {
+      this.$emit('show', obj)
+    });
     this.init();
   },
   watch: {
@@ -102,7 +110,6 @@ export default {
         console.error("recalculate方法 必须传入 layer ID");
         return;
       }
-      this.isClearValue = false;
       this.recalculateField(id);
       let valid = true;
       (this.layerData || []).forEach(da => {
@@ -116,7 +123,6 @@ export default {
       !this.model && console.error(`model is not define`);
       (this.layerData || []).forEach(da => {
         if (da.show && da.id === id) {
-          this.isClearValue = false;
           (da.data || []).forEach(d => {
             // 私有/公有属性整合
             let obj = { ...(da.view || {}), ...d };
@@ -130,7 +136,7 @@ export default {
             const value = Array.isArray(this.model)
               ? this.model[p.split("/")[p.split("/").length - 2] * 1][key]
               : this.model[key] || this.$set(this.model, key, "");
-            
+
             // 获取重算返回对象
             const cb = obj.recalculate(value) || null;
             if (typeof cb === "object") {
@@ -156,7 +162,6 @@ export default {
     clearCalculate(id, props = [], resetModel) {
       (this.layerData || []).forEach((da, idx) => {
         if (da.id !== id) return;
-        this.isClearValue = false;
         (da.data || []).forEach((d, i) => {
           if (d.recalculate && typeof d.recalculate === "function") {
             const obj = {
@@ -192,7 +197,9 @@ export default {
       // 初始化值
       if (!this.initData) return;
       !this.model && console.error(`model is not define`);
-      this.isClearValue = true;
+
+      this.broadcast('RenderSlot', 'slotReset')
+
       if (Array.isArray(this.model)) {
         (this.model || []).forEach((d, i) => {
           this.$set(d, prop, this.initData[i][prop] || "");
