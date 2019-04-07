@@ -1,29 +1,3 @@
-<template>
-  <vue-col :span="abreastAttr.span">
-    <div class="vue-form-line" v-if="!label">
-      <vue-col v-for="(d, i) in slotNodes" :key="i" :span="getSlotAttr(i).span" :style="{ padding: itemGutter }">
-        <vue-form-item :label="getSlotAttr(i).label" :labelWidth="getSlotAttr(i).labelWidth" :required="getSlotAttr(i).required">
-          <vue-layer v-if="hasLayer(i)" :layer="hasLayer(i).layer" :prop="hasLayer(i).prop">
-            <render-slot :value="d" :referenceBorderColor="getReferenceBorderColor(hasLayer(i))"></render-slot>
-          </vue-layer>
-          <render-slot v-else :value="d" :referenceBorderColor="getReferenceBorderColor(hasLayer(i))"></render-slot>
-        </vue-form-item>
-      </vue-col>
-    </div>
-    <div class="vue-form-line" v-else>
-      <vue-form-item :label="label" :labelWidth="abreastAttr.labelWidth" :required="required" :style="{ padding: itemGutter }">
-        <vue-col v-for="(d, i) in slotNodes" :key="i" :span="getSlotAttr(i).span" class="form-line--abreast">
-          <vue-layer v-if="hasLayer(i)" :layer="hasLayer(i).layer" :prop="hasLayer(i).prop">
-            <render-slot :value="d" :referenceBorderColor="getReferenceBorderColor(hasLayer(i))"></render-slot>
-          </vue-layer>
-          <render-slot v-else :value="d" :referenceBorderColor="getReferenceBorderColor(hasLayer(i))"></render-slot>
-        </vue-col>
-      </vue-form-item>
-    </div>
-  </vue-col>
-</template>
-
-
 <script>
 import { offset, scroll, generateId } from "../../utils/util";
 export default {
@@ -42,23 +16,6 @@ export default {
     labelWidth: String
   },
   computed: {
-    slotNodes() {
-      return this.$slots.default.filter((d, i) => this.$slots.default[i].tag);
-    },
-    // 行距
-    rowledge() {
-      return `${this.form.$props.rowledge}px`;
-    },
-    // 间距
-    itemGutter() {
-      return (
-        this.form.$props.itemGutter && `0 ${this.form.$props.itemGutter / 2}px`
-      );
-    },
-    // 响应式
-    isResponse() {
-      return this.form.$data.isResponse;
-    },
     form() {
       let parent = this.$parent;
       let parentName = parent.$options.name;
@@ -69,92 +26,153 @@ export default {
       return parent;
     },
     layer() {
-      if (!this.form.$data.layerData || !this.form.$data.layerData.length) {
-        return false;
-      }
-      return this.form.$data.layerData || [];
+      return this.form.$data.initLayer || [];
     },
     formationLayer() {
-      if (!this.layer.length) return [];
-      let layerArr = [];
-      const layer = this.layer;
-      (layer || []).forEach(la => {
-        la.data.forEach(da => {
-          const layer = { ...la.view, ...da };
-          let findIndex = layerArr.findIndex(l => l.prop === da.prop);
+      return this.layer.reduce((acc, cur) => {
+        cur.data.forEach(da => {
+          const layer = {...cur.view, ...da}
+          const findIndex = acc.findIndex(l => l.prop === da.prop);
           if (findIndex === -1) {
-            layerArr.push({
-              id: la.id,
-              prop: da.prop,
-              show: la.show,
-              layer: [layer]
-            });
+            acc.push({ prop: da.prop, show: cur.show, layer: [layer] });
           } else {
-            layerArr[findIndex].layer.push(layer);
+            acc[findIndex].layer.push(layer);
           }
         });
-      });
-      return layerArr;
-    },
-    // 并列布局
-    abreastAttr() {
-      return {
-        labelWidth: this.labelWidth || this.form.$props.labelWidth || "80px",
-        span: this.isResponse ? 24 : this.span
-      };
+        return acc;
+      }, [])
     }
   },
-  methods: {
-    getSlotAttr(index) {
+  render(h) {
+    // 获取节点
+    let slotNodes = this.$slots.default.filter(
+      (d, i) => this.$slots.default[i].tag
+    );
+    const rowledge = this.form.$props.rowledge + "px"; // 行距
+    const itemGutter =
+      (this.form.$props.itemGutter &&
+        `0 ${this.form.$props.itemGutter / 2}px`) ||
+      ""; // 间距
+    const isResponse = this.form.$data.isResponse; // 响应式
+    let nodes = []; // form-line 实际插入的节点
+    let abreastSlotNodes = []; // form-item 内并排节点
+    // form-line 节点处理
+    slotNodes.forEach((slotNode, index) => {
       let remainSpace = 24;
-      let remainNodeNum = this.slotNodes.length;
+      let remainNodeNum = slotNodes.length;
       (this.cols || []).forEach(d => {
         if (d.span) {
           remainSpace -= d.span;
           remainNodeNum--;
         }
       });
-      let span, label, labelWidth, prop, required;
-      if (this.cols.length && this.cols[index]) {
+      let span, label, labelWidth, prop, required, value;
+      if (this.cols && this.cols.length && this.cols[index]) {
         span = this.cols[index].span || remainSpace / remainNodeNum;
-        label = this.cols[index].label;
+        label = this.cols[index].label || "";
         labelWidth =
           this.cols[index].labelWidth ||
           this.labelWidth ||
           this.form.$props.labelWidth ||
           "80px";
-        prop = this.cols[index].prop;
-        required = this.cols[index].required;
+        prop = this.cols[index].prop || "";
+        required = this.cols[index].required || false;
       } else {
         span = remainSpace / remainNodeNum;
       }
-      this.isResponse && (span = 24);
-      return {
-        span: span * 1,
-        label: label,
-        labelWidth: labelWidth,
-        prop: prop,
-        required: required
-      };
-    },
-    hasLayer(index) {
-      return (
-        this.cols.length &&
-        this.cols[index] &&
-        this.formationLayer.find(
-          d => d.show && d.prop === this.cols[index].prop
+      isResponse && (span = 24);
+      let referenceBorderColor;
+      (this.formationLayer || []).forEach((d, i) => {
+        d.prop === prop && d.layer.forEach(l => {
+          l.referenceBorderColor && (referenceBorderColor = l.referenceBorderColor);
+        })
+      });
+      slotNode = <render-slot ref="renderSlot" slotNode={slotNode} referenceBorderColor={referenceBorderColor}></render-slot>
+
+      // 图层分发到 slotNode
+      const layerObj = this.formationLayer.find(d => d.show && d.prop === prop);
+      layerObj &&
+        (slotNode = h(
+          "vue-layer",
+          {
+            attrs: { layer: layerObj.layer, prop: layerObj.prop }
+          },
+          [slotNode]
+        ));
+
+      // slotNode 分发
+      if (!this.label) {
+        // 基本布局
+        let paddingBottom;
+        isResponse &&
+          index !== slotNodes.length - 1 &&
+          (paddingBottom = `${rowledge}`);
+        nodes.push(
+          h(
+            "vue-col",
+            {
+              attrs: { span: span },
+              style: { padding: itemGutter, paddingBottom: paddingBottom }
+            },
+            [
+              h(
+                "vue-form-item",
+                {
+                  attrs: {
+                    label: label,
+                    labelWidth: labelWidth,
+                    required: required
+                  }
+                },
+                [slotNode]
+              )
+            ]
+          )
+        );
+      } else {
+        // 并列布局
+        abreastSlotNodes.push([
+          h(
+            "vue-col",
+            {
+              attrs: { span: span },
+              class: { "form-line--abreast": true }
+            },
+            [slotNode]
+          )
+        ]);
+      }
+    });
+    // 并列布局添加节点
+    if (this.label) {
+      nodes.push(
+        h(
+          "vue-form-item",
+          {
+            attrs: {
+              label: this.label,
+              labelWidth: this.labelWidth || "80px",
+              required: this.required
+            },
+            style: { padding: itemGutter }
+          },
+          [abreastSlotNodes]
         )
       );
-    },
-    // 获取参考点 borderColor
-    getReferenceBorderColor(data) {
-      if (!data || !data.layer) return;
-      let referenceBorderColor;
-      (data.layer || []).forEach((d, i) => {
-        d.referenceBorderColor &&
-          (referenceBorderColor = d.referenceBorderColor);
-      });
-      return referenceBorderColor;
+    }
+    let span = isResponse ? 24 : this.span;
+    return h("vue-col", { attrs: { span: span } }, [
+      h("div", { class: "vue-form-line", style: { marginBottom: rowledge } }, [
+        nodes
+      ])
+    ]);
+  },
+  methods: {
+    extend(to, _from) {
+      for (var key in _from) {
+        to[key] = _from[key];
+      }
+      return to;
     }
   }
 };

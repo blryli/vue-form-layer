@@ -1,9 +1,9 @@
 <script>
 export default {
   name: "VueContent",
-  props: ['data'],
+  props: ["data"],
   render(h) {
-    return h("div", {class: {'vue-layer__content': true}}, [this.data]);
+    return <div class="vue-layer__content">{this.data}</div>;
   }
 };
 </script>

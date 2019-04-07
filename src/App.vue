@@ -32,7 +32,7 @@
       <p>
         <el-switch v-model="value" @change="$refs['form2'].changeShow('layerTooltip')" inactive-text="layer visible" />
       </p>
-      <vue-form ref="form2" :model="form2" :layer="layerShow" :rowledge="24" @show="alert('show')" @hide="alert('hide')" label-width="120px">
+      <vue-form ref="form2" :model="form2" :layer="layerShow" :rowledge="24" label-width="120px">
         <vue-form-line :cols="[{ span: 12, label: '气泡展示', prop: '/form/popover' },{ span: 12, label: '自定义内容模板', prop: '/form/templateFn' }]">
           <el-input type="text" v-model="form2.popover" />
           <el-input type="text" v-model="form2.templateFn" />
@@ -529,6 +529,48 @@ export default {
         }
       });
     }
+  },
+  mounted() {
+    setTimeout(() => {
+      this.$set(this.formLayou, 'product', 'aaa')
+      this.layer1.push({
+          id: "formLayer1",
+          show: true,
+          view: {
+            effect: "#F56C6C"
+          },
+          data: [
+            {
+              prop: "/form/name",
+              data: "111111"
+            },
+            {
+              prop: "/form/age",
+              data: "1111111"
+            }
+          ]
+        })
+      setTimeout(() => {
+        this.$set(this.formLayou, 'product', 'bbb')
+        this.layer1.push({
+          id: "formLayer2",
+          show: true,
+          view: {
+            effect: "#F56C6C"
+          },
+          data: [
+            {
+              prop: "/form/name",
+              data: "22222"
+            },
+            {
+              prop: "/form/age",
+              data: "222222"
+            }
+          ]
+        })
+      }, 2000)
+    }, 2000)
   }
 };
 </script>

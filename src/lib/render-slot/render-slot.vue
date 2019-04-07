@@ -2,20 +2,14 @@
 export default {
   name: "RenderSlot",
   componentName: "RenderSlot",
-  props: ["value", "referenceBorderColor"],
+  props: ["slotNode", "referenceBorderColor"],
   render(h) {
-    return this.value;
+    return this.slotNode;
   },
   data() {
     return {
-      focusNode: this.$el,
-      initValue: ""
+      focusNode: this.$el
     };
-  },
-  created() {
-    this.$on('slotReset', () => {
-      this.reset();
-    })
   },
   watch: {
     referenceBorderColor(val) {
@@ -50,18 +44,14 @@ export default {
       getAllChildNodes(node, names, allCN);
       // 3.返回全部节点的数组
       return allCN;
-    },
-    reset() {
-      this.focusNode.value = this.initValue;
     }
   },
   mounted() {
     this.$nextTick(() => {
-      const focusNodes = this.allChildNodes(this.$el, ["TEXTAREA", "INPUT"]);
+      const focusNodes = this.allChildNodes(this.$el, ["TEXTAREA", "INPUT","SELECT"]);
       this.focusNode = focusNodes.length === 1 ? focusNodes[0] : this.$el;
       if (focusNodes.length === 1) {
         this.focusNode = focusNodes[0];
-        this.initValue = this.focusNode.value;
       } else {
         this.focusNode.style.cssText = `border: 1px solid ${this
           .referenceBorderColor || "transparent"}`;

@@ -96,11 +96,11 @@ export default {
     show(val) {
       if (this.showAlways) return;
       if (val) {
-        this.dispatch('VueForm', 'popover.show', [{prop: this.prop, show: true}])
+        this.$emit.apply(this.form, ['popover.show', {prop: this.prop, show: true}])
         this.popoverAddedBody();
         this.calculateCoordinate();
       } else {
-        this.dispatch('VueForm', 'popover.hide', [{prop: this.prop, show: false}])
+        this.$emit.apply(this.form, ['popover.hide', {prop: this.prop, show: false}])
       }
     },
     layerShow(val) {
@@ -124,6 +124,15 @@ export default {
     }
   },
   computed: {
+    form() {
+      let parent = this.$parent;
+      let parentName = parent.$options.name;
+      while (parentName !== "VueForm") {
+        parent = parent.$parent;
+        parentName = parent.$options.name;
+      }
+      return parent;
+    },
     effectClass() {
       let effect = this.effect ? `is-${this.effect}` : "is-light";
       effect += ` ${this.popoverClass}`;

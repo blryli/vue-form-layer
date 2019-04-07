@@ -34,9 +34,9 @@ export default {
   data() {
     return {
       layerCopy: null,
-      initData: null,
+      initModel: null,
       isResponse: false,
-      layerData: [],
+      initLayer: [],
       reload: true
     };
   },
@@ -65,7 +65,7 @@ export default {
     layer: {
       handler() {
         this.reload = false;
-        this.layerData = [];
+        this.initLayer = [];
         this.$nextTick(() => {
           this.reload = true;
           this.init();
@@ -76,24 +76,24 @@ export default {
   },
   methods: {
     init() {
-      this.layerData = clone(this.layer);
-      (this.layerData || []).forEach(da => {
+      this.initLayer = clone(this.layer);
+      (this.initLayer || []).forEach(da => {
         da.show === undefined && this.$set(da, "show", true);
       });
-      this.initLayer();
-      this.initModel();
+      this.initLayerFn();
+      this.initModelFn();
     },
-    initLayer() {
-      this.layerData &&
-        (this.layerCopy = JSON.parse(JSON.stringify(this.layerData)));
+    initLayerFn() {
+      this.initLayer &&
+        (this.layerCopy = JSON.parse(JSON.stringify(this.initLayer)));
     },
-    initModel() {
-      this.model && (this.initData = JSON.parse(JSON.stringify(this.model)));
+    initModelFn() {
+      this.model && (this.initModel = JSON.parse(JSON.stringify(this.model)));
     },
     changeShow(id) {
       !id && console.error(`changeShow 方法必须传入 layer id`);
       let hasId = false;
-      (this.layerData || []).forEach(d => {
+      (this.initLayer || []).forEach(d => {
         if (d.id && d.id === id) {
           this.$set(d, "show", !d.show);
           hasId = true;
@@ -112,7 +112,7 @@ export default {
       }
       this.recalculateField(id);
       let valid = true;
-      (this.layerData || []).forEach(da => {
+      (this.initLayer || []).forEach(da => {
         if (da.id === id) {
           (da.data || []).find(d => d.data) && (valid = false);
         }
@@ -121,7 +121,7 @@ export default {
     },
     recalculateField(id, prop) {
       !this.model && console.error(`model is not define`);
-      (this.layerData || []).forEach(da => {
+      (this.initLayer || []).forEach(da => {
         if (da.show && da.id === id) {
           (da.data || []).forEach(d => {
             // 私有/公有属性整合
@@ -136,6 +136,7 @@ export default {
             const value = Array.isArray(this.model)
               ? this.model[p.split("/")[p.split("/").length - 2] * 1][key]
               : this.model[key] || this.$set(this.model, key, "");
+              console.log
 
             // 获取重算返回对象
             const cb = obj.recalculate(value) || null;
@@ -160,7 +161,7 @@ export default {
       });
     },
     clearCalculate(id, props = [], resetModel) {
-      (this.layerData || []).forEach((da, idx) => {
+      (this.initLayer || []).forEach((da, idx) => {
         if (da.id !== id) return;
         (da.data || []).forEach((d, i) => {
           if (d.recalculate && typeof d.recalculate === "function") {
@@ -195,17 +196,15 @@ export default {
     },
     resetData(prop) {
       // 初始化值
-      if (!this.initData) return;
+      if (!this.initModel) return;
       !this.model && console.error(`model is not define`);
-
-      this.broadcast('RenderSlot', 'slotReset')
 
       if (Array.isArray(this.model)) {
         (this.model || []).forEach((d, i) => {
-          this.$set(d, prop, this.initData[i][prop] || "");
+          this.$set(d, prop, this.initModel[i][prop] || "");
         });
       } else {
-        this.$set(this.model, prop, this.initData[prop] || "");
+        this.$set(this.model, prop, this.initModel[prop] || "");
       }
     },
     resetFields(id, props = []) {
