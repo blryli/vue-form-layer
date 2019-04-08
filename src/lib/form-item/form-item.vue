@@ -1,5 +1,5 @@
 <template>
-  <div class="vue-form-item" :class="{'is-required': required}" :style="{marginBottom: rowledge}">
+  <div class="vue-form-item" :class="{'is-required': required}" :style="{marginBottom: rowledge, '--lineHeight': lineHeight}">
     <label class="vue-form-item__label" :style="{flex: `0 0 ${labelWidth}`}" v-if="label">{{label}}</label>
     <div ref="formItemContent" class="vue-form-item__content">
       <slot></slot>
@@ -28,9 +28,12 @@ export default {
       }
       return parent;
     },
+    lineHeight() {
+      return this.form.$props.lineHeight;
+    },
     // 行距
     rowledge() {
-      return `${this.form.$props.rowledge}px`;
+      return this.form.$props.rowledge;
     }
   }
 };
@@ -66,12 +69,14 @@ export default {
   font-size: 14px;
   color: #606266;
   padding-right: 12px;
-  height: 32px;
-  line-height: 32px;
+  height: var(--lineHeight);
+  line-height: var(--lineHeight);
   box-sizing: border-box;
 }
 .vue-form-item__content {
   width: 100%;
+  position: relative;
+  line-height: var(--lineHeight);
   font-size: 14px;
   &::before,
   &::after {

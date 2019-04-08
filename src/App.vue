@@ -13,7 +13,7 @@
         <el-radio-button label="right"></el-radio-button>
         <el-radio-button label="left"></el-radio-button>
       </el-radio-group>
-      <vue-form ref="formLayou" :model="formLayou" :label-position="radio" :item-gutter="20">
+      <vue-form ref="formLayou" :model="formLayou" :label-position="radio" :item-gutter="24">
         <vue-form-line :cols="[{ label: '产品' },{ label: '类型' }]">
           <el-input type="text" v-model="formLayou.product" placeholder="product" />
           <el-input type="text" v-model="formLayou.type" placeholder="type" />
@@ -32,7 +32,7 @@
       <p>
         <el-switch v-model="value" @change="$refs['form2'].changeShow('layerTooltip')" inactive-text="layer visible" />
       </p>
-      <vue-form ref="form2" :model="form2" :layer="layerShow" :rowledge="24" label-width="120px">
+      <vue-form ref="form2" :model="form2" :layer="layerShow" rowledge="24px" label-width="120px">
         <vue-form-line :cols="[{ span: 12, label: '气泡展示', prop: '/form/popover' },{ span: 12, label: '自定义内容模板', prop: '/form/templateFn' }]">
           <el-input type="text" v-model="form2.popover" />
           <el-input type="text" v-model="form2.templateFn" />
@@ -48,7 +48,7 @@
       </vue-form>
       <br />
       <h2>apply to form validate</h2>
-      <vue-form ref="form1" :model="form1" :layer="layer1" :rowledge="24">
+      <vue-form ref="form1" :model="form1" :layer="layer1" rowledge="24px">
         <vue-form-line :cols="[{ span: 12, label: 'name', prop: '/form/name' },{ span: 12, label: 'age', prop: '/form/age' }]">
           <el-input type="text" v-model="form1.name" @blur="recalculateField('/form/name')" />
           <el-input type="text" v-model="form1.age" @blur="recalculateField('/form/age')" />
@@ -61,7 +61,7 @@
       </p>
       <br />
       <h2>apply to table validate</h2>
-      <vue-form ref="table" :model="tableData" :layer="tableLayer" :rowledge="0">
+      <vue-form ref="table" :model="tableData" :layer="tableLayer" rowledge="0">
         <el-table :data="tableData" style="width: 100%">
           <el-table-column label="id">
             <template slot-scope="scope">
@@ -531,46 +531,13 @@ export default {
     }
   },
   mounted() {
-    setTimeout(() => {
-      this.$set(this.formLayou, 'product', 'aaa')
-      this.layer1.push({
-          id: "formLayer1",
-          show: true,
-          view: {
-            effect: "#F56C6C"
-          },
-          data: [
-            {
-              prop: "/form/name",
-              data: "111111"
-            },
-            {
-              prop: "/form/age",
-              data: "1111111"
-            }
-          ]
-        })
-      setTimeout(() => {
-        this.$set(this.formLayou, 'product', 'bbb')
-        this.layer1.push({
-          id: "formLayer2",
-          show: true,
-          view: {
-            effect: "#F56C6C"
-          },
-          data: [
-            {
-              prop: "/form/name",
-              data: "22222"
-            },
-            {
-              prop: "/form/age",
-              data: "222222"
-            }
-          ]
-        })
-      }, 2000)
-    }, 2000)
+    // setTimeout(() => {
+    //   this.$set(this.formLayou, 'product', 'aaa')
+    //   setTimeout(() => {
+    //     this.$set(this.formLayou, 'product', 'bbb')
+
+    //   }, 2000)
+    // }, 2000)
   }
 };
 </script>

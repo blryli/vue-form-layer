@@ -10,7 +10,7 @@
 #### npm 安装
 
 ```js
-npm install vue-form-layer --save
+npm i vue-form-layer -S
 ```
 
 #### 使用
@@ -81,7 +81,7 @@ export default {
 #### 自定义显示模板
 
 ```html
-<vue-form :model="form" ref="form" :layer="layer">
+<vue-form :model="form" :layer="layer">
     <vue-form-line 
     :cols="[{ label: '名字', prop: '/form/name' },
             { label: '年龄', prop: '/form/age'}]">
@@ -224,12 +224,13 @@ export default {
 
 |    参数    |    说明      |   类型     |可选值  |默认值|
 | ---------  | ----------  | --------   |----  | ----- |
-| model      | form对象    | object     |-     | -     |
+| model      | form对象，用于重算及重置    | object/array     |-     | -     |
 | layer      | 图层数组    | array       |-     | -     |
 | label-width | 表单域标签的宽度 | string |-     | -   |
 | labelPosition | label的位置 | string  |left/right/top  | right    |
-| item-gutter | item之间的间隔 | number |-  | -    |
-| rowledge  | line行距       | number   | -     |20  |
+| line-height | form-item 内label及content行高 | string |-  | '32px'    |
+| rowledge  | form-item 行距       | string   | -     |'24px'  |
+| item-gutter | form-item 之间的间隔 | number |-  | 0    |
 | response  | 表单响应式，只在手机端生效  | boolean   | -     |true  |
 
 ### vue-form Methods

@@ -30,8 +30,8 @@ export default {
     },
     formationLayer() {
       return this.layer.reduce((acc, cur) => {
-        cur.data.forEach(da => {
-          const layer = {...cur.view, ...da}
+        (cur.data || []).forEach(da => {
+          const layer = { ...cur.view, ...da };
           const findIndex = acc.findIndex(l => l.prop === da.prop);
           if (findIndex === -1) {
             acc.push({ prop: da.prop, show: cur.show, layer: [layer] });
@@ -40,7 +40,15 @@ export default {
           }
         });
         return acc;
-      }, [])
+      }, []);
+    },
+    // 间距
+    itemGutter() {
+      return this.form.$props.itemGutter / 2;
+    },
+    // 响应式
+    isResponse() {
+      return this.form.$data.isResponse;
     }
   },
   render(h) {
@@ -48,16 +56,10 @@ export default {
     let slotNodes = this.$slots.default.filter(
       (d, i) => this.$slots.default[i].tag
     );
-    const rowledge = this.form.$props.rowledge + "px"; // 行距
-    const itemGutter =
-      (this.form.$props.itemGutter &&
-        `0 ${this.form.$props.itemGutter / 2}px`) ||
-      ""; // 间距
-    const isResponse = this.form.$data.isResponse; // 响应式
     let nodes = []; // form-line 实际插入的节点
     let abreastSlotNodes = []; // form-item 内并排节点
     // form-line 节点处理
-    slotNodes.forEach((slotNode, index) => {
+    (slotNodes || []).forEach((slotNode, index) => {
       let remainSpace = 24;
       let remainNodeNum = slotNodes.length;
       (this.cols || []).forEach(d => {
@@ -80,100 +82,77 @@ export default {
       } else {
         span = remainSpace / remainNodeNum;
       }
-      isResponse && (span = 24);
+      this.isResponse && (span = 24);
       let referenceBorderColor;
       (this.formationLayer || []).forEach((d, i) => {
-        d.prop === prop && d.layer.forEach(l => {
-          l.referenceBorderColor && (referenceBorderColor = l.referenceBorderColor);
-        })
+        d.prop === prop &&
+          (d.layer || []).forEach(l => {
+            l.referenceBorderColor &&
+              (referenceBorderColor = l.referenceBorderColor);
+          });
       });
-      slotNode = <render-slot ref="renderSlot" slotNode={slotNode} referenceBorderColor={referenceBorderColor}></render-slot>
+      slotNode = (
+        <render-slot
+          ref="renderSlot"
+          slotNode={slotNode}
+          referenceBorderColor={referenceBorderColor}
+        />
+      );
 
       // 图层分发到 slotNode
       const layerObj = this.formationLayer.find(d => d.show && d.prop === prop);
       layerObj &&
-        (slotNode = h(
-          "vue-layer",
-          {
-            attrs: { layer: layerObj.layer, prop: layerObj.prop }
-          },
-          [slotNode]
+        (slotNode = (
+          <vue-layer layer={layerObj.layer} prop={layerObj.prop}>
+            {slotNode}
+          </vue-layer>
         ));
 
       // slotNode 分发
       if (!this.label) {
         // 基本布局
-        let paddingBottom;
-        isResponse &&
-          index !== slotNodes.length - 1 &&
-          (paddingBottom = `${rowledge}`);
         nodes.push(
-          h(
-            "vue-col",
-            {
-              attrs: { span: span },
-              style: { padding: itemGutter, paddingBottom: paddingBottom }
-            },
-            [
-              h(
-                "vue-form-item",
-                {
-                  attrs: {
-                    label: label,
-                    labelWidth: labelWidth,
-                    required: required
-                  }
-                },
-                [slotNode]
-              )
-            ]
-          )
+          <vue-col span={span} style={{ padding: `0 ${this.itemGutter}px` }}>
+            <vue-form-item
+              label={label}
+              labelWidth={labelWidth}
+              required={required}
+            >
+              {slotNode}
+            </vue-form-item>
+          </vue-col>
         );
       } else {
         // 并列布局
         abreastSlotNodes.push([
-          h(
-            "vue-col",
-            {
-              attrs: { span: span },
-              class: { "form-line--abreast": true }
-            },
-            [slotNode]
-          )
+          <vue-col
+            span={span}
+            class="form-line--abreast"
+          >
+            {slotNode}
+          </vue-col>
         ]);
       }
     });
     // 并列布局添加节点
     if (this.label) {
       nodes.push(
-        h(
-          "vue-form-item",
-          {
-            attrs: {
-              label: this.label,
-              labelWidth: this.labelWidth || "80px",
-              required: this.required
-            },
-            style: { padding: itemGutter }
-          },
-          [abreastSlotNodes]
-        )
+        <vue-form-item
+          label={this.label}
+          labelWidth={this.labelWidth || "80px"}
+          required={this.required}
+          style={{ padding: `0 ${this.itemGutter}px` }}
+        >
+          {abreastSlotNodes}
+        </vue-form-item>
       );
     }
-    let span = isResponse ? 24 : this.span;
-    return h("vue-col", { attrs: { span: span } }, [
-      h("div", { class: "vue-form-line", style: { marginBottom: rowledge } }, [
-        nodes
-      ])
-    ]);
-  },
-  methods: {
-    extend(to, _from) {
-      for (var key in _from) {
-        to[key] = _from[key];
-      }
-      return to;
-    }
+    let span = this.isResponse ? 24 : this.span;
+    return (
+      <vue-col span={span}>
+        <div class="vue-form-line">{nodes}</div>
+      </vue-col>
+    );
   }
 };
 </script>

@@ -33,7 +33,7 @@ export default {
       bottom: []
     };
     let layers = [];
-    this.layer.forEach((d, i) => {
+    (this.layer || []).forEach((d, i) => {
       let referenceId = `${generateId()}${this.prop}/${i}`; // 参考点id
       const data =
         typeof d.template === "function"
@@ -107,7 +107,12 @@ export default {
       } else {
       }
     });
-    return h("div", { class: "vue-layer" }, [referenceNode, layers]);
+    return (
+      <div class="vue-layer">
+        {referenceNode}
+        {layers}
+      </div>
+    );
   },
   methods: {
     // 计算叛逆列表

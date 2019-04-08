@@ -1,5 +1,5 @@
 <template>
-  <form ref="vueForm" v-if="reload" class="vue-form" :class="formClass" :style="style">
+  <form ref="vueForm" v-if="reload" class="vue-form" :class="formClass" :style="{ margin: `0 -${itemGutter / 2}px` }">
     <slot></slot>
   </form>
 </template>
@@ -21,14 +21,21 @@ export default {
     },
     labelWidth: String,
     labelPosition: String,
-    itemGutter: Number,
+    lineHeight: {
+      type: String,
+      default: '32px'
+    },
+    itemGutter: {
+      type: Number,
+      default: 0
+    },
     response: {
       type: Boolean,
       default: true
     },
     rowledge: {
-      type: Number,
-      default: 24
+      type: String,
+      default: '24px'
     }
   },
   data() {
@@ -47,17 +54,14 @@ export default {
         (formClass += `vue-form--label-${this.labelPosition}`);
       this.response && this.isResponse && (formClass += " vue-form-response");
       return formClass;
-    },
-    style() {
-      return (this.itemGutter && `margin: 0 -${this.itemGutter / 2}px`) || {};
     }
   },
   created() {
-    this.$on("popover.show", obj => {
-      this.$emit('show', obj)
+    this.$on("popover.show", prop => {
+      this.$emit('show', prop)
     });
-    this.$on("popover.hide", obj => {
-      this.$emit('show', obj)
+    this.$on("popover.hide", prop => {
+      this.$emit('hide', prop)
     });
     this.init();
   },
@@ -136,7 +140,6 @@ export default {
             const value = Array.isArray(this.model)
               ? this.model[p.split("/")[p.split("/").length - 2] * 1][key]
               : this.model[key] || this.$set(this.model, key, "");
-              console.log
 
             // 获取重算返回对象
             const cb = obj.recalculate(value) || null;

@@ -96,11 +96,11 @@ export default {
     show(val) {
       if (this.showAlways) return;
       if (val) {
-        this.$emit.apply(this.form, ['popover.show', {prop: this.prop, show: true}])
+        this.$emit.apply(this.form, ['popover.show', this.prop])
         this.popoverAddedBody();
         this.calculateCoordinate();
       } else {
-        this.$emit.apply(this.form, ['popover.hide', {prop: this.prop, show: false}])
+        this.$emit.apply(this.form, ['popover.hide', this.prop])
       }
     },
     layerShow(val) {

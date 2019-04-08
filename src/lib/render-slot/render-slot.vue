@@ -26,6 +26,7 @@ export default {
     allChildNodes(node, names) {
       // 1.创建全部节点的数组
       var allCN = [];
+      names.find(d => d === node.nodeName) && allCN.push(node)
 
       // 2.递归获取全部节点
       var getAllChildNodes = function(node, names, allCN) {
@@ -62,7 +63,4 @@ export default {
 </script>
 
 <style>
-input {
-  border-color: var(--referenceBorderColor);
-}
 </style>
