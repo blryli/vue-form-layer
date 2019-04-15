@@ -54,14 +54,15 @@ export default {
 <style lang="scss" scoped>
 .vue-text-content {
   position: absolute;
-  color: #666;
-  font-size: 12px;
   top: 0;
   left: 0;
+  line-height: 1;
+  color: #666;
+  font-size: 12px;
   &.vue-text__bottom {
     top: 100%;
     left: 0;
-    padding-top: 3px;
+    padding-top: 4px;
   }
   &.vue-text__right,
   &.vue-text__left {

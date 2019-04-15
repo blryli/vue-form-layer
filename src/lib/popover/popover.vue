@@ -1,36 +1,29 @@
 <template>
   <transition name="fade">
-    <div :id="placementId" class="vue-popover-wrap" :class="[
-      effectClass,
-      {'vue-popover-wrap-top': momentPlacement === 'top'},
-      {'vue-popover-wrap-left': momentPlacement === 'left'},
-      {'vue-popover-wrap-right': momentPlacement === 'right'},
-      {'vue-popover-wrap-bottom': momentPlacement === 'bottom'},
-      {'vue-popover-wrap-visible': layerShow && (show || showAlways) && !disabled},
-      {'vue-popover-wrap-hidden': !layerShow || (!show && !showAlways) || disabled }
-    ]" ref="popover" role="popover" :style="popoverStyle" @mouseenter="mouseenterWrap" @mouseleave="mouseleaveWrap">
-      <div class="vue-popover-arrow" v-if="visibleArrow"></div>
+    <div :id="placementId" class="vue-popover" :class="pClass" ref="popover" :style="popoverStyle" @mouseenter="mouseenterWrap" @mouseleave="mouseleaveWrap">
+      <div class="vue-popover__arrow" v-if="visibleArrow"></div>
       <vue-content :data="data"></vue-content>
     </div>
   </transition>
 </template>
 
 <script>
-import { offset, scroll } from "../../utils/util";
+import { offset, scroll, debounce } from "../../utils/util";
 import {
   on,
   off,
   removeBody,
   getParentNodes,
   enableEventListener,
-  removeEventListener
+  removeEventListener,
+  getDomClientRect
 } from "../../utils/dom";
 import Mixin from "./mixin";
-import Emitter from "../../mixins/emitter";
+import emitter from "../../mixins/emitter";
 
 export default {
   name: "VuePopover",
-  mixins: [Mixin, Emitter],
+  mixins: [Mixin, emitter],
   props: {
     referenceId: String,
     // 需要监听的事件
@@ -57,14 +50,6 @@ export default {
       type: Boolean,
       default: true
     },
-    order: {
-      type: Number,
-      default: 0
-    },
-    layerShow: {
-      type: Boolean,
-      default: true
-    },
     showAlways: Boolean,
     positions: {
       type: Array,
@@ -81,10 +66,6 @@ export default {
   data() {
     return {
       reference: null,
-      position: {
-        top: 0,
-        left: 0
-      },
       show: false,
       addedBody: false,
       timeoutPending: null,
@@ -96,18 +77,11 @@ export default {
     show(val) {
       if (this.showAlways) return;
       if (val) {
-        this.$emit.apply(this.form, ['popover.show', this.prop])
+        this.$emit.apply(this.form, ["popover.show", this.prop]);
         this.popoverAddedBody();
         this.calculateCoordinate();
       } else {
-        this.$emit.apply(this.form, ['popover.hide', this.prop])
-      }
-    },
-    layerShow(val) {
-      if (val) {
-        this.reference.style.display = "block";
-      } else {
-        this.reference.style.display = "none";
+        this.$emit.apply(this.form, ["popover.hide", this.prop]);
       }
     },
     // 叛逆者管理
@@ -124,6 +98,17 @@ export default {
     }
   },
   computed: {
+    // 对应方向是否有多个图层
+    isMorePlacement() {
+      let isMorePlacement = false;
+      if (['top', 'bottom'].find(d => d === this.placement)) {
+        this.placementObj['top'].length + this.placementObj['bottom'].length >= 2 && (isMorePlacement = true)
+      }
+      if (['left', 'right'].find(d => d === this.placement)) {
+        return this.placementObj['left'].length + this.placementObj['right'].length >= 2 && (isMorePlacement = true)
+      }
+      return isMorePlacement
+    },
     form() {
       let parent = this.$parent;
       let parentName = parent.$options.name;
@@ -133,10 +118,15 @@ export default {
       }
       return parent;
     },
-    effectClass() {
-      let effect = this.effect ? `is-${this.effect}` : "is-light";
-      effect += ` ${this.popoverClass}`;
-      return effect;
+    isVisible() {
+      return (this.showAlways || this.show) && !this.disabled;
+    },
+    pClass() {
+      return `${this.effect ? `is-${this.effect}` : "is-light"}  vue-popover__${
+        this.momentPlacement
+      } ${this.popoverClass || ""} ${
+        this.isVisible ? "vue-popover--visible" : "vue-popover--hidden"
+      }`;
     },
     popoverStyle() {
       let style = {
@@ -221,17 +211,20 @@ export default {
       }
     },
     scrollChange() {
-      this.calculateCoordinate();
+      if (this.isVisible) {
+        this.calculateCoordinate() // 可见的popover实时计算位置
+      } else {
+        this.isMorePlacement && debounce(this.calculateCoordinate)() // 不可见的popover,如果是多图层，位置计算开启节流
+      }
     }
   },
   mounted() {
     this.$nextTick(() => {
-      this.reference = document.getElementById(this.referenceId).children[0];
-      if (!this.reference) return;
-
+      const referenceId = document.getElementById(this.referenceId);
+      if (!referenceId) return;
+      this.reference = referenceId.children[0];
       this.parentNodes = getParentNodes(this.reference);
-      this.parentNodes.length &&
-        enableEventListener(this.parentNodes, this.scrollChange);
+      enableEventListener(this.parentNodes, this.scrollChange);
       this.calculateCoordinate();
 
       if (this.trigger === "hover") {
@@ -247,8 +240,7 @@ export default {
   },
   beforeDestroy() {
     if (!this.reference || !this.reference.nodeName) return;
-    this.parentNodes.length &&
-      removeEventListener(this.parentNodes, this.scrollChange);
+    removeEventListener(this.parentNodes, this.scrollChange);
 
     if (this.trigger === "hover") {
       off(this.reference, "mouseenter", this.doShow);
@@ -259,44 +251,39 @@ export default {
     } else {
       off(window, "click", this.triggerClick);
     }
-    removeBody(this, "popover");
+    this.addedBody && document.body.removeChild(this.$el);
   }
 };
 </script>
 
 <style lang="scss" scoped>
 .vue-popover {
-  position: relative;
-  order: var(--order);
-}
-.vue-popover-wrap {
   visibility: hidden;
+  opacity: 0;
+  transition: opacity 0.3s ease;
   position: fixed;
   z-index: 3000;
-  opacity: 0;
   padding: 10px;
   line-height: 1.2;
   font-size: 14px;
   min-width: 10px;
   border-radius: 4px;
   border: 1px solid;
-  transition: opacity 0.3s ease;
   background-color: var(--bgColor);
   border-color: var(--borderColor);
   color: var(--color);
 }
 
-.vue-popover-wrap-visible {
+.vue-popover--visible {
   visibility: visible;
   opacity: 1;
 }
-.vue-popover-wrap-hidden {
+.vue-popover--hidden {
   visibility: hidden;
   opacity: 0;
 }
-
 // 气泡箭头
-.vue-popover-arrow {
+.vue-popover__arrow {
   position: absolute;
   width: 0;
   height: 0;
@@ -309,8 +296,8 @@ export default {
     border: 5px solid transparent;
   }
 }
-.vue-popover-wrap-top {
-  .vue-popover-arrow {
+.vue-popover__top {
+  .vue-popover__arrow {
     border-top-color: var(--borderColor);
     margin-left: -6px;
     left: 50%;
@@ -322,8 +309,8 @@ export default {
     }
   }
 }
-.vue-popover-wrap-right {
-  .vue-popover-arrow {
+.vue-popover__right {
+  .vue-popover__arrow {
     border-right-color: var(--borderColor);
     margin-top: -6px;
     left: -12px;
@@ -335,8 +322,8 @@ export default {
     }
   }
 }
-.vue-popover-wrap-bottom {
-  .vue-popover-arrow {
+.vue-popover__bottom {
+  .vue-popover__arrow {
     border-bottom-color: var(--borderColor);
     margin-left: -6px;
     top: -12px;
@@ -348,8 +335,8 @@ export default {
     }
   }
 }
-.vue-popover-wrap-left {
-  .vue-popover-arrow {
+.vue-popover__left {
+  .vue-popover__arrow {
     border-left-color: var(--borderColor);
     margin-top: -6px;
     left: 100%;

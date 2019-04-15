@@ -8,7 +8,7 @@ export default {
   },
   data() {
     return {
-      focusNode: this.$el
+      focusNode: null
     };
   },
   watch: {
@@ -50,10 +50,10 @@ export default {
   mounted() {
     this.$nextTick(() => {
       const focusNodes = this.allChildNodes(this.$el, ["TEXTAREA", "INPUT","SELECT"]);
-      this.focusNode = focusNodes.length === 1 ? focusNodes[0] : this.$el;
       if (focusNodes.length === 1) {
         this.focusNode = focusNodes[0];
       } else {
+        this.focusNode = this.$el;
         this.focusNode.style.cssText = `border: 1px solid ${this
           .referenceBorderColor || "transparent"}`;
       }

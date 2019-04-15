@@ -7,6 +7,24 @@
         <p>特点：高度灵活性、可控性、扩展性。</p>
         <a class="link" href="https://github.com/blryli/vue-form-layer">文档</a>
       </center>
+      <!-- <vue-form ref="testform" :model="testform" :layer="testlayer" rowledge="0" label-width="120px">
+        <table style="width: 100%">
+          <tbody id="contentArea">
+            <tr v-for="(d, i) in 200" :key="i" :class="`/testform/${i}/popover`">
+              <vue-form-line :cols="[{ span: 12, label: '气泡展示', prop: `/testform/${i}/popover` },{ span: 12, label: '自定义内容模板', prop: `/testform/${i}/templateFn` }]">
+                <el-button>{{`/testform/${i}/popover`}}</el-button>
+                <el-button>{{`/testform/${i}/templateFn`}}</el-button>
+              </vue-form-line>
+            </tr>
+            <tr :class="`/testform/10000/popover`">
+              <vue-form-line :cols="[{ span: 12, label: '气泡展示', prop: `/testform/10000/popover` },{ span: 12, label: '自定义内容模板', prop: `/testform/20000/templateFn` }]">
+                <el-button>{{`/testform/10000/popover`}}</el-button>
+                <el-button>{{`/testform/20000/templateFn`}}</el-button>
+              </vue-form-line>
+            </tr>
+          </tbody>
+        </table>
+      </vue-form> -->
       <h2>apply to form layou</h2>
       <el-radio-group v-model="radio" style="margin-bottom: 20px;">
         <el-radio-button label="top"></el-radio-button>
@@ -92,6 +110,7 @@
         <el-button @click="$refs['table'].resetFields('tableLayer')">resetFields</el-button>
       </p>
     </div>
+    <!-- <el-switch v-model="testvalue" @change="$refs['testform'].changeShow('testId')" inactive-text="layer visible" /> -->
   </div>
 </template>
 
@@ -171,6 +190,8 @@ export default {
       }
     };
     return {
+      testform: {},
+      testlayer: Object.freeze([]),
       radio: "right",
       value: true,
       formLayou: {},
@@ -531,13 +552,39 @@ export default {
     }
   },
   mounted() {
-    // setTimeout(() => {
-    //   this.$set(this.formLayou, 'product', 'aaa')
-    //   setTimeout(() => {
-    //     this.$set(this.formLayou, 'product', 'bbb')
-
-    //   }, 2000)
-    // }, 2000)
+    let data = [];
+    for (let i = 0; i < 200; i++) {
+      data.push({
+        prop: `/testform/${i}/popover`,
+        data: `/testform/${i}/popover`
+      });
+      data.push({
+        prop: `/testform/${i}/templateFn`,
+        data: `/testform/${i}/templateFn`
+      });
+    }
+    this.testlayer = Object.freeze([
+      {
+        id: "testId",
+        show: true,
+        view: {
+          trigger: "click"
+        },
+        data: data
+      }
+    ]);
+    setTimeout(() => {
+      this.layer1.push({data: [{
+        prop: "/form/name",
+        data: "第三方斯蒂芬斯蒂芬"
+      }]});
+      setTimeout(() => {
+        this.layer1.push({data: [{
+          prop: "/form/name",
+          data: "第三方斯蒂芬斯蒂芬"
+        }]});
+      }, 2000);
+    }, 2000);
   }
 };
 </script>
@@ -573,6 +620,9 @@ body {
   #app {
     padding: 40px;
   }
+}
+#scrollArea {
+  min-height: 500px;
 }
 </style>
 

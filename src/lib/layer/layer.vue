@@ -16,16 +16,30 @@ export default {
         right: [],
         top: [],
         bottom: []
-      }
+      },
+      addLayer: false
     };
   },
   computed: {
     defaultReferenceId() {
       return `${generateId()}${this.prop}/default`;
+    },
+    form() {
+      let parent = this.$parent;
+      let parentName = parent.$options.name;
+      while (parentName !== "VueForm") {
+        parent = parent.$parent;
+        parentName = parent.$options.name;
+      }
+      return parent;
     }
   },
   render(h) {
-    let referenceNode = this.$slots.default[0];
+    let referenceNode = (
+      <div id={this.defaultReferenceId} class="vue-layer__reference">
+        {this.$slots.default[0]}
+      </div>
+    );
     let placementObj = {
       left: [],
       right: [],
@@ -33,7 +47,8 @@ export default {
       bottom: []
     };
     let layers = [];
-    (this.layer || []).forEach((d, i) => {
+    for (let i = 0, len = (this.layer || []).length; i < len; i++) {
+      const d = this.layer[i];
       let referenceId = `${generateId()}${this.prop}/${i}`; // 参考点id
       const data =
         typeof d.template === "function"
@@ -41,11 +56,6 @@ export default {
           : d.data; // 展示内容
 
       if (!d.type || d.type === "popover") {
-        referenceNode = (
-          <div id={this.defaultReferenceId} class="vue-layer__reference">
-            {referenceNode}
-          </div>
-        );
         const placement = d.placement || "top"; // 默认展示位置
         const disabled = d.disabled === true || d.show === false ? 1 : 0; // 是否禁用
         let placementId = `${
@@ -65,30 +75,31 @@ export default {
             disabled: disabled
           });
         }
-        layers.push(
-          <vue-popover
-            referenceId={referenceId}
-            placementId={placementId}
-            data={data}
-            placement={placement}
-            trigger={d.trigger}
-            effect={d.effect}
-            visibleArrow={d.visibleArrow}
-            order={d.order}
-            layerShow={d.show}
-            disabled={disabled}
-            borderColor={d.borderColor}
-            showAlways={d.showAlways}
-            enterable={d.enterable}
-            popoverClass={d.popoverClass}
-            hideDelay={d.hideDelay}
-            prop={this.prop}
-            betraye={this.betraye}
-            placementObj={placementObj}
-            onAddBetrayer={this.addBetrayer}
-            onRemoveBetrayer={this.removeBetrayer}
-          />
-        );
+        // 图层懒加载
+        (d.showAlways || this.addLayer) &&
+          layers.push(
+            <vue-popover
+              referenceId={referenceId}
+              placementId={placementId}
+              data={data}
+              placement={placement}
+              trigger={d.trigger}
+              effect={d.effect}
+              visibleArrow={d.visibleArrow}
+              order={d.order}
+              disabled={disabled}
+              borderColor={d.borderColor}
+              showAlways={d.showAlways}
+              enterable={d.enterable}
+              popoverClass={d.popoverClass}
+              hideDelay={d.hideDelay}
+              prop={this.prop}
+              betraye={this.betraye}
+              placementObj={placementObj}
+              onAddBetrayer={this.addBetrayer}
+              onRemoveBetrayer={this.removeBetrayer}
+            />
+          );
       } else if (d.type === "text") {
         referenceNode = (
           <div id={referenceId} class="vue-text">
@@ -106,9 +117,9 @@ export default {
         );
       } else {
       }
-    });
+    }
     return (
-      <div class="vue-layer">
+      <div class="vue-layer" onMouseenter={this.initLayer}>
         {referenceNode}
         {layers}
       </div>
@@ -126,7 +137,19 @@ export default {
         d => d === betrayer.id
       );
       index !== -1 && this.betraye[betrayer.placement].splice(index, 1);
+    },
+    // 加载图层
+    initLayer() {
+      if (!this.addLayer) {
+        this.addLayer = true;
+      }
     }
+  },
+  mounted() {
+    this.$emit.apply(this.form, [
+      "layer.add",
+      { prop: this.prop, layer: this }
+    ]);
   }
 };
 </script>

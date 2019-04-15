@@ -11,7 +11,7 @@ import Emitter from "../../mixins/emitter";
 
 export default {
   name: "VueForm",
-  componentName: 'VueForm',
+  componentName: "VueForm",
   mixins: [Emitter],
   props: {
     model: [Object, Array],
@@ -23,7 +23,7 @@ export default {
     labelPosition: String,
     lineHeight: {
       type: String,
-      default: '32px'
+      default: "32px"
     },
     itemGutter: {
       type: Number,
@@ -35,16 +35,17 @@ export default {
     },
     rowledge: {
       type: String,
-      default: '24px'
+      default: "24px"
     }
   },
   data() {
     return {
-      layerCopy: null,
-      initModel: null,
+      layerCopy: Object.freeze(null),
+      initModel: Object.freeze(null),
       isResponse: false,
-      initLayer: [],
-      reload: true
+      initLayer: Object.freeze([]),
+      reload: true,
+      layerComponents: []
     };
   },
   computed: {
@@ -57,11 +58,15 @@ export default {
     }
   },
   created() {
+    this.layerComponents = [];
     this.$on("popover.show", prop => {
-      this.$emit('show', prop)
+      this.$emit("show", prop);
     });
     this.$on("popover.hide", prop => {
-      this.$emit('hide', prop)
+      this.$emit("hide", prop);
+    });
+    this.$on("layer.add", obj => {
+      this.layerComponents.push(obj);
     });
     this.init();
   },
@@ -80,19 +85,24 @@ export default {
   },
   methods: {
     init() {
-      this.initLayer = clone(this.layer);
+      this.initLayer = Object.freeze(clone(this.layer));
       (this.initLayer || []).forEach(da => {
-        da.show === undefined && this.$set(da, "show", true);
+        da.show === undefined && (da.show = true);
       });
       this.initLayerFn();
       this.initModelFn();
     },
     initLayerFn() {
       this.initLayer &&
-        (this.layerCopy = JSON.parse(JSON.stringify(this.initLayer)));
+        (this.layerCopy = Object.freeze(
+          JSON.parse(JSON.stringify(this.initLayer))
+        ));
     },
     initModelFn() {
-      this.model && (this.initModel = JSON.parse(JSON.stringify(this.model)));
+      this.model &&
+        (this.initModel = Object.freeze(
+          JSON.parse(JSON.stringify(this.model))
+        ));
     },
     changeShow(id) {
       !id && console.error(`changeShow 方法必须传入 layer id`);
@@ -133,6 +143,12 @@ export default {
             if (!obj.recalculate) return;
             typeof obj.recalculate !== "function" &&
               console.error(`recalculate 必须是 function`);
+
+            // 加载图层
+            const layerComponent = this.layerComponents.find(
+              l => l.prop === d.prop
+            );
+            layerComponent && layerComponent.layer.initLayer();
 
             // 获取 value
             const p = prop || d.prop;
@@ -212,8 +228,10 @@ export default {
     },
     resetFields(id, props = []) {
       this.clearCalculate(id, props, true);
-    },
-    windowResize() {
+    }
+  },
+  mounted() {
+    if (this.response) {
       let width;
       if (window.innerWidth) {
         width = window.innerWidth;
@@ -221,21 +239,8 @@ export default {
         width = document.body.clientWidth;
       }
       if (width <= 768) {
-        !this.isResponse && (this.isResponse = true);
-      } else {
-        this.isResponse && (this.isResponse = false);
+        this.isResponse = true;
       }
-    }
-  },
-  mounted() {
-    if (this.response) {
-      this.windowResize();
-      on(window, "resize", this.windowResize);
-    }
-  },
-  beforeDestroy() {
-    if (this.response) {
-      on(window, "resize", this.windowResize);
     }
   }
 };

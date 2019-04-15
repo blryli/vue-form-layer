@@ -55,12 +55,14 @@ export default {
     },
     calculateCoordinate() {
       !this.addedBody && this.popoverAddedBody();
-      const popover = this.$el;
-      const popoverRect = getDomClientRect(popover);
-      const samePlacementArr = this.placementObj[this.placement];
+      const popoverRect = getDomClientRect(this.$el);
       let reference = $(this.getReferenceId()) || this.reference;
-      let referenceRect = getDomClientRect(reference);
+      const referenceRect = getDomClientRect(reference);
       let referenceRectCount = referenceRect;
+      let position = {
+        top: 0,
+        left: 0
+      }
 
       // 判断是否改变方向与确定最终参考点
       switch (this.placement) {
@@ -172,40 +174,40 @@ export default {
       // 计算节点坐标
       switch (this.momentPlacement) {
         case "top":
-          this.position.left =
+          position.left =
             referenceRectCount.left -
             popoverRect.width / 2 +
             referenceRectCount.width / 2;
-          this.position.top = referenceRectCount.top - popoverRect.height - 12;
+          position.top = referenceRectCount.top - popoverRect.height - 12;
           break;
         case "left":
-          this.position.left = referenceRectCount.left - popoverRect.width - 12;
-          this.position.top =
+          position.left = referenceRectCount.left - popoverRect.width - 12;
+          position.top =
             referenceRectCount.top +
             referenceRectCount.height / 2 -
             popoverRect.height / 2;
           break;
         case "right":
-          this.position.left =
+          position.left =
             referenceRectCount.left + referenceRectCount.width + 12;
-          this.position.top =
+          position.top =
             referenceRectCount.top +
             referenceRectCount.height / 2 -
             popoverRect.height / 2;
           break;
         case "bottom":
-          this.position.left =
+          position.left =
             referenceRectCount.left -
             popoverRect.width / 2 +
             referenceRectCount.width / 2;
-          this.position.top =
+          position.top =
             referenceRectCount.top + referenceRectCount.height + 12;
           break;
         default:
           console.error("Wrong placement prop");
       }
-      popover.style.top = this.position.top + "px";
-      popover.style.left = this.position.left + "px";
+      this.$el.style.top = position.top + "px";
+      this.$el.style.left = position.left + "px";
     }
   }
 }

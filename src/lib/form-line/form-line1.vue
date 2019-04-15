@@ -34,7 +34,12 @@ export default {
           const layer = { ...cur.view, ...da };
           const findIndex = acc.findIndex(l => l.prop === da.prop);
           if (findIndex === -1) {
-            acc.push({ prop: da.prop, show: cur.show, layer: [layer] });
+            acc.push({
+              prop: da.prop,
+              show: cur.show,
+              useRecalculate: !!layer.recalculate,
+              layer: [layer]
+            });
           } else {
             acc[findIndex].layer.push(layer);
           }
@@ -83,14 +88,10 @@ export default {
         span = remainSpace / remainNodeNum;
       }
       this.isResponse && (span = 24);
-      let referenceBorderColor;
-      (this.formationLayer || []).forEach((d, i) => {
-        d.prop === prop &&
-          (d.layer || []).forEach(l => {
-            l.referenceBorderColor &&
-              (referenceBorderColor = l.referenceBorderColor);
-          });
-      });
+      const layerRow = this.formationLayer.find(d => d.show && d.prop === prop);
+      const hasColor =
+        layerRow && (layerRow.layer || []).find(l => l.referenceBorderColor);
+      const referenceBorderColor = hasColor && hasColor.referenceBorderColor;
       slotNode = (
         <render-slot
           ref="renderSlot"
@@ -100,10 +101,9 @@ export default {
       );
 
       // 图层分发到 slotNode
-      const layerObj = this.formationLayer.find(d => d.show && d.prop === prop);
-      layerObj &&
+      layerRow &&
         (slotNode = (
-          <vue-layer layer={layerObj.layer} prop={layerObj.prop}>
+          <vue-layer layer={layerRow.layer} prop={layerRow.prop}>
             {slotNode}
           </vue-layer>
         ));
@@ -125,10 +125,7 @@ export default {
       } else {
         // 并列布局
         abreastSlotNodes.push([
-          <vue-col
-            span={span}
-            class="form-line--abreast"
-          >
+          <vue-col span={span} class="form-line--abreast">
             {slotNode}
           </vue-col>
         ]);
