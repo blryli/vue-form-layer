@@ -1,5 +1,4 @@
 <script>
-import { offset, scroll, generateId } from "utils/util";
 import VueFormItem from "components/form-item";
 import VueLayer from "components/layer";
 import VueCol from "components/col";
@@ -102,7 +101,7 @@ export default {
           [slotNode]
         ));
 
-      if (this.form.tableCell) {
+      if (this.form.isTable) {
         nodes.push(slotNode);
         return;
       }
@@ -152,7 +151,7 @@ export default {
       }
     });
     // 并列布局添加节点
-    if (!this.form.tableCell && this.label) {
+    if (!this.form.isTable && this.label) {
       nodes.push(
         h(
           "vue-form-item",

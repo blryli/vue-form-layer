@@ -148,7 +148,8 @@
       rowledge: {
         type: String,
         default: "24px"
-      }
+      },
+      isTable: Boolean
     },
 
     data() {
@@ -177,12 +178,6 @@
       var _this = this;
 
       this.layerComponents = [];
-      this.$on("popover.show", function (prop) {
-        _this.$emit("show", prop);
-      });
-      this.$on("popover.hide", function (prop) {
-        _this.$emit("hide", prop);
-      });
       this.$on("layer.add", function (obj) {
         _this.layerComponents.push(obj);
       });
@@ -259,6 +254,8 @@
       },
 
       recalculate(id, callback) {
+        var _this3 = this;
+
         if (typeof callback !== "function") {
           console.error("recalculate方法 回调参数必须是 函数");
           return;
@@ -269,27 +266,26 @@
           return;
         }
 
-        this.recalculateField(id);
         var valid = true;
-        (this.initLayer || []).forEach(function (da) {
-          if (da.id === id) {
-            (da.data || []).find(function (d) {
-              return d.data;
-            }) && (valid = false);
-          }
+        this.layerComponents.forEach(function (d) {
+          d.layer.recalculateField(id, null, function (fieldCb) {
+            fieldCb.message && (valid = false);
+
+            _this3.$emit('recalculate', fieldCb);
+          });
         });
         callback(valid);
       },
 
-      recalculateEmit(obj) {
-        this.$emit('recalculate', obj);
-      },
-
       recalculateField(id, prop) {
+        var _this4 = this;
+
         !id && console.error(`recalculateField 方法必须传入 layer id`);
         !this.model && console.error(`model is not define`);
         this.layerComponents.forEach(function (d) {
-          d.layer.recalculateField(id, prop);
+          d.layer.recalculateField(id, prop, function (fieldCb) {
+            _this4.$emit('recalculate', fieldCb);
+          });
         });
       },
 
@@ -302,7 +298,7 @@
       },
 
       resetData(prop) {
-        var _this3 = this;
+        var _this5 = this;
 
         // 初始化值
         if (!this.initModel) return;
@@ -310,7 +306,7 @@
 
         if (Array.isArray(this.model)) {
           (this.model || []).forEach(function (d, i) {
-            _this3.$set(d, prop, _this3.initModel[i][prop] || "");
+            _this5.$set(d, prop, _this5.initModel[i][prop] || "");
           });
         } else {
           this.$set(this.model, prop, this.initModel[prop] || "");
@@ -477,32 +473,6 @@
       undefined
     );
 
-  var generateId = function generateId() {
-    return Math.floor(Math.random() * 10000);
-  };
-  var debounce = function debounce(func) {
-    var wait = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 300;
-    var immediate = arguments.length > 2 ? arguments[2] : undefined;
-    var timeout;
-    return function () {
-      var context = this;
-      var args = arguments;
-      if (timeout) clearTimeout(timeout);
-
-      if (immediate) {
-        var callNow = !timeout;
-        timeout = setTimeout(function () {
-          timeout = null;
-        }, wait);
-        if (callNow) func.apply(context, args);
-      } else {
-        timeout = setTimeout(function () {
-          func.apply(context, args);
-        }, wait);
-      }
-    };
-  };
-
   //
   //
   //
@@ -612,6 +582,32 @@
       undefined,
       undefined
     );
+
+  var generateId = function generateId() {
+    return Math.floor(Math.random() * 10000);
+  };
+  var debounce = function debounce(func) {
+    var wait = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 300;
+    var immediate = arguments.length > 2 ? arguments[2] : undefined;
+    var timeout;
+    return function () {
+      var context = this;
+      var args = arguments;
+      if (timeout) clearTimeout(timeout);
+
+      if (immediate) {
+        var callNow = !timeout;
+        timeout = setTimeout(function () {
+          timeout = null;
+        }, wait);
+        if (callNow) func.apply(context, args);
+      } else {
+        timeout = setTimeout(function () {
+          func.apply(context, args);
+        }, wait);
+      }
+    };
+  };
 
   var script$2 = {
     name: "VueContent",
@@ -915,11 +911,11 @@
         if (this.showAlways) return;
 
         if (val) {
-          this.$emit.apply(this.form, ["popover.show", this.prop]);
+          this.form.$emit("show", this.prop);
           this.popoverAddedBody();
           this.calculateCoordinate();
         } else {
-          this.$emit.apply(this.form, ["popover.hide", this.prop]);
+          this.form.$emit("hide", this.prop);
         }
       },
 
@@ -1483,7 +1479,7 @@
         });
       },
 
-      recalculateField(id, prop) {
+      recalculateField(id, prop, callback) {
         var _this = this;
 
         this.layerLoad();
@@ -1495,24 +1491,23 @@
           var key = p.substring(p.lastIndexOf("/") + 1);
           var value = Array.isArray(_this.form.model) ? _this.form.model[p.split("/")[p.split("/").length - 2] * 1][key] : _this.form.model[key] || _this.$set(_this.form.model, key, ""); // 获取重算返回对象
 
-          var cb = d.recalculate(value) || null;
-          d.data = cb.message;
-          d.referenceBorderColor = cb.referenceBorderColor;
-          d.disabled = cb.disabled;
+          var recalculateObj = d.recalculate(value) || null;
+          d.data = recalculateObj.message;
+          d.referenceBorderColor = recalculateObj.referenceBorderColor;
+          d.disabled = recalculateObj.disabled;
+          callback({
+            id: d.id,
+            prop: d.prop,
+            message: recalculateObj.message || ""
+          });
 
-          if (typeof cb === "object") {
-            Array.isArray(cb) && console.error("recalculate 返回值必须是 object");
+          if (typeof recalculateObj === "object") {
+            Array.isArray(recalculateObj) && console.error("recalculate 返回值必须是 object");
           } else {
             console.error("recalculate 返回值必须是 object");
           }
 
           _this.updateSlot(d.referenceBorderColor);
-
-          _this.form.recalculateEmit({
-            id: d.id,
-            prop: _this.prop,
-            data: d.data
-          });
 
           return d;
         }));
@@ -1549,10 +1544,10 @@
 
     mounted() {
       // console.log(this.$children[0])
-      this.$emit.apply(this.form, ["layer.add", {
+      this.form.$emit("layer.add", {
         prop: this.prop,
         layer: this
-      }]);
+      });
     }
 
   };
@@ -1867,7 +1862,7 @@
           label = _this.cols[index].label || "";
           labelWidth = _this.cols[index].labelWidth || _this.labelWidth || _this.form.labelWidth || "80px";
           prop = _this.cols[index].prop || "";
-          required = _this.cols[index].required || false;
+          required = _this.cols[index].required;
         } else {
           span = remainSpace / remainNodeNum;
         }
@@ -1894,7 +1889,13 @@
             layer: layerRow.layer,
             prop: layerRow.prop
           }
-        }, [slotNode])); // slotNode 分发
+        }, [slotNode]));
+
+        if (_this.form.isTable) {
+          nodes.push(slotNode);
+          return;
+        } // slotNode 分发
+
 
         if (!_this.label) {
           // 基本布局
@@ -1925,7 +1926,7 @@
         }
       }); // 并列布局添加节点
 
-      if (this.label) {
+      if (!this.form.isTable && this.label) {
         nodes.push(h("vue-form-item", {
           attrs: {
             label: this.label,
@@ -1942,9 +1943,6 @@
       return h("vue-col", {
         attrs: {
           span: span
-        },
-        class: {
-          "form-line--abreast": true
         }
       }, [h("div", {
         class: {

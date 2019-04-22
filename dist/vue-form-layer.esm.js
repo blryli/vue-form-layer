@@ -1,5 +1,3 @@
-import 'util';
-
 function _defineProperty(obj, key, value) {
   if (key in obj) {
     Object.defineProperty(obj, key, {
@@ -144,7 +142,8 @@ var script = {
     rowledge: {
       type: String,
       default: "24px"
-    }
+    },
+    isTable: Boolean
   },
 
   data() {
@@ -468,32 +467,6 @@ __vue_render__._withStripped = true;
     undefined
   );
 
-var generateId = function generateId() {
-  return Math.floor(Math.random() * 10000);
-};
-var debounce = function debounce(func) {
-  var wait = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 300;
-  var immediate = arguments.length > 2 ? arguments[2] : undefined;
-  var timeout;
-  return function () {
-    var context = this;
-    var args = arguments;
-    if (timeout) clearTimeout(timeout);
-
-    if (immediate) {
-      var callNow = !timeout;
-      timeout = setTimeout(function () {
-        timeout = null;
-      }, wait);
-      if (callNow) func.apply(context, args);
-    } else {
-      timeout = setTimeout(function () {
-        func.apply(context, args);
-      }, wait);
-    }
-  };
-};
-
 //
 //
 //
@@ -603,6 +576,32 @@ __vue_render__$1._withStripped = true;
     undefined,
     undefined
   );
+
+var generateId = function generateId() {
+  return Math.floor(Math.random() * 10000);
+};
+var debounce = function debounce(func) {
+  var wait = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 300;
+  var immediate = arguments.length > 2 ? arguments[2] : undefined;
+  var timeout;
+  return function () {
+    var context = this;
+    var args = arguments;
+    if (timeout) clearTimeout(timeout);
+
+    if (immediate) {
+      var callNow = !timeout;
+      timeout = setTimeout(function () {
+        timeout = null;
+      }, wait);
+      if (callNow) func.apply(context, args);
+    } else {
+      timeout = setTimeout(function () {
+        func.apply(context, args);
+      }, wait);
+    }
+  };
+};
 
 var script$2 = {
   name: "VueContent",
@@ -1886,7 +1885,7 @@ var script$8 = {
         }
       }, [slotNode]));
 
-      if (_this.form.tableCell) {
+      if (_this.form.isTable) {
         nodes.push(slotNode);
         return;
       } // slotNode 分发
@@ -1921,7 +1920,7 @@ var script$8 = {
       }
     }); // 并列布局添加节点
 
-    if (!this.form.tableCell && this.label) {
+    if (!this.form.isTable && this.label) {
       nodes.push(h("vue-form-item", {
         attrs: {
           label: this.label,

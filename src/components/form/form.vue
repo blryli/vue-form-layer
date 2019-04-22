@@ -6,7 +6,6 @@
 
 <script>
 import { on, off } from "utils/dom";
-import { callbackify } from 'util';
 
 export default {
   name: "VueForm",
@@ -34,7 +33,8 @@ export default {
     rowledge: {
       type: String,
       default: "24px"
-    }
+    },
+    isTable: Boolean
   },
   data() {
     return {

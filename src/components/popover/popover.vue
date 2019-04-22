@@ -9,7 +9,7 @@
 
 <script>
 import VueContent from 'components/content'
-import { offset, scroll, debounce } from "utils/util";
+import { scroll, debounce } from "utils/util";
 import {
   on,
   off,
