@@ -1,45 +1,59 @@
 {
   "name": "vue-form-layer",
-  "description": "A vue2.0 vue-form-layer component-form",
-  "version": "1.2.13",
-  "author": "lizhili <405549416@qq.com>",
+  "description": "Smooth scrolling for any amount of data",
+  "version": "1.0.0",
+  "author": {
+    "name": "blryli",
+    "email": "405549416@qq.com"
+  },
+  "keywords": [
+    "vue",
+    "vuejs",
+    "plugin"
+  ],
   "license": "MIT",
-  "private": false,
-  "main": "dist/vue-form-layer.js",
+  "main": "dist/vue-form-layer.umd.js",
+  "module": "dist/vue-form-layer.esm.js",
+  "unpkg": "dist/vue-form-layer.min.js",
+  "scripts": {
+    "build": "npm run build:browser && npm run build:es && npm run build:umd",
+    "build:browser": "rollup --config build/rollup.config.browser.js",
+    "build:es": "rollup --config build/rollup.config.es.js",
+    "build:umd": "rollup --config build/rollup.config.umd.js",
+    "dev": "cross-env NODE_ENV=development rollup --config build/rollup.config.es.js --watch",
+    "es5": "babel dist -d lib"
+  },
   "repository": {
     "type": "git",
-    "url": "https://github.com/blryli/vue-form-layer"
+    "url": "git+https://github.com/blryli/vue-form-layer.git"
   },
-  "scripts": {
-    "dev": "cross-env NODE_ENV=development webpack-dev-server --open --hot",
-    "build": "cross-env NODE_ENV=production webpack --progress --hide-modules"
+  "bugs": {
+    "url": "https://github.com/blryli/vue-form-layer/issues"
   },
-  "dependencies": {
-    "vue": "^2.5.11"
+  "homepage": "https://github.com/blryli/vue-form-layer#readme",
+  "peerDependencies": {
+    "vue": "^2.6.10"
+  },
+  "devDependencies": {
+    "@babel/cli": "^7.4.3",
+    "@babel/core": "^7.4.3",
+    "@babel/preset-env": "^7.4.3",
+    "babel-plugin-module-resolver": "^3.2.0",
+    "cross-env": "^5.2.0",
+    "rollup": "^1.10.0",
+    "rollup-plugin-babel": "^4.3.2",
+    "rollup-plugin-commonjs": "^9.3.4",
+    "rollup-plugin-node-resolve": "^4.2.3",
+    "rollup-plugin-replace": "^2.2.0",
+    "rollup-plugin-sass": "^1.2.2",
+    "rollup-plugin-uglify": "^6.0.2",
+    "rollup-plugin-vue": "^5.0.0",
+    "vue": "^2.6.10",
+    "vue-template-compiler": "^2.6.10"
   },
   "browserslist": [
-    "> 1%",
+    "> 1%, not dead",
     "last 2 versions",
     "not ie <= 8"
-  ],
-  "devDependencies": {
-    "babel-core": "^6.26.0",
-    "babel-helper-vue-jsx-merge-props": "^2.0.3",
-    "babel-loader": "^7.1.2",
-    "babel-plugin-syntax-jsx": "^6.18.0",
-    "babel-plugin-transform-vue-jsx": "^3.7.0",
-    "babel-preset-env": "^1.6.0",
-    "babel-preset-stage-3": "^6.24.1",
-    "cross-env": "^5.0.5",
-    "css-loader": "^0.28.7",
-    "element-ui": "^2.4.8",
-    "file-loader": "^1.1.4",
-    "node-sass": "^4.9.3",
-    "sass-loader": "^7.1.0",
-    "url-loader": "^1.1.2",
-    "vue-loader": "^13.0.5",
-    "vue-template-compiler": "^2.4.4",
-    "webpack": "^3.6.0",
-    "webpack-dev-server": "^2.9.1"
-  }
+  ]
 }

@@ -1,10 +1,5 @@
-import Vue from 'vue';
-
-const isServer = Vue.prototype.$isServer;
-
-// 用来绑定事件的方法，它是一个自执行的函数，会根据是否运行于服务器和是否支持addEventListener来返回一个function
 export const on = (function () {
-  if (!isServer && document.addEventListener) {
+  if (document.addEventListener) {
     return function (element, event, handler) {
       if (element && event && handler) {
         element.addEventListener(event, function (e) {
@@ -25,7 +20,7 @@ export const on = (function () {
 
 // 解除绑定事件
 export const off = (function () {
-  if (!isServer && document.removeEventListener) {
+  if (document.removeEventListener) {
     return function (element, event, handler) {
       if (element && event) {
         element.removeEventListener(event, handler, false);
@@ -85,14 +80,14 @@ export const getDomClientRect = function (target) {
   const right = targetRect.right;
   const width = targetRect.width || right - left;
   const height = targetRect.height || bottom - top;
-    return {
-      x: left + document.documentElement.scrollLeft,
-      y: right + document.documentElement.scrollTop,
-      width: width,
-      height: height,
-      top: top,
-      right: right,
-      bottom: bottom,
-      left: left
-    }
+  return {
+    x: left + document.documentElement.scrollLeft,
+    y: right + document.documentElement.scrollTop,
+    width: width,
+    height: height,
+    top: top,
+    right: right,
+    bottom: bottom,
+    left: left
+  }
 };

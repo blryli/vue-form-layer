@@ -55,7 +55,7 @@ export const debounce = (func, wait = 300, immediate) => {
   return function () {
     let context = this;
     let args = arguments;
-    
+
     if (timeout) clearTimeout(timeout);
     if (immediate) {
       var callNow = !timeout;
