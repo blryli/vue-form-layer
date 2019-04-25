@@ -17,11 +17,13 @@ npm i vue-form-layer -S
 
 ```js
 import VueFormLayer from 'vue-form-layer'
+import 'vue-form-layer/dist/vue-form-layer.css'
 
 Vue.use(VueFormLayer)
 
 // 或者直接使用script导入
-<script src="https://unpkg.com/vue-form-layer/dist/vue-form-layer.js"></script>
+<script src="https://unpkg.com/vue-form-layer/dist/vue-form-layer.min.js"></script>
+<script src="https://unpkg.com/vue-form-layer/dist/vue-form-layer.css"></script>
 ```
 
 #### 基本布局
@@ -271,14 +273,12 @@ export default {
 | placement  | layer 展示位置   | string   | top/right/bottom/left  | top    |
 | target    | layer 默认为default(传入form-line的dom)，target存在时会修改触发目标，(data) => {return 模板/组件 },多个图层同时指向default时，排列显示   | string/function   | why/warn  | default |
 | disabled    | layer 是否禁用  | boolean   | -  | false |
-| order      | layer 图层横向排序，数字越小越靠前   | number   | -  | 0 |
 | trigger    | layer 触发方式   | string   | hover/focus/click  | hover    |
 | hideDelay    | layer 隐藏延时   | number   | -  | 200    |
 | showAlways    | layer 是否总是显示  | boolean   | -  | false |
 | enterable    | layer为popover时，鼠标是否可移入  | boolean   | -  | false |
 | visible-arrow | layer为popover时，是否显示箭头  | boolean   | -  | true |
 | template   | 数据展示模板 (data, prop, show) => {return 模板/组件 }, 回调参数data是数据，回调参数prop是模板位置，回调读书show是模板所在图层展示状态 | function | -  | top    |
-| recalculate| 字段重算规则 (value) => {return {message: 展示文字，effect: 主题颜色, disabled: 是否禁用, borderColor: 边框颜色} | function  |  -  | -   |
 
 ### layer data 图层item配置 array
 
@@ -310,32 +310,24 @@ export default {
 
 ### 版本
 
-## 1.2.9
+## 1.2.14
 
-2018-4-2
+2018-4-22
 
-- 优化、简化组件。
+- 迁移到 rollup，优化组件打包，支持esm格式。
 
-## 1.2.8
+- form 增加 isTable 属性，以更少的node渲染 table，提高渲染性能。
 
-2018-3-28
+## 1.2.13
 
-- 增加图层处理组件 vue-layer。
+2018-4-8
 
-- 解决多图层，scroll 事件改变popover placement 时定位不准确的问题。
+- 图层使用懒加载，在鼠标移入reference或重算时加载，提高组件渲染性能。
 
-- 增加 form-line 内的 slot 渲染组件 render-slot。
+## 1.2.11
 
-- 节点位置改用 getBoundingClientRect 函数获取。
+2018-4-8
 
-- 增加 referenceBorderColor，用于改变reference 边框颜色属性，不传referenceBorderColor则不会改变 reference 的样式。
-
-## 1.2.6
-
-2018-3-15
-
-- scroll事件时，展示状态的popover实时计算位置。
-
-- 修复popover对scroll响应不准确的BUG。
+- form增加line-height属性。
 
 [历史版本](https://github.com/blryli/vue-form-layer/blob/master/VERSIONS.md)

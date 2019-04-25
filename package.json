@@ -1,7 +1,7 @@
 {
   "name": "vue-form-layer",
-  "description": "Smooth scrolling for any amount of data",
-  "version": "1.2.14",
+  "description": "The form is quickly laid out and validated with layer thinking",
+  "version": "1.2.15",
   "author": {
     "name": "blryli",
     "email": "405549416@qq.com"
@@ -9,9 +9,15 @@
   "keywords": [
     "vue",
     "vuejs",
-    "plugin"
+    "form",
+    "layer",
+    "validate",
+    "layou"
   ],
   "license": "MIT",
+  "files": [
+    "dist"
+  ],
   "main": "dist/vue-form-layer.umd.js",
   "module": "dist/vue-form-layer.esm.js",
   "unpkg": "dist/vue-form-layer.min.js",
@@ -52,7 +58,7 @@
     "vue-template-compiler": "^2.6.10"
   },
   "browserslist": [
-    "> 1%, not dead",
+    "> 1%",
     "last 2 versions",
     "not ie <= 8"
   ]
