@@ -228,6 +228,8 @@ export default {
 | ---------  | ----------  | --------   |----  | ----- |
 | model      | form对象，用于重算及重置    | object/array     |-     | -     |
 | layer      | 图层数组    | array       |-     | -     |
+| mark      | 启用标记信息组件    | boolean       |-     | false   |
+| markContent      | (prop, show) => {}    | funtion       |-     | -   |
 | label-width | 表单域标签的宽度 | string |-     | -   |
 | labelPosition | label的位置 | string  |left/right/top  | right    |
 | line-height | form-item 内label及content行高 | string |-  | '32px'    |

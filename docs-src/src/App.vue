@@ -7,7 +7,7 @@
         <p>特点：高度灵活性、可控性、扩展性。</p>
         <a class="link" href="https://github.com/blryli/vue-form-layer">文档</a>
       </center>
-      <vue-form ref="testform" :model="testform" :layer="testlayer" rowledge="0" label-width="120px">
+      <!-- <vue-form ref="testform" :model="testform" :layer="testlayer" rowledge="0" label-width="120px">
         <p>length: 500</p>
         <table style="width: 100%">
           <tbody id="contentArea">
@@ -25,8 +25,8 @@
             </tr>
           </tbody>
         </table>
-      </vue-form>
-      <!-- <h2>apply to form layou</h2>
+      </vue-form> -->
+      <h2>apply to form layou</h2>
       <el-radio-group v-model="radio" style="margin-bottom: 20px;">
         <el-radio-button label="top"></el-radio-button>
         <el-radio-button label="right"></el-radio-button>
@@ -80,7 +80,7 @@
       </p>
       <br />
       <h2>apply to table validate</h2>
-      <vue-form ref="table" :model="tableData" :layer="tableLayer" isTable rowledge="0">
+      <vue-form ref="table" :model="tableData" :layer="tableLayer" isTable rowledge="0" mark>
         <el-table :data="tableData" style="width: 100%">
           <el-table-column label="id">
             <template slot-scope="scope">
@@ -109,7 +109,7 @@
         <el-button type="primary" @click="submitTable('table')">submit table</el-button>
         <el-button @click="$refs['table'].clearCalculate('tableLayer')">clearCalculate</el-button>
         <el-button @click="$refs['table'].resetFields('tableLayer')">resetFields</el-button>
-      </p> -->
+      </p>
     </div>
     <!-- <el-switch v-model="testvalue" @change="$refs['testform'].changeShow('testId')" inactive-text="layer visible" /> -->
   </div>

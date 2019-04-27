@@ -80,16 +80,21 @@ export default {
       const hasColor =
         layerRow && (layerRow.layer || []).find(l => l.referenceBorderColor);
       const referenceBorderColor = hasColor && hasColor.referenceBorderColor;
+      const slotId = this.form.mark && prop ? `slotId${prop}` : ''
       slotNode = h("render-slot", {
         attrs: {
+          id: slotId,
           slotNode: slotNode,
           referenceBorderColor: referenceBorderColor
+        },
+        nativeOn: {
+          click: this.slotHandle
         }
       });
 
 
       // 图层分发到 slotNode
-      layerRow &&
+      !this.form.mark && layerRow &&
         (slotNode = h(
           "vue-layer",
           {
@@ -168,6 +173,7 @@ export default {
       );
     }
     let span = this.isResponse ? 24 : this.span;
+    if (this.form.mark && this.form.isTable) return nodes;
     return h(
       "vue-col",
       {
@@ -177,6 +183,21 @@ export default {
       },
       [h("div", { class: { "vue-form-line": true } }, [nodes])]
     );
+  },
+  methods: {
+    slotHandle(e) {
+      if (!this.form.mark) return;
+      if (!this.cols.find(d => d.prop)) {
+        console.error('mark模式 必须在cols传入prop');
+        return;
+      }
+      const target = e.target;
+      const parent = target.parentNode;
+      while (parent.id.indexOf('slotId')) {
+        parent = target.parentNode;
+      }
+      this.form.clickItemId = parent.id;
+    }
   }
 };
 </script>

@@ -1,11 +1,12 @@
 <template>
   <form ref="vueForm" v-if="reload" class="vue-form" :class="formClass" :style="{ margin: `0 -${itemGutter / 2}px` }">
     <slot></slot>
+    <vue-form-mark v-if="mark" :id="clickItemId"></vue-form-mark>
   </form>
 </template>
 
 <script>
-import { on, off } from "utils/dom";
+import vueFormMark from 'components/form-mark'
 
 export default {
   name: "VueForm",
@@ -34,17 +35,18 @@ export default {
       type: String,
       default: "24px"
     },
-    isTable: Boolean
+    isTable: Boolean,
+    mark: Boolean
   },
+  components: { vueFormMark },
   data() {
     return {
-      layerCopy: Object.freeze(null),
       initModel: Object.freeze(null),
       isResponse: false,
       initLayer: Object.freeze([]),
       reload: true,
       layerComponents: [],
-      layerSwich: {}
+      clickItemId: null
     };
   },
   computed: {
@@ -98,13 +100,7 @@ export default {
     },
     init() {
       this.initLayer = Object.freeze(this.formationLayer());
-      this.initLayerFn();
       this.initModelFn();
-    },
-    initLayerFn() {
-        (this.layerCopy = Object.freeze(
-          JSON.parse(JSON.stringify(this.initLayer))
-        ));
     },
     initModelFn() {
       this.model &&

@@ -244,3 +244,11 @@ textarea {
 .vue-col {
   float: left;
 }
+
+.vue-form__mark {
+  position: fixed;
+  padding: 10px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  background-color: #fff;
+}
