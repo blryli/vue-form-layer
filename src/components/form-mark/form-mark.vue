@@ -1,25 +1,74 @@
 <script>
 import { on, off, getDomClientRect } from "utils/dom";
+import VueMarkContent from './form-mark-content.vue'
+import { setTimeout } from 'timers';
 
 export default {
   name: "vueFormMark",
   props: {
-    id: String
+    id: String,
+    markContent: Function,
+    markEffect: {
+      type: String,
+      default: "light"
+    }
   },
+  components: {VueMarkContent},
   data() {
     return {
       show: false,
       oldId: null
     };
   },
+  computed: {
+    style() {
+      const style = {
+        borderColor: "#ddd",
+        backgroundColor: "#fff",
+        color: "#333"
+      };
+      switch (this.markEffect) {
+        case "light":
+          break;
+        case "dark":
+          style.borderColor = style.backgroundColor = "#333";
+          style.color = "#fff";
+          break;
+        default:
+          style.borderColor = style.backgroundColor = this.markEffect;
+          style.color = "#fff";
+          break;
+      }
+      style.display = this.show ? "block" : "none";
+      return style;
+    }
+  },
   render(h) {
-    const prop = this.id ? this.id.substring(this.id.indexOf('/')) : '';
-    return h('div', {
-      attrs: {
-        class: 'vue-form__mark'
+    const prop = this.id ? this.id.substring(this.id.indexOf("/")) : "";
+    const contentFn = (h, prop) => {
+      return h('vue-mark-content', {
+        attrs: {
+          prop: prop
+        },
+        ref: 'VueMarkContent'
+      })
+    }
+    return h(
+      "div",
+      {
+        attrs: {
+          class: "vue-form__mark"
+        },
+        style: this.style
       },
-      style: {display: this.show ? 'block' : 'none'}
-    }, [`${prop}  ${this.show}`])
+      [
+        h("div", {
+          class: "vue-popover__arrow",
+          style: {'--borderColor': this.style.borderColor, '--bdColor': this.style.backgroundColor}
+        }),
+        contentFn(h, prop)
+      ]
+    );
   },
   methods: {
     windowClick(e) {
@@ -43,18 +92,29 @@ export default {
     setPosition() {
       this.reference = document.getElementById(this.id);
       const referenceRect = getDomClientRect(this.reference);
-      this.$el.style.display = 'block';
-      this.$el.style.left = referenceRect.left + referenceRect.width / 2 - this.$el.offsetWidth / 2 + 'px';
-      this.$el.style.top = referenceRect.top - this.$el.offsetHeight - 12 + 'px';
+      this.$el.style.display = "block";
+      this.$el.style.left =
+        referenceRect.left +
+        referenceRect.width / 2 -
+        this.$el.offsetWidth / 2 +
+        "px";
+      this.$el.style.top =
+        referenceRect.top - this.$el.offsetHeight - 12 + "px";
+      this.$refs.VueMarkContent.$emit('mark.to.show');
     },
     windowScroll() {
       this.id && this.show && this.setPosition();
     }
   },
   mounted() {
-    on(window, 'click', this.windowClick);
-    on(window, 'scroll', this.windowScroll);
-    document.body.appendChild(this.$el)
+    on(window, "click", this.windowClick);
+    on(window, "scroll", this.windowScroll);
+    document.body.appendChild(this.$el);
+  },
+  beforeDestroy() {
+    off(window, "click", this.windowClick);
+    off(window, "scroll", this.windowScroll);
+    document.body.removeChild(this.$el);
   }
 };
 </script>

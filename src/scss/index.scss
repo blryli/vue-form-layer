@@ -248,7 +248,17 @@ textarea {
 .vue-form__mark{
   position: fixed;
   padding: 10px;
-  border: 1px solid #ddd;
+  border: 1px solid;
   border-radius: 4px;
-  background-color: #fff;
+  .vue-popover__arrow {
+    border-top-color: var(--borderColor);
+    margin-left: -6px;
+    left: 50%;
+    top: 100%;
+  }
+  .vue-popover__arrow:after {
+    top: -6px;
+    margin-left: -5px;
+    border-top: 5px solid var(--bdColor);
+  }
 }

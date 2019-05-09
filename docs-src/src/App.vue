@@ -7,26 +7,32 @@
         <p>特点：高度灵活性、可控性、扩展性。</p>
         <a class="link" href="https://github.com/blryli/vue-form-layer">文档</a>
       </center>
-      <!-- <vue-form ref="testform" :model="testform" :layer="testlayer" rowledge="0" label-width="120px">
-        <p>length: 500</p>
+      <vue-form
+        ref="testform"
+        :model="testform"
+        :layer="testlayer"
+        rowledge="0"
+        label-width="120px"
+        isTable
+        mark
+        markEffect="orange"
+      >
+        <p>length: 1000</p>
         <table style="width: 100%">
           <tbody id="contentArea">
-            <tr v-for="(d, i) in 500" :key="i" :class="`/testform/${i}/popover`">
-              <vue-form-line :cols="[{ span: 12, label: '气泡展示', prop: `/testform/${i}/popover` },{ span: 12, label: '自定义内容模板', prop: `/testform/${i}/templateFn` }]">
-                <el-button>{{`/testform/${i}/popover`}}</el-button>
-                <el-button>{{`/testform/${i}/templateFn`}}</el-button>
-              </vue-form-line>
-            </tr>
-            <tr :class="`/testform/10000/popover`">
-              <vue-form-line :cols="[{ span: 12, label: '气泡展示', prop: `/testform/10000/popover` },{ span: 12, label: '自定义内容模板', prop: `/testform/20000/templateFn` }]">
-                <el-button>{{`/testform/10000/popover`}}</el-button>
-                <el-button>{{`/testform/20000/templateFn`}}</el-button>
-              </vue-form-line>
+            <tr v-for="(da, idx) in 200" :key="idx">
+              <td v-for="(d, i) in 5" :key="i">
+                <vue-form-line
+                  :cols="[{ label: '气泡展示', prop: `/testform/${idx}/popover/${i}` }]"
+                >
+                  <el-button>{{`${i}/popover`}}</el-button>
+                </vue-form-line>
+              </td>
             </tr>
           </tbody>
         </table>
-      </vue-form> -->
-      <h2>apply to form layou</h2>
+      </vue-form>
+      <!-- <h2>apply to form layou</h2>
       <el-radio-group v-model="radio" style="margin-bottom: 20px;">
         <el-radio-button label="top"></el-radio-button>
         <el-radio-button label="right"></el-radio-button>
@@ -46,8 +52,8 @@
           <el-input type="text" v-model="formLayou.name" placeholder="name" />
           <el-input type="text" v-model="formLayou.phone" placeholder="phone" />
         </vue-form-line>
-      </vue-form>
-      <h2>apply to form layer show</h2>
+      </vue-form>-->
+      <!-- <h2>apply to form layer show</h2>
       <p>
         <el-switch v-model="value" @change="$refs['form2'].changeShow('layerTooltip')" inactive-text="layer visible" />
       </p>
@@ -65,8 +71,8 @@
           <el-input type="text" v-model="form2.boundary" />
         </vue-form-line>
       </vue-form>
-      <br />
-      <h2>apply to form validate</h2>
+      <br />-->
+      <!-- <h2>apply to form validate</h2>
       <vue-form ref="form1" :model="form1" :layer="layer1" rowledge="24px">
         <vue-form-line :cols="[{ span: 12, label: 'name', prop: '/form/name' },{ span: 12, label: 'age', prop: '/form/age' }]">
           <el-input type="text" v-model="form1.name" @blur="recalculateField('/form/name')" />
@@ -78,8 +84,8 @@
         <el-button @click="$refs['form1'].clearCalculate('formLayer')">clearCalculate</el-button>
         <el-button @click="$refs['form1'].resetFields('formLayer')">resetFields</el-button>
       </p>
-      <br />
-      <h2>apply to table validate</h2>
+      <br />-->
+      <!-- <h2>apply to table validate</h2>
       <vue-form ref="table" :model="tableData" :layer="tableLayer" isTable rowledge="0" mark>
         <el-table :data="tableData" style="width: 100%">
           <el-table-column label="id">
@@ -109,7 +115,7 @@
         <el-button type="primary" @click="submitTable('table')">submit table</el-button>
         <el-button @click="$refs['table'].clearCalculate('tableLayer')">clearCalculate</el-button>
         <el-button @click="$refs['table'].resetFields('tableLayer')">resetFields</el-button>
-      </p>
+      </p>-->
     </div>
     <!-- <el-switch v-model="testvalue" @change="$refs['testform'].changeShow('testId')" inactive-text="layer visible" /> -->
   </div>
@@ -554,15 +560,13 @@ export default {
   },
   mounted() {
     let data = [];
-    for (let i = 0; i < 500; i++) {
-      data.push({
-        prop: `/testform/${i}/popover`,
-        data: `/testform/${i}/popover`
-      });
-      data.push({
-        prop: `/testform/${i}/templateFn`,
-        data: `/testform/${i}/templateFn`
-      });
+    for (let i = 0; i < 200; i++) {
+      for (let index = 0; index < 5; index++) {
+        data.push({
+          prop: `/testform/${i}/popover/${index}`,
+          data: `/testform/${i}/popover/${index}`
+        });
+      }
     }
     this.testlayer = Object.freeze([
       {
@@ -607,7 +611,7 @@ body {
   margin: 0 auto;
   padding: 20px;
   background-color: #fff;
-  box-shadow: 0 1px 15px rgba(0, 0, 0, .1);
+  box-shadow: 0 1px 15px rgba(0, 0, 0, 0.1);
 }
 
 .link {

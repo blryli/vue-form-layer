@@ -80,21 +80,23 @@ export default {
       const hasColor =
         layerRow && (layerRow.layer || []).find(l => l.referenceBorderColor);
       const referenceBorderColor = hasColor && hasColor.referenceBorderColor;
-      const slotId = this.form.mark && prop ? `slotId${prop}` : ''
+      const slotId = this.form.mark && prop ? `slotId${prop}` : "";
+      const markRefrenceClass = this.form.mark && prop ? 'vue-form__mark-reference' : "";
       slotNode = h("render-slot", {
         attrs: {
           id: slotId,
           slotNode: slotNode,
           referenceBorderColor: referenceBorderColor
         },
+        class: markRefrenceClass,
         nativeOn: {
           click: this.slotHandle
         }
       });
 
-
       // 图层分发到 slotNode
-      !this.form.mark && layerRow &&
+      !this.form.mark &&
+        layerRow &&
         (slotNode = h(
           "vue-layer",
           {
@@ -118,7 +120,7 @@ export default {
             "vue-col",
             {
               attrs: {
-                span: span,
+                span: span
               },
               style: {
                 padding: `0 ${this.itemGutter}px`
@@ -146,7 +148,7 @@ export default {
             "vue-col",
             {
               attrs: {
-                span: span,
+                span: span
               },
               class: { "form-line--abreast": true }
             },
@@ -164,7 +166,7 @@ export default {
             attrs: {
               label: this.label,
               labelWidth: this.labelWidth || "80px",
-              required: this.required,
+              required: this.required
             },
             style: { padding: `0 ${this.itemGutter}px` }
           },
@@ -178,7 +180,7 @@ export default {
       "vue-col",
       {
         attrs: {
-          span: span,
+          span: span
         }
       },
       [h("div", { class: { "vue-form-line": true } }, [nodes])]
@@ -188,16 +190,19 @@ export default {
     slotHandle(e) {
       if (!this.form.mark) return;
       if (!this.cols.find(d => d.prop)) {
-        console.error('mark模式 必须在cols传入prop');
+        console.error("mark模式 必须在cols传入prop");
         return;
       }
-      const target = e.target;
-      const parent = target.parentNode;
-      while (parent.id.indexOf('slotId')) {
-        parent = target.parentNode;
+      this.getParent(e.target);
+    },
+    getParent(node) {
+        if (node.id.indexOf("slotId") !== -1) {
+          this.form.clickItemId = node.id;
+        } else {
+          const nodeParent = node.parentNode;
+          parent.nodeName !== "TD" && this.getParent(nodeParent);
+        }
       }
-      this.form.clickItemId = parent.id;
-    }
   }
 };
 </script>

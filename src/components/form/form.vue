@@ -1,7 +1,7 @@
 <template>
   <form ref="vueForm" v-if="reload" class="vue-form" :class="formClass" :style="{ margin: `0 -${itemGutter / 2}px` }">
     <slot></slot>
-    <vue-form-mark v-if="mark" :id="clickItemId"></vue-form-mark>
+    <vue-form-mark v-if="mark" :id="clickItemId" :markEffect="markEffect" :markContent="markContent"></vue-form-mark>
   </form>
 </template>
 
@@ -36,7 +36,9 @@ export default {
       default: "24px"
     },
     isTable: Boolean,
-    mark: Boolean
+    mark: Boolean,
+    markEffect: String,
+    markContent: Function
   },
   components: { vueFormMark },
   data() {

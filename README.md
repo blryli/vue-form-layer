@@ -230,6 +230,7 @@ export default {
 | layer      | 图层数组    | array       |-     | -     |
 | mark      | 启用标记信息组件    | boolean       |-     | false   |
 | markContent      | (prop, show) => {}    | funtion       |-     | -   |
+| markEffect      | 用于设置标记组件主题，接受传入一个颜色值    | string       |light/dark    | light   |
 | label-width | 表单域标签的宽度 | string |-     | -   |
 | labelPosition | label的位置 | string  |left/right/top  | right    |
 | line-height | form-item 内label及content行高 | string |-  | '32px'    |

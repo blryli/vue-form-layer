@@ -1,3 +1,5 @@
+import 'timers';
+
 function _defineProperty(obj, key, value) {
   if (key in obj) {
     Object.defineProperty(obj, key, {
@@ -30,10 +32,6 @@ function _objectSpread(target) {
   }
 
   return target;
-}
-
-function _readOnlyError(name) {
-  throw new Error("\"" + name + "\" is read-only");
 }
 
 var on = function () {
@@ -118,71 +116,28 @@ var getDomClientRect = function getDomClientRect(target) {
   };
 };
 
+//
+//
+//
+//
 var script = {
-  name: "vueFormMark",
   props: {
-    id: String
+    prop: String,
+    onload: Function
   },
-
-  data() {
-    return {
-      show: false,
-      oldId: null
-    };
-  },
-
-  render(h) {
-    var prop = this.id ? this.id.substring(this.id.indexOf('/')) : '';
-    return h('div', {
-      attrs: {
-        class: 'vue-form__mark'
-      },
-      style: {
-        display: this.show ? 'block' : 'none'
-      }
-    }, [`${prop}  ${this.show}`]);
-  },
-
   methods: {
-    windowClick(e) {
-      if (!this.id) return;
-      var idTarget = document.getElementById(this.id);
-      var eTarget = e.target;
-      if (this.$el.contains(eTarget)) return;
+    select() {
+      var _this = this;
 
-      if (this.id !== this.oldId) {
-        this.show = true;
-        this.oldId = this.id;
-      } else if (idTarget.contains(eTarget)) {
-        this.show = !this.show;
-        this.oldId = this.id;
-      } else {
-        this.show = false;
-      }
-
-      if (this.show) {
-        this.setPosition();
-      }
-    },
-
-    setPosition() {
-      this.reference = document.getElementById(this.id);
-      var referenceRect = getDomClientRect(this.reference);
-      this.$el.style.display = 'block';
-      this.$el.style.left = referenceRect.left + referenceRect.width / 2 - this.$el.offsetWidth / 2 + 'px';
-      this.$el.style.top = referenceRect.top - this.$el.offsetHeight - 12 + 'px';
-    },
-
-    windowScroll() {
-      this.id && this.show && this.setPosition();
+      setTimeout(function () {
+        _this.$refs.input.select();
+      });
     }
 
   },
 
   mounted() {
-    on(window, 'click', this.windowClick);
-    on(window, 'scroll', this.windowScroll);
-    document.body.appendChild(this.$el);
+    this.$on('mark.to.show', this.select);
   }
 
 };
@@ -274,8 +229,19 @@ var normalizeComponent_1 = normalizeComponent;
 
 /* script */
 const __vue_script__ = script;
-
 /* template */
+var __vue_render__ = function() {
+  var _vm = this;
+  var _h = _vm.$createElement;
+  var _c = _vm._self._c || _h;
+  return _c("input", {
+    ref: "input",
+    attrs: { type: "text" },
+    domProps: { value: _vm.prop }
+  })
+};
+var __vue_staticRenderFns__ = [];
+__vue_render__._withStripped = true;
 
   /* style */
   const __vue_inject_styles__ = undefined;
@@ -284,15 +250,15 @@ const __vue_script__ = script;
   /* module identifier */
   const __vue_module_identifier__ = undefined;
   /* functional template */
-  const __vue_is_functional_template__ = undefined;
+  const __vue_is_functional_template__ = false;
   /* style inject */
   
   /* style inject SSR */
   
 
   
-  var vueFormMark = normalizeComponent_1(
-    {},
+  var VueMarkContent = normalizeComponent_1(
+    { render: __vue_render__, staticRenderFns: __vue_staticRenderFns__ },
     __vue_inject_styles__,
     __vue_script__,
     __vue_scope_id__,
@@ -303,6 +269,163 @@ const __vue_script__ = script;
   );
 
 var script$1 = {
+  name: "vueFormMark",
+  props: {
+    id: String,
+    markContent: Function,
+    markEffect: {
+      type: String,
+      default: "light"
+    }
+  },
+  components: {
+    VueMarkContent
+  },
+
+  data() {
+    return {
+      show: false,
+      oldId: null
+    };
+  },
+
+  computed: {
+    style() {
+      var style = {
+        borderColor: "#ddd",
+        backgroundColor: "#fff",
+        color: "#333"
+      };
+
+      switch (this.markEffect) {
+        case "light":
+          break;
+
+        case "dark":
+          style.borderColor = style.backgroundColor = "#333";
+          style.color = "#fff";
+          break;
+
+        default:
+          style.borderColor = style.backgroundColor = this.markEffect;
+          style.color = "#fff";
+          break;
+      }
+
+      style.display = this.show ? "block" : "none";
+      return style;
+    }
+
+  },
+
+  render(h) {
+    var prop = this.id ? this.id.substring(this.id.indexOf("/")) : "";
+
+    var contentFn = function contentFn(h, prop) {
+      return h('vue-mark-content', {
+        attrs: {
+          prop: prop
+        },
+        ref: 'VueMarkContent'
+      });
+    };
+
+    return h("div", {
+      attrs: {
+        class: "vue-form__mark"
+      },
+      style: this.style
+    }, [h("div", {
+      class: "vue-popover__arrow",
+      style: {
+        '--borderColor': this.style.borderColor,
+        '--bdColor': this.style.backgroundColor
+      }
+    }), contentFn(h, prop)]);
+  },
+
+  methods: {
+    windowClick(e) {
+      if (!this.id) return;
+      var idTarget = document.getElementById(this.id);
+      var eTarget = e.target;
+      if (this.$el.contains(eTarget)) return;
+
+      if (this.id !== this.oldId) {
+        this.show = true;
+        this.oldId = this.id;
+      } else if (idTarget.contains(eTarget)) {
+        this.show = !this.show;
+        this.oldId = this.id;
+      } else {
+        this.show = false;
+      }
+
+      if (this.show) {
+        this.setPosition();
+      }
+    },
+
+    setPosition() {
+      this.reference = document.getElementById(this.id);
+      var referenceRect = getDomClientRect(this.reference);
+      this.$el.style.display = "block";
+      this.$el.style.left = referenceRect.left + referenceRect.width / 2 - this.$el.offsetWidth / 2 + "px";
+      this.$el.style.top = referenceRect.top - this.$el.offsetHeight - 12 + "px";
+      this.$refs.VueMarkContent.$emit('mark.to.show');
+    },
+
+    windowScroll() {
+      this.id && this.show && this.setPosition();
+    }
+
+  },
+
+  mounted() {
+    on(window, "click", this.windowClick);
+    on(window, "scroll", this.windowScroll);
+    document.body.appendChild(this.$el);
+  },
+
+  beforeDestroy() {
+    off(window, "click", this.windowClick);
+    off(window, "scroll", this.windowScroll);
+    document.body.removeChild(this.$el);
+  }
+
+};
+
+/* script */
+const __vue_script__$1 = script$1;
+
+/* template */
+
+  /* style */
+  const __vue_inject_styles__$1 = undefined;
+  /* scoped */
+  const __vue_scope_id__$1 = undefined;
+  /* module identifier */
+  const __vue_module_identifier__$1 = undefined;
+  /* functional template */
+  const __vue_is_functional_template__$1 = undefined;
+  /* style inject */
+  
+  /* style inject SSR */
+  
+
+  
+  var vueFormMark = normalizeComponent_1(
+    {},
+    __vue_inject_styles__$1,
+    __vue_script__$1,
+    __vue_scope_id__$1,
+    __vue_is_functional_template__$1,
+    __vue_module_identifier__$1,
+    undefined,
+    undefined
+  );
+
+var script$2 = {
   name: "VueForm",
   componentName: "VueForm",
   props: {
@@ -332,7 +455,9 @@ var script$1 = {
       default: "24px"
     },
     isTable: Boolean,
-    mark: Boolean
+    mark: Boolean,
+    markEffect: String,
+    markContent: Function
   },
   components: {
     vueFormMark
@@ -519,10 +644,10 @@ var script$1 = {
 };
 
 /* script */
-const __vue_script__$1 = script$1;
+const __vue_script__$2 = script$2;
 
 /* template */
-var __vue_render__ = function() {
+var __vue_render__$1 = function() {
   var _vm = this;
   var _h = _vm.$createElement;
   var _c = _vm._self._c || _h;
@@ -539,24 +664,30 @@ var __vue_render__ = function() {
           _vm._t("default"),
           _vm._v(" "),
           _vm.mark
-            ? _c("vue-form-mark", { attrs: { id: _vm.clickItemId } })
+            ? _c("vue-form-mark", {
+                attrs: {
+                  id: _vm.clickItemId,
+                  markEffect: _vm.markEffect,
+                  markContent: _vm.markContent
+                }
+              })
             : _vm._e()
         ],
         2
       )
     : _vm._e()
 };
-var __vue_staticRenderFns__ = [];
-__vue_render__._withStripped = true;
+var __vue_staticRenderFns__$1 = [];
+__vue_render__$1._withStripped = true;
 
   /* style */
-  const __vue_inject_styles__$1 = undefined;
+  const __vue_inject_styles__$2 = undefined;
   /* scoped */
-  const __vue_scope_id__$1 = undefined;
+  const __vue_scope_id__$2 = undefined;
   /* module identifier */
-  const __vue_module_identifier__$1 = undefined;
+  const __vue_module_identifier__$2 = undefined;
   /* functional template */
-  const __vue_is_functional_template__$1 = false;
+  const __vue_is_functional_template__$2 = false;
   /* style inject */
   
   /* style inject SSR */
@@ -564,12 +695,12 @@ __vue_render__._withStripped = true;
 
   
   var vueForm = normalizeComponent_1(
-    { render: __vue_render__, staticRenderFns: __vue_staticRenderFns__ },
-    __vue_inject_styles__$1,
-    __vue_script__$1,
-    __vue_scope_id__$1,
-    __vue_is_functional_template__$1,
-    __vue_module_identifier__$1,
+    { render: __vue_render__$1, staticRenderFns: __vue_staticRenderFns__$1 },
+    __vue_inject_styles__$2,
+    __vue_script__$2,
+    __vue_scope_id__$2,
+    __vue_is_functional_template__$2,
+    __vue_module_identifier__$2,
     undefined,
     undefined
   );
@@ -583,7 +714,7 @@ __vue_render__._withStripped = true;
 //
 //
 //
-var script$2 = {
+var script$3 = {
   name: "VueFormItem",
   props: {
     label: String,
@@ -621,10 +752,10 @@ var script$2 = {
 };
 
 /* script */
-const __vue_script__$2 = script$2;
+const __vue_script__$3 = script$3;
 
 /* template */
-var __vue_render__$1 = function() {
+var __vue_render__$2 = function() {
   var _vm = this;
   var _h = _vm.$createElement;
   var _c = _vm._self._c || _h;
@@ -656,17 +787,17 @@ var __vue_render__$1 = function() {
     ]
   )
 };
-var __vue_staticRenderFns__$1 = [];
-__vue_render__$1._withStripped = true;
+var __vue_staticRenderFns__$2 = [];
+__vue_render__$2._withStripped = true;
 
   /* style */
-  const __vue_inject_styles__$2 = undefined;
+  const __vue_inject_styles__$3 = undefined;
   /* scoped */
-  const __vue_scope_id__$2 = undefined;
+  const __vue_scope_id__$3 = undefined;
   /* module identifier */
-  const __vue_module_identifier__$2 = undefined;
+  const __vue_module_identifier__$3 = undefined;
   /* functional template */
-  const __vue_is_functional_template__$2 = false;
+  const __vue_is_functional_template__$3 = false;
   /* style inject */
   
   /* style inject SSR */
@@ -674,12 +805,12 @@ __vue_render__$1._withStripped = true;
 
   
   var vueFormItem = normalizeComponent_1(
-    { render: __vue_render__$1, staticRenderFns: __vue_staticRenderFns__$1 },
-    __vue_inject_styles__$2,
-    __vue_script__$2,
-    __vue_scope_id__$2,
-    __vue_is_functional_template__$2,
-    __vue_module_identifier__$2,
+    { render: __vue_render__$2, staticRenderFns: __vue_staticRenderFns__$2 },
+    __vue_inject_styles__$3,
+    __vue_script__$3,
+    __vue_scope_id__$3,
+    __vue_is_functional_template__$3,
+    __vue_module_identifier__$3,
     undefined,
     undefined
   );
@@ -710,7 +841,7 @@ var debounce = function debounce(func) {
   };
 };
 
-var script$3 = {
+var script$4 = {
   name: "VueContent",
   props: ["data"],
 
@@ -725,18 +856,18 @@ var script$3 = {
 };
 
 /* script */
-const __vue_script__$3 = script$3;
+const __vue_script__$4 = script$4;
 
 /* template */
 
   /* style */
-  const __vue_inject_styles__$3 = undefined;
+  const __vue_inject_styles__$4 = undefined;
   /* scoped */
-  const __vue_scope_id__$3 = undefined;
+  const __vue_scope_id__$4 = undefined;
   /* module identifier */
-  const __vue_module_identifier__$3 = undefined;
+  const __vue_module_identifier__$4 = undefined;
   /* functional template */
-  const __vue_is_functional_template__$3 = undefined;
+  const __vue_is_functional_template__$4 = undefined;
   /* style inject */
   
   /* style inject SSR */
@@ -745,11 +876,11 @@ const __vue_script__$3 = script$3;
   
   var Content = normalizeComponent_1(
     {},
-    __vue_inject_styles__$3,
-    __vue_script__$3,
-    __vue_scope_id__$3,
-    __vue_is_functional_template__$3,
-    __vue_module_identifier__$3,
+    __vue_inject_styles__$4,
+    __vue_script__$4,
+    __vue_scope_id__$4,
+    __vue_is_functional_template__$4,
+    __vue_module_identifier__$4,
     undefined,
     undefined
   );
@@ -946,7 +1077,7 @@ var Mixin = {
 };
 
 //
-var script$4 = {
+var script$5 = {
   name: "VuePopover",
   mixins: [Mixin],
   components: {
@@ -1228,10 +1359,10 @@ var script$4 = {
 };
 
 /* script */
-const __vue_script__$4 = script$4;
+const __vue_script__$5 = script$5;
 
 /* template */
-var __vue_render__$2 = function() {
+var __vue_render__$3 = function() {
   var _vm = this;
   var _h = _vm.$createElement;
   var _c = _vm._self._c || _h;
@@ -1257,17 +1388,17 @@ var __vue_render__$2 = function() {
     )
   ])
 };
-var __vue_staticRenderFns__$2 = [];
-__vue_render__$2._withStripped = true;
+var __vue_staticRenderFns__$3 = [];
+__vue_render__$3._withStripped = true;
 
   /* style */
-  const __vue_inject_styles__$4 = undefined;
+  const __vue_inject_styles__$5 = undefined;
   /* scoped */
-  const __vue_scope_id__$4 = undefined;
+  const __vue_scope_id__$5 = undefined;
   /* module identifier */
-  const __vue_module_identifier__$4 = undefined;
+  const __vue_module_identifier__$5 = undefined;
   /* functional template */
-  const __vue_is_functional_template__$4 = false;
+  const __vue_is_functional_template__$5 = false;
   /* style inject */
   
   /* style inject SSR */
@@ -1275,18 +1406,18 @@ __vue_render__$2._withStripped = true;
 
   
   var VuePopover = normalizeComponent_1(
-    { render: __vue_render__$2, staticRenderFns: __vue_staticRenderFns__$2 },
-    __vue_inject_styles__$4,
-    __vue_script__$4,
-    __vue_scope_id__$4,
-    __vue_is_functional_template__$4,
-    __vue_module_identifier__$4,
+    { render: __vue_render__$3, staticRenderFns: __vue_staticRenderFns__$3 },
+    __vue_inject_styles__$5,
+    __vue_script__$5,
+    __vue_scope_id__$5,
+    __vue_is_functional_template__$5,
+    __vue_module_identifier__$5,
     undefined,
     undefined
   );
 
 //
-var script$5 = {
+var script$6 = {
   name: "VueText",
   components: {
     VueContent: Content
@@ -1350,10 +1481,10 @@ var script$5 = {
 };
 
 /* script */
-const __vue_script__$5 = script$5;
+const __vue_script__$6 = script$6;
 
 /* template */
-var __vue_render__$3 = function() {
+var __vue_render__$4 = function() {
   var _vm = this;
   var _h = _vm.$createElement;
   var _c = _vm._self._c || _h;
@@ -1373,17 +1504,17 @@ var __vue_render__$3 = function() {
     attrs: { data: _vm.data }
   })
 };
-var __vue_staticRenderFns__$3 = [];
-__vue_render__$3._withStripped = true;
+var __vue_staticRenderFns__$4 = [];
+__vue_render__$4._withStripped = true;
 
   /* style */
-  const __vue_inject_styles__$5 = undefined;
+  const __vue_inject_styles__$6 = undefined;
   /* scoped */
-  const __vue_scope_id__$5 = undefined;
+  const __vue_scope_id__$6 = undefined;
   /* module identifier */
-  const __vue_module_identifier__$5 = undefined;
+  const __vue_module_identifier__$6 = undefined;
   /* functional template */
-  const __vue_is_functional_template__$5 = false;
+  const __vue_is_functional_template__$6 = false;
   /* style inject */
   
   /* style inject SSR */
@@ -1391,17 +1522,17 @@ __vue_render__$3._withStripped = true;
 
   
   var VueText = normalizeComponent_1(
-    { render: __vue_render__$3, staticRenderFns: __vue_staticRenderFns__$3 },
-    __vue_inject_styles__$5,
-    __vue_script__$5,
-    __vue_scope_id__$5,
-    __vue_is_functional_template__$5,
-    __vue_module_identifier__$5,
+    { render: __vue_render__$4, staticRenderFns: __vue_staticRenderFns__$4 },
+    __vue_inject_styles__$6,
+    __vue_script__$6,
+    __vue_scope_id__$6,
+    __vue_is_functional_template__$6,
+    __vue_module_identifier__$6,
     undefined,
     undefined
   );
 
-var script$6 = {
+var script$7 = {
   name: "VueLayer",
   components: {
     VuePopover,
@@ -1654,18 +1785,18 @@ var script$6 = {
 };
 
 /* script */
-const __vue_script__$6 = script$6;
+const __vue_script__$7 = script$7;
 
 /* template */
 
   /* style */
-  const __vue_inject_styles__$6 = undefined;
+  const __vue_inject_styles__$7 = undefined;
   /* scoped */
-  const __vue_scope_id__$6 = undefined;
+  const __vue_scope_id__$7 = undefined;
   /* module identifier */
-  const __vue_module_identifier__$6 = undefined;
+  const __vue_module_identifier__$7 = undefined;
   /* functional template */
-  const __vue_is_functional_template__$6 = undefined;
+  const __vue_is_functional_template__$7 = undefined;
   /* style inject */
   
   /* style inject SSR */
@@ -1674,11 +1805,11 @@ const __vue_script__$6 = script$6;
   
   var Layer = normalizeComponent_1(
     {},
-    __vue_inject_styles__$6,
-    __vue_script__$6,
-    __vue_scope_id__$6,
-    __vue_is_functional_template__$6,
-    __vue_module_identifier__$6,
+    __vue_inject_styles__$7,
+    __vue_script__$7,
+    __vue_scope_id__$7,
+    __vue_is_functional_template__$7,
+    __vue_module_identifier__$7,
     undefined,
     undefined
   );
@@ -1689,7 +1820,7 @@ const __vue_script__$6 = script$6;
 //
 //
 //
-var script$7 = {
+var script$8 = {
   name: "VueCol",
   props: {
     span: Number
@@ -1732,10 +1863,10 @@ var script$7 = {
 };
 
 /* script */
-const __vue_script__$7 = script$7;
+const __vue_script__$8 = script$8;
 
 /* template */
-var __vue_render__$4 = function() {
+var __vue_render__$5 = function() {
   var _vm = this;
   var _h = _vm.$createElement;
   var _c = _vm._self._c || _h;
@@ -1746,17 +1877,17 @@ var __vue_render__$4 = function() {
     2
   )
 };
-var __vue_staticRenderFns__$4 = [];
-__vue_render__$4._withStripped = true;
+var __vue_staticRenderFns__$5 = [];
+__vue_render__$5._withStripped = true;
 
   /* style */
-  const __vue_inject_styles__$7 = undefined;
+  const __vue_inject_styles__$8 = undefined;
   /* scoped */
-  const __vue_scope_id__$7 = undefined;
+  const __vue_scope_id__$8 = undefined;
   /* module identifier */
-  const __vue_module_identifier__$7 = undefined;
+  const __vue_module_identifier__$8 = undefined;
   /* functional template */
-  const __vue_is_functional_template__$7 = false;
+  const __vue_is_functional_template__$8 = false;
   /* style inject */
   
   /* style inject SSR */
@@ -1764,17 +1895,17 @@ __vue_render__$4._withStripped = true;
 
   
   var vueCol = normalizeComponent_1(
-    { render: __vue_render__$4, staticRenderFns: __vue_staticRenderFns__$4 },
-    __vue_inject_styles__$7,
-    __vue_script__$7,
-    __vue_scope_id__$7,
-    __vue_is_functional_template__$7,
-    __vue_module_identifier__$7,
+    { render: __vue_render__$5, staticRenderFns: __vue_staticRenderFns__$5 },
+    __vue_inject_styles__$8,
+    __vue_script__$8,
+    __vue_scope_id__$8,
+    __vue_is_functional_template__$8,
+    __vue_module_identifier__$8,
     undefined,
     undefined
   );
 
-var script$8 = {
+var script$9 = {
   name: "RenderSlot",
   componentName: "RenderSlot",
   props: ["slotNode", "referenceBorderColor"],
@@ -1858,18 +1989,18 @@ var script$8 = {
 };
 
 /* script */
-const __vue_script__$8 = script$8;
+const __vue_script__$9 = script$9;
 
 /* template */
 
   /* style */
-  const __vue_inject_styles__$8 = undefined;
+  const __vue_inject_styles__$9 = undefined;
   /* scoped */
-  const __vue_scope_id__$8 = undefined;
+  const __vue_scope_id__$9 = undefined;
   /* module identifier */
-  const __vue_module_identifier__$8 = undefined;
+  const __vue_module_identifier__$9 = undefined;
   /* functional template */
-  const __vue_is_functional_template__$8 = undefined;
+  const __vue_is_functional_template__$9 = undefined;
   /* style inject */
   
   /* style inject SSR */
@@ -1878,16 +2009,16 @@ const __vue_script__$8 = script$8;
   
   var RenderSlot = normalizeComponent_1(
     {},
-    __vue_inject_styles__$8,
-    __vue_script__$8,
-    __vue_scope_id__$8,
-    __vue_is_functional_template__$8,
-    __vue_module_identifier__$8,
+    __vue_inject_styles__$9,
+    __vue_script__$9,
+    __vue_scope_id__$9,
+    __vue_is_functional_template__$9,
+    __vue_module_identifier__$9,
     undefined,
     undefined
   );
 
-var script$9 = {
+var script$a = {
   name: "VueFormLine",
   components: {
     VueFormItem: vueFormItem,
@@ -1978,13 +2109,15 @@ var script$9 = {
         return l.referenceBorderColor;
       });
       var referenceBorderColor = hasColor && hasColor.referenceBorderColor;
-      var slotId = _this.form.mark && prop ? `slotId${prop}` : '';
+      var slotId = _this.form.mark && prop ? `slotId${prop}` : "";
+      var markRefrenceClass = _this.form.mark && prop ? 'vue-form__mark-reference' : "";
       slotNode = h("render-slot", {
         attrs: {
           id: slotId,
           slotNode: slotNode,
           referenceBorderColor: referenceBorderColor
         },
+        class: markRefrenceClass,
         nativeOn: {
           click: _this.slotHandle
         }
@@ -2065,36 +2198,38 @@ var script$9 = {
       if (!this.cols.find(function (d) {
         return d.prop;
       })) {
-        console.error('mark模式 必须在cols传入prop');
+        console.error("mark模式 必须在cols传入prop");
         return;
       }
 
-      var target = e.target;
-      var parent = target.parentNode;
+      this.getParent(e.target);
+    },
 
-      while (parent.id.indexOf('slotId')) {
-        parent = (_readOnlyError("parent"), target.parentNode);
+    getParent(node) {
+      if (node.id.indexOf("slotId") !== -1) {
+        this.form.clickItemId = node.id;
+      } else {
+        var nodeParent = node.parentNode;
+        parent.nodeName !== "TD" && this.getParent(nodeParent);
       }
-
-      this.form.clickItemId = parent.id;
     }
 
   }
 };
 
 /* script */
-const __vue_script__$9 = script$9;
+const __vue_script__$a = script$a;
 
 /* template */
 
   /* style */
-  const __vue_inject_styles__$9 = undefined;
+  const __vue_inject_styles__$a = undefined;
   /* scoped */
-  const __vue_scope_id__$9 = undefined;
+  const __vue_scope_id__$a = undefined;
   /* module identifier */
-  const __vue_module_identifier__$9 = undefined;
+  const __vue_module_identifier__$a = undefined;
   /* functional template */
-  const __vue_is_functional_template__$9 = undefined;
+  const __vue_is_functional_template__$a = undefined;
   /* style inject */
   
   /* style inject SSR */
@@ -2103,11 +2238,11 @@ const __vue_script__$9 = script$9;
   
   var VueFormLine = normalizeComponent_1(
     {},
-    __vue_inject_styles__$9,
-    __vue_script__$9,
-    __vue_scope_id__$9,
-    __vue_is_functional_template__$9,
-    __vue_module_identifier__$9,
+    __vue_inject_styles__$a,
+    __vue_script__$a,
+    __vue_scope_id__$a,
+    __vue_is_functional_template__$a,
+    __vue_module_identifier__$a,
     undefined,
     undefined
   );
