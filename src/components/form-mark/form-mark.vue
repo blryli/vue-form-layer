@@ -1,7 +1,14 @@
 <script>
-import { on, off, getDomClientRect } from "utils/dom";
-import VueMarkContent from './form-mark-content.vue'
-import { setTimeout } from 'timers';
+import {
+  on,
+  off,
+  getDomClientRect,
+  getParentNodes,
+  enableEventListener,
+  removeEventListener
+} from "utils/dom";
+import { throttle } from "utils/util";
+import VueMarkContent from "./form-mark-content.vue";
 
 export default {
   name: "vueFormMark",
@@ -13,7 +20,7 @@ export default {
       default: "light"
     }
   },
-  components: {VueMarkContent},
+  components: { VueMarkContent },
   data() {
     return {
       show: false,
@@ -46,13 +53,13 @@ export default {
   render(h) {
     const prop = this.id ? this.id.substring(this.id.indexOf("/")) : "";
     const contentFn = (h, prop) => {
-      return h('vue-mark-content', {
+      return h("vue-mark-content", {
         attrs: {
           prop: prop
         },
-        ref: 'VueMarkContent'
-      })
-    }
+        ref: "VueMarkContent"
+      });
+    };
     return h(
       "div",
       {
@@ -64,7 +71,10 @@ export default {
       [
         h("div", {
           class: "vue-popover__arrow",
-          style: {'--borderColor': this.style.borderColor, '--bdColor': this.style.backgroundColor}
+          style: {
+            "--borderColor": this.style.borderColor,
+            "--bdColor": this.style.backgroundColor
+          }
         }),
         contentFn(h, prop)
       ]
@@ -100,20 +110,22 @@ export default {
         "px";
       this.$el.style.top =
         referenceRect.top - this.$el.offsetHeight - 12 + "px";
-      this.$refs.VueMarkContent.$emit('mark.to.show');
+      this.$refs.VueMarkContent.$emit("mark.to.show");
     },
     windowScroll() {
-      this.id && this.show && this.setPosition();
+      this.id && this.show && this.scrollThrottle();
     }
   },
   mounted() {
+    this.scrollThrottle = throttle(12, this.setPosition);
     on(window, "click", this.windowClick);
-    on(window, "scroll", this.windowScroll);
+    this.parentNodes = getParentNodes(this.$el);
+    enableEventListener(this.parentNodes, this.windowScroll);
     document.body.appendChild(this.$el);
   },
   beforeDestroy() {
     off(window, "click", this.windowClick);
-    off(window, "scroll", this.windowScroll);
+    removeEventListener(this.parentNodes, this.windowScroll);
     document.body.removeChild(this.$el);
   }
 };

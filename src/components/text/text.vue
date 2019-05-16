@@ -1,12 +1,19 @@
 <template>
-  <vue-content class="vue-text-content" :class="'vue-text__'+placement" v-show="!disabled" ref="vueTextContent" :style="{color: effect}" :data="data"></vue-content>
+  <vue-content
+    class="vue-text-content"
+    :class="'vue-text__'+placement"
+    v-show="!disabled"
+    ref="vueTextContent"
+    :style="{color: effect}"
+    :data="data"
+  ></vue-content>
 </template>
 
 <script>
-import VueContent from 'components/content'
+import VueContent from "components/content";
 export default {
   name: "VueText",
-  components: {VueContent},
+  components: { VueContent },
   props: {
     referenceId: String,
     data: [String, Object, Array],

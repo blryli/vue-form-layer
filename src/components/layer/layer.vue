@@ -14,15 +14,17 @@ export default {
   },
   data() {
     return {
-      betraye: {
-        left: [],
-        right: [],
-        top: [],
-        bottom: []
-      },
       addLayer: false,
       layerData: Object.freeze(this.layer),
       resetLayerData: Object.freeze(JSON.parse(JSON.stringify(this.layer)))
+    };
+  },
+  created() {
+    this.betraye = {
+      left: [],
+      right: [],
+      top: [],
+      bottom: []
     };
   },
   computed: {

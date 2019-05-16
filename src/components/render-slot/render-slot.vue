@@ -27,7 +27,7 @@ export default {
     allChildNodes(node, names) {
       // 1.创建全部节点的数组
       var allCN = [];
-      names.find(d => d === node.nodeName) && allCN.push(node)
+      names.find(d => d === node.nodeName) && allCN.push(node);
 
       // 2.递归获取全部节点
       var getAllChildNodes = function(node, names, allCN) {
@@ -53,13 +53,17 @@ export default {
   },
   mounted() {
     this.$nextTick(() => {
-      const focusNodes = this.allChildNodes(this.$el, ["TEXTAREA", "INPUT","SELECT"]);
+      const focusNodes = this.allChildNodes(this.$el, [
+        "TEXTAREA",
+        "INPUT",
+        "SELECT"
+      ]);
       if (focusNodes.length === 1) {
         this.focusNode = focusNodes[0];
       } else {
         this.focusNode = this.$el;
-        this.focusNode.style.cssText = `border: 1px solid ${this
-          .borderColor || "transparent"}`;
+        this.focusNode.style.cssText = `border: 1px solid ${this.borderColor ||
+          "transparent"}`;
       }
     });
   }

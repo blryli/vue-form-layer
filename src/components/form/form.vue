@@ -47,7 +47,6 @@ export default {
       isResponse: false,
       initLayer: Object.freeze([]),
       reload: true,
-      layerComponents: [],
       clickItemId: null
     };
   },

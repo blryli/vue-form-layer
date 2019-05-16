@@ -32,7 +32,7 @@
           </tbody>
         </table>
       </vue-form>
-      <!-- <h2>apply to form layou</h2>
+      <h2>apply to form layou</h2>
       <el-radio-group v-model="radio" style="margin-bottom: 20px;">
         <el-radio-button label="top"></el-radio-button>
         <el-radio-button label="right"></el-radio-button>
@@ -52,8 +52,8 @@
           <el-input type="text" v-model="formLayou.name" placeholder="name" />
           <el-input type="text" v-model="formLayou.phone" placeholder="phone" />
         </vue-form-line>
-      </vue-form>-->
-      <!-- <h2>apply to form layer show</h2>
+      </vue-form>
+      <h2>apply to form layer show</h2>
       <p>
         <el-switch v-model="value" @change="$refs['form2'].changeShow('layerTooltip')" inactive-text="layer visible" />
       </p>
@@ -71,8 +71,8 @@
           <el-input type="text" v-model="form2.boundary" />
         </vue-form-line>
       </vue-form>
-      <br />-->
-      <!-- <h2>apply to form validate</h2>
+      <br />
+      <h2>apply to form validate</h2>
       <vue-form ref="form1" :model="form1" :layer="layer1" rowledge="24px">
         <vue-form-line :cols="[{ span: 12, label: 'name', prop: '/form/name' },{ span: 12, label: 'age', prop: '/form/age' }]">
           <el-input type="text" v-model="form1.name" @blur="recalculateField('/form/name')" />
@@ -84,9 +84,9 @@
         <el-button @click="$refs['form1'].clearCalculate('formLayer')">clearCalculate</el-button>
         <el-button @click="$refs['form1'].resetFields('formLayer')">resetFields</el-button>
       </p>
-      <br />-->
-      <!-- <h2>apply to table validate</h2>
-      <vue-form ref="table" :model="tableData" :layer="tableLayer" isTable rowledge="0" mark>
+      <br />
+      <h2>apply to table validate</h2>
+      <vue-form ref="table" :model="tableData" :layer="tableLayer" isTable rowledge="0">
         <el-table :data="tableData" style="width: 100%">
           <el-table-column label="id">
             <template slot-scope="scope">
@@ -115,7 +115,7 @@
         <el-button type="primary" @click="submitTable('table')">submit table</el-button>
         <el-button @click="$refs['table'].clearCalculate('tableLayer')">clearCalculate</el-button>
         <el-button @click="$refs['table'].resetFields('tableLayer')">resetFields</el-button>
-      </p>-->
+      </p>
     </div>
     <!-- <el-switch v-model="testvalue" @change="$refs['testform'].changeShow('testId')" inactive-text="layer visible" /> -->
   </div>
@@ -215,7 +215,8 @@ export default {
           data: [
             {
               prop: "/form/popover",
-              data: "气泡"
+              data: "气泡",
+              trigger: 'click'
             },
             {
               template: templateFn,

@@ -9,11 +9,10 @@
 
 <script>
 import VueContent from 'components/content'
-import { scroll, debounce } from "utils/util";
+import { debounce, throttle } from "utils/util";
 import {
   on,
   off,
-  removeBody,
   getParentNodes,
   enableEventListener,
   removeEventListener,
@@ -70,9 +69,12 @@ export default {
       show: false,
       addedBody: false,
       timeoutPending: null,
-      momentPlacement: this.placement,
-      parentNodes: []
+      momentPlacement: this.placement
     };
+  },
+  created() {
+    this.calculateDebounce = debounce(200, this.calculateCoordinate)
+    this.calculateThrottle = throttle(12, this.calculateCoordinate)
   },
   watch: {
     show(val) {
@@ -213,9 +215,9 @@ export default {
     },
     scrollChange() {
       if (this.isVisible) {
-        this.calculateCoordinate() // 可见的popover实时计算位置
+        this.calculateThrottle() // 可见的popover实时计算位置,开启节流
       } else {
-        this.isMorePlacement && debounce(this.calculateCoordinate)() // 不可见的popover,如果是多图层，位置计算开启节流
+        this.isMorePlacement && this.calculateDebounce() // 不可见的popover,如果是多图层，启动计算位置,开启防抖
       }
     }
   },

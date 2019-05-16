@@ -1,5 +1,3 @@
-import 'timers';
-
 function _defineProperty(obj, key, value) {
   if (key in obj) {
     Object.defineProperty(obj, key, {
@@ -114,6 +112,71 @@ var getDomClientRect = function getDomClientRect(target) {
     bottom: bottom,
     left: left
   };
+};
+
+var generateId = function generateId() {
+  return Math.floor(Math.random() * 10000);
+};
+var debounce = function debounce(delay, atBegin, callback) {
+  return callback === undefined ? throttle(delay, atBegin, false) : throttle(delay, callback, atBegin !== false);
+};
+var throttle = function throttle(delay, noTrailing, callback, debounceMode) {
+  var timeoutID;
+  var cancelled = false;
+  var lastExec = 0;
+
+  function clearExistingTimeout() {
+    if (timeoutID) {
+      clearTimeout(timeoutID);
+    }
+  } // Function to cancel next exec
+
+
+  function cancel() {
+    clearExistingTimeout();
+    cancelled = true;
+  } // `noTrailing` defaults to falsy.
+
+
+  if (typeof noTrailing !== 'boolean') {
+    debounceMode = callback;
+    callback = noTrailing;
+    noTrailing = undefined;
+  }
+
+  function wrapper() {
+    var self = this;
+    var elapsed = Date.now() - lastExec;
+    var args = arguments;
+
+    if (cancelled) {
+      return;
+    }
+
+    function exec() {
+      lastExec = Date.now();
+      callback.apply(self, args);
+    }
+
+    function clear() {
+      timeoutID = undefined;
+    }
+
+    if (debounceMode && !timeoutID) {
+      exec();
+    }
+
+    clearExistingTimeout();
+
+    if (debounceMode === undefined && elapsed > delay) {
+      exec();
+    } else if (noTrailing !== true) {
+      timeoutID = setTimeout(debounceMode ? clear : exec, debounceMode === undefined ? delay - elapsed : delay);
+    }
+  }
+
+  wrapper.cancel = cancel;
+  return wrapper;
 };
 
 //
@@ -322,11 +385,11 @@ var script$1 = {
     var prop = this.id ? this.id.substring(this.id.indexOf("/")) : "";
 
     var contentFn = function contentFn(h, prop) {
-      return h('vue-mark-content', {
+      return h("vue-mark-content", {
         attrs: {
           prop: prop
         },
-        ref: 'VueMarkContent'
+        ref: "VueMarkContent"
       });
     };
 
@@ -338,8 +401,8 @@ var script$1 = {
     }, [h("div", {
       class: "vue-popover__arrow",
       style: {
-        '--borderColor': this.style.borderColor,
-        '--bdColor': this.style.backgroundColor
+        "--borderColor": this.style.borderColor,
+        "--bdColor": this.style.backgroundColor
       }
     }), contentFn(h, prop)]);
   },
@@ -372,24 +435,26 @@ var script$1 = {
       this.$el.style.display = "block";
       this.$el.style.left = referenceRect.left + referenceRect.width / 2 - this.$el.offsetWidth / 2 + "px";
       this.$el.style.top = referenceRect.top - this.$el.offsetHeight - 12 + "px";
-      this.$refs.VueMarkContent.$emit('mark.to.show');
+      this.$refs.VueMarkContent.$emit("mark.to.show");
     },
 
     windowScroll() {
-      this.id && this.show && this.setPosition();
+      this.id && this.show && this.scrollThrottle();
     }
 
   },
 
   mounted() {
+    this.scrollThrottle = throttle(12, this.setPosition);
     on(window, "click", this.windowClick);
-    on(window, "scroll", this.windowScroll);
+    this.parentNodes = getParentNodes(this.$el);
+    enableEventListener(this.parentNodes, this.windowScroll);
     document.body.appendChild(this.$el);
   },
 
   beforeDestroy() {
     off(window, "click", this.windowClick);
-    off(window, "scroll", this.windowScroll);
+    removeEventListener(this.parentNodes, this.windowScroll);
     document.body.removeChild(this.$el);
   }
 
@@ -469,7 +534,6 @@ var script$2 = {
       isResponse: false,
       initLayer: Object.freeze([]),
       reload: true,
-      layerComponents: [],
       clickItemId: null
     };
   },
@@ -815,32 +879,6 @@ __vue_render__$2._withStripped = true;
     undefined
   );
 
-var generateId = function generateId() {
-  return Math.floor(Math.random() * 10000);
-};
-var debounce = function debounce(func) {
-  var wait = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 300;
-  var immediate = arguments.length > 2 ? arguments[2] : undefined;
-  var timeout;
-  return function () {
-    var context = this;
-    var args = arguments;
-    if (timeout) clearTimeout(timeout);
-
-    if (immediate) {
-      var callNow = !timeout;
-      timeout = setTimeout(function () {
-        timeout = null;
-      }, wait);
-      if (callNow) func.apply(context, args);
-    } else {
-      timeout = setTimeout(function () {
-        func.apply(context, args);
-      }, wait);
-    }
-  };
-};
-
 var script$4 = {
   name: "VueContent",
   props: ["data"],
@@ -1133,9 +1171,13 @@ var script$5 = {
       show: false,
       addedBody: false,
       timeoutPending: null,
-      momentPlacement: this.placement,
-      parentNodes: []
+      momentPlacement: this.placement
     };
+  },
+
+  created() {
+    this.calculateDebounce = debounce(200, this.calculateCoordinate);
+    this.calculateThrottle = throttle(12, this.calculateCoordinate);
   },
 
   watch: {
@@ -1307,9 +1349,9 @@ var script$5 = {
 
     scrollChange() {
       if (this.isVisible) {
-        this.calculateCoordinate(); // 可见的popover实时计算位置
+        this.calculateThrottle(); // 可见的popover实时计算位置,开启节流
       } else {
-        this.isMorePlacement && debounce(this.calculateCoordinate)(); // 不可见的popover,如果是多图层，位置计算开启节流
+        this.isMorePlacement && this.calculateDebounce(); // 不可见的popover,如果是多图层，启动计算位置,开启防抖
       }
     }
 
@@ -1550,15 +1592,18 @@ var script$7 = {
 
   data() {
     return {
-      betraye: {
-        left: [],
-        right: [],
-        top: [],
-        bottom: []
-      },
       addLayer: false,
       layerData: Object.freeze(this.layer),
       resetLayerData: Object.freeze(JSON.parse(JSON.stringify(this.layer)))
+    };
+  },
+
+  created() {
+    this.betraye = {
+      left: [],
+      right: [],
+      top: [],
+      bottom: []
     };
   },
 
